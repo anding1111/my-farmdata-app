@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Grid, List, Plus } from "lucide-react";
+import { Search, Grid, List, Plus, MoreVertical } from "lucide-react";
 
 interface TopBarProps {
   title?: string;
@@ -44,46 +44,22 @@ const TopBar = ({
   };
 
   return (
-    <div className="bg-white border-b p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div className="flex items-center space-x-3">
-        <div className="relative w-full max-w-[240px]">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar en archivos..."
-            className="pl-8 w-full"
-            value={searchValue}
-            onChange={handleSearch}
-          />
-        </div>
-        
-        <div className="flex items-center space-x-2">
+    <div className="bg-white border-b py-3 px-4 flex items-center justify-between">
+      <div className="flex items-center">
+        <h1 className="text-xl font-semibold">FarmaData</h1>
+      </div>
+      
+      <div className="flex items-center space-x-4">
+        <div className="flex items-center">
           <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="icon"
-            onClick={() => handleViewModeChange("grid")}
+            variant="ghost"
+            size="sm"
+            className="text-gray-500 hover:text-gray-700"
           >
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "outline"}
-            size="icon"
-            onClick={() => handleViewModeChange("list")}
-          >
-            <List className="h-4 w-4" />
+            <MoreVertical className="h-5 w-5" />
           </Button>
         </div>
       </div>
-      
-      <div className="flex items-center space-x-2">
-        <div className="text-sm font-medium text-muted-foreground">
-          {title} <span className="text-foreground">{count}</span>
-        </div>
-      </div>
-      
-      <Button onClick={handleAddNew} className="md:ml-auto">
-        <Plus className="h-4 w-4 mr-1" /> Añadir nueva lista
-      </Button>
     </div>
   );
 };
