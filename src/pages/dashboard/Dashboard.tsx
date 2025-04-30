@@ -6,40 +6,49 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
 const Dashboard = () => {
-  // Datos de ejemplo para simular contenido similar a la imagen
+  // Datos de ejemplo para simular contenido
   const products = [
     {
       id: 1,
       name: "Inflavin",
-      price: 34.00,
+      price: 34000,
       image: "https://via.placeholder.com/100x100/FF8C00/FFFFFF?text=Inflavin"
     },
     {
       id: 2,
-      name: "Jointum (drops)",
-      price: 8.00,
+      name: "Jointum (gotas)",
+      price: 8000,
       image: "https://via.placeholder.com/100x100/654321/FFFFFF?text=Jointum"
     },
     {
       id: 3,
-      name: "Jointum (tablets)",
-      price: 8.00,
+      name: "Jointum (tabletas)",
+      price: 8000,
       image: "https://via.placeholder.com/100x100/A9A9A9/FFFFFF?text=Jointum"
     },
     {
       id: 4,
       name: "Veno Protect",
-      price: 15.00,
+      price: 15000,
       image: "https://via.placeholder.com/100x100/FF6347/FFFFFF?text=Veno"
     }
   ];
 
   const productLists = [
-    { name: "My vitamins", total: 123.00 },
-    { name: "For parents", total: 34.00 },
-    { name: "Vacation", total: 12.00 },
-    { name: "Children's medicines", total: 87.00 },
+    { name: "Mis vitaminas", total: 123000 },
+    { name: "Para padres", total: 34000 },
+    { name: "Vacaciones", total: 12000 },
+    { name: "Medicinas para niños", total: 87000 },
   ];
+  
+  // Función para formatear moneda colombiana (COP)
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(value);
+  };
 
   return (
     <DashboardLayout>
@@ -59,7 +68,7 @@ const Dashboard = () => {
               <Card key={list.name} className="mb-4">
                 <CardHeader className="py-3 flex flex-row items-center justify-between">
                   <CardTitle className="text-lg">{list.name}</CardTitle>
-                  <div className="text-sm font-medium">${list.total.toFixed(2)}</div>
+                  <div className="text-sm font-medium">{formatCurrency(list.total)}</div>
                 </CardHeader>
                 <CardContent className="py-2">
                   <div className="flex space-x-2 items-center">
@@ -86,7 +95,7 @@ const Dashboard = () => {
               </CardHeader>
               <CardContent className="p-4">
                 <h3 className="font-medium text-lg">{product.name}</h3>
-                <div className="mt-2 font-semibold">${product.price.toFixed(2)}</div>
+                <div className="mt-2 font-semibold">{formatCurrency(product.price)}</div>
               </CardContent>
             </Card>
           ))}
@@ -94,7 +103,7 @@ const Dashboard = () => {
         
         <div className="md:col-span-2 flex justify-between items-center px-4 py-3 bg-white rounded-lg border">
           <div className="text-lg font-medium">Total</div>
-          <div className="text-xl font-semibold">$123.00</div>
+          <div className="text-xl font-semibold">{formatCurrency(123000)}</div>
         </div>
         
         <div className="md:col-span-2">

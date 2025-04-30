@@ -1,6 +1,6 @@
 
-import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,8 +22,10 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ className }: SidebarProps) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true); // Inicialmente cerrado
   const location = useLocation();
+  const navigate = useNavigate();
+  const sidebarRef = useRef<HTMLDivElement>(null);
   
   const user = JSON.parse(localStorage.getItem("user") || '{"name": "Usuario", "avatar": ""}');
 
@@ -68,16 +70,35 @@ const Sidebar = ({ className }: SidebarProps) => {
   const handleLogout = () => {
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("user");
-    // Redirigir al login
-    window.location.href = "/login";
+    navigate("/login");
   };
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
   };
 
+  // Cerrar el sidebar cuando se hace clic fuera de él
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && !collapsed) {
+        setCollapsed(true);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [collapsed]);
+
+  // Cerrar el sidebar al cambiar de ruta
+  useEffect(() => {
+    setCollapsed(true);
+  }, [location.pathname]);
+
   return (
     <div
+      ref={sidebarRef}
       className={cn(
         "flex flex-col bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out",
         collapsed ? "w-[70px]" : "w-[260px]",
@@ -95,7 +116,7 @@ const Sidebar = ({ className }: SidebarProps) => {
               />
             )}
             <div className="font-medium text-white">
-              {user.name ? `Hello, ${user.name.split(' ')[0]}` : "Hello"}
+              {user.name ? `Hola, ${user.name.split(' ')[0]}` : "Hola"}
             </div>
           </div>
         )}

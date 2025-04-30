@@ -28,6 +28,19 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+// Configurar la localización para Colombia/América Bogotá
+if (typeof window !== 'undefined') {
+  document.documentElement.lang = 'es';
+  
+  // Establecer la zona horaria para Colombia
+  try {
+    // Si el navegador soporta Intl.DateTimeFormat con timeZone
+    Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota' });
+  } catch (e) {
+    console.error("Error al configurar la zona horaria:", e);
+  }
+}
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -35,13 +48,13 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          {/* Public routes */}
+          {/* Rutas públicas */}
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<GuestGuard><Login /></GuestGuard>} />
           <Route path="/registro" element={<GuestGuard><Register /></GuestGuard>} />
           <Route path="/recuperar-contrasena" element={<GuestGuard><ResetPassword /></GuestGuard>} />
           
-          {/* Protected routes */}
+          {/* Rutas protegidas */}
           <Route
             path="/dashboard"
             element={<AuthGuard><Dashboard /></AuthGuard>}
@@ -71,7 +84,7 @@ const App = () => (
             element={<AuthGuard><Settings /></AuthGuard>}
           />
           
-          {/* 404 route */}
+          {/* Ruta 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
