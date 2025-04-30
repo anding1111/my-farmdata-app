@@ -1,15 +1,11 @@
 
-import { useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import TopBar from "@/components/dashboard/TopBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 
 const Dashboard = () => {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  
   // Datos de ejemplo para simular contenido
   const products = [
     {
@@ -57,7 +53,6 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <DashboardHeader title="Mi Inventario" />
-      <TopBar itemCount={6} listName="Mis vitaminas" onViewChange={setViewMode} />
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
         <div className="space-y-6">
@@ -90,13 +85,15 @@ const Dashboard = () => {
           </div>
         </div>
         
-        <div className={viewMode === "grid" ? "grid grid-cols-2 gap-4" : "space-y-4"}>
+        <div className="grid grid-cols-2 gap-4">
           {products.map((product) => (
-            <Card key={product.id} className={viewMode === "list" ? "flex overflow-hidden" : "overflow-hidden"}>
-              <div className={viewMode === "list" ? "w-32 h-auto" : "w-full h-40 overflow-hidden bg-gray-100 flex items-center justify-center"}>
-                <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-              </div>
-              <CardContent className={viewMode === "list" ? "flex-1 p-4" : "p-4"}>
+            <Card key={product.id} className="overflow-hidden">
+              <CardHeader className="p-0">
+                <div className="w-full h-40 overflow-hidden bg-gray-100 flex items-center justify-center">
+                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                </div>
+              </CardHeader>
+              <CardContent className="p-4">
                 <h3 className="font-medium text-lg">{product.name}</h3>
                 <div className="mt-2 font-semibold">{formatCurrency(product.price)}</div>
               </CardContent>
