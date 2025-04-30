@@ -8,6 +8,7 @@ interface DashboardHeaderProps {
   title: string;
 }
 
+// Este componente se mantiene por compatibilidad, pero se recomienda usar TopBar
 const DashboardHeader = ({ title }: DashboardHeaderProps) => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
