@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { UserRound } from "lucide-react";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -99,6 +100,24 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
         <Link to="/registro" className="text-primary hover:underline">
           Regístrate
         </Link>
+      </div>
+
+      <div className="mt-6 rounded-md bg-blue-50 p-3 border border-blue-100">
+        <div className="text-center text-xs font-medium text-blue-700 mb-2">
+          Perfiles de prueba
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs text-gray-700">
+            <UserRound className="h-3 w-3 text-primary" />
+            <span className="font-medium">Administrador:</span>
+            <span>admin@farmacia.com / admin123</span>
+          </div>
+          <div className="flex items-center gap-2 text-xs text-gray-700">
+            <UserRound className="h-3 w-3 text-primary" />
+            <span className="font-medium">Vendedor:</span>
+            <span>vendedor@farmacia.com / venta123</span>
+          </div>
+        </div>
       </div>
     </form>
   );
