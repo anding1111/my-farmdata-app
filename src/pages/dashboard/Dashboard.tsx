@@ -1,116 +1,69 @@
 
-import { useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, MoreVertical, CheckSquare } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { 
+  Plus, 
+  MoreVertical, 
+  CheckSquare, 
+  Grid3X3, 
+  List, 
+  ArrowUpDown,
+  Edit,
+  Copy,
+  Trash2,
+  Heart,
+  Home,
+  Stethoscope,
+  Pill,
+  Baby
+} from "lucide-react";
+import { useFarmaData } from "@/hooks/useFarmaData";
+import { CreateListDialog } from "@/components/dashboard/CreateListDialog";
+import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
+import { PurchaseDialog } from "@/components/dashboard/PurchaseDialog";
+import { formatCurrency } from "@/data/mockData";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  // Estado para la búsqueda y el modo de vista
-  const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedList, setSelectedList] = useState("Mis vitaminas");
+  const {
+    products,
+    productLists,
+    selectedList,
+    selectedListId,
+    searchQuery,
+    viewMode,
+    sortBy,
+    selectedListProducts,
+    setSelectedListId,
+    setSearchQuery,
+    setViewMode,
+    setSortBy,
+    createList,
+    updateList,
+    deleteList,
+    duplicateList,
+    addProductToList,
+    removeProductFromList,
+    updateProductQuantity,
+    stats,
+  } = useFarmaData();
   
-  // Datos de ejemplo para simular contenido
-  const products = [
-    {
-      id: 1,
-      name: "Inflavin",
-      price: 34000,
-      image: "https://via.placeholder.com/150x150/FF8C00/FFFFFF?text=Inflavin"
-    },
-    {
-      id: 2,
-      name: "Jointum (gotas)",
-      price: 8000,
-      image: "https://via.placeholder.com/150x150/654321/FFFFFF?text=Jointum"
-    },
-    {
-      id: 3,
-      name: "Jointum (tabletas)",
-      price: 8000,
-      image: "https://via.placeholder.com/150x150/A9A9A9/FFFFFF?text=Jointum"
-    },
-    {
-      id: 4,
-      name: "Veno Protect",
-      price: 15000,
-      image: "https://via.placeholder.com/150x150/FF6347/FFFFFF?text=Veno"
+  const { toast } = useToast();
+
+  // Iconos para las listas
+  const getListIcon = (iconName?: string) => {
+    switch (iconName) {
+      case 'heart': return Heart;
+      case 'home': return Home;
+      case 'stethoscope': return Stethoscope;
+      case 'pill': return Pill;
+      case 'baby': return Baby;
+      default: return Heart;
     }
-  ];
-
-  const productLists = [
-    { 
-      id: 1,
-      name: "Mis vitaminas", 
-      total: 123000,
-      products: [
-        {image: "https://via.placeholder.com/50x50/00AA55/FFFFFF?text=V1"},
-        {image: "https://via.placeholder.com/50x50/0055AA/FFFFFF?text=V2"},
-        {image: "https://via.placeholder.com/50x50/AA0055/FFFFFF?text=V3"},
-        {image: "https://via.placeholder.com/50x50/55AA00/FFFFFF?text=V4"},
-      ],
-      moreCount: 2
-    },
-    { 
-      id: 2,
-      name: "Para padres", 
-      total: 34000,
-      products: [
-        {image: "https://via.placeholder.com/50x50/AACC00/FFFFFF?text=P1"},
-        {image: "https://via.placeholder.com/50x50/00CCAA/FFFFFF?text=P2"},
-        {image: "https://via.placeholder.com/50x50/CC00AA/FFFFFF?text=P3"},
-      ],
-      moreCount: 0
-    },
-    { 
-      id: 3,
-      name: "Vacaciones", 
-      total: 12000,
-      products: [
-        {image: "https://via.placeholder.com/50x50/FFA500/FFFFFF?text=V1"},
-        {image: "https://via.placeholder.com/50x50/FF4500/FFFFFF?text=V2"},
-      ],
-      moreCount: 0
-    },
-    { 
-      id: 4,
-      name: "Medicinas para niños", 
-      total: 87000,
-      products: [
-        {image: "https://via.placeholder.com/50x50/4169E1/FFFFFF?text=N1"},
-        {image: "https://via.placeholder.com/50x50/6A5ACD/FFFFFF?text=N2"},
-        {image: "https://via.placeholder.com/50x50/9370DB/FFFFFF?text=N3"},
-        {image: "https://via.placeholder.com/50x50/8A2BE2/FFFFFF?text=N4"},
-      ],
-      moreCount: 5
-    },
-  ];
-  
-  // Filtrar productos según la búsqueda
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  // Filtrar listas según la búsqueda
-  const filteredLists = productLists.filter(list => 
-    list.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  // Función para formatear moneda colombiana (COP)
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(value);
-  };
-
-  // Obtener la lista seleccionada
-  const getSelectedListTotal = () => {
-    const list = productLists.find(list => list.name === selectedList);
-    return list ? list.total : 0;
   };
 
   // Manejadores de eventos
@@ -118,8 +71,52 @@ const Dashboard = () => {
     setSearchQuery(e.target.value);
   };
 
-  const handleListSelect = (listName: string) => {
-    setSelectedList(listName);
+  const handleListSelect = (listId: number) => {
+    setSelectedListId(listId);
+  };
+
+  const handleDeleteList = (listId: number) => {
+    if (productLists.length <= 1) {
+      toast({
+        title: "No se puede eliminar",
+        description: "Debe haber al menos una lista",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    deleteList(listId);
+    toast({
+      title: "Lista eliminada",
+      description: "La lista ha sido eliminada exitosamente",
+    });
+  };
+
+  const handleDuplicateList = (listId: number) => {
+    duplicateList(listId);
+    toast({
+      title: "Lista duplicada",
+      description: "Se ha creado una copia de la lista",
+    });
+  };
+
+  const handleAddProduct = (product: any, quantity: number) => {
+    if (!selectedList) return;
+    addProductToList(selectedList.id, product, quantity);
+  };
+
+  const handleRemoveProduct = (productId: number) => {
+    if (!selectedList) return;
+    removeProductFromList(selectedList.id, productId);
+    toast({
+      title: "Producto eliminado",
+      description: "El producto ha sido eliminado de la lista",
+    });
+  };
+
+  const handleUpdateQuantity = (productId: number, newQuantity: number) => {
+    if (!selectedList) return;
+    updateProductQuantity(selectedList.id, productId, newQuantity);
   };
 
   return (
@@ -131,7 +128,7 @@ const Dashboard = () => {
             <div className="relative flex-1 mr-2">
               <Input
                 type="text"
-                placeholder="Buscar en archivos..."
+                placeholder="Buscar listas o productos..."
                 className="pl-8 w-full"
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -152,125 +149,185 @@ const Dashboard = () => {
                 <path d="m21 21-4.3-4.3" />
               </svg>
             </div>
-            <div className="flex">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("grid")}
-                className="mr-1"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="7" height="7" x="3" y="3" rx="1" />
-                  <rect width="7" height="7" x="14" y="3" rx="1" />
-                  <rect width="7" height="7" x="14" y="14" rx="1" />
-                  <rect width="7" height="7" x="3" y="14" rx="1" />
-                </svg>
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("list")}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="8" y1="6" x2="21" y2="6" />
-                  <line x1="8" y1="12" x2="21" y2="12" />
-                  <line x1="8" y1="18" x2="21" y2="18" />
-                  <line x1="3" y1="6" x2="3.01" y2="6" />
-                  <line x1="3" y1="12" x2="3.01" y2="12" />
-                  <line x1="3" y1="18" x2="3.01" y2="18" />
-                </svg>
-              </Button>
-            </div>
           </div>
 
           <div className="border border-dashed border-blue-300 rounded-md p-4 mb-4 flex items-center justify-center">
-            <Button variant="ghost" className="text-blue-500 flex items-center">
-              <Plus className="h-5 w-5 mr-2" /> Añadir nueva lista
-            </Button>
+            <CreateListDialog onCreateList={createList} />
           </div>
 
           <div className="space-y-4">
-            {filteredLists.map((list) => (
-              <Card 
-                key={list.id} 
-                className={`overflow-hidden cursor-pointer transition-all ${selectedList === list.name ? 'ring-2 ring-primary' : ''}`}
-                onClick={() => handleListSelect(list.name)}
-              >
-                <CardHeader className="p-4 pb-0">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">{list.name}</CardTitle>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreVertical className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex -space-x-2">
-                      {list.products.map((product, idx) => (
-                        <div key={idx} className="h-10 w-10 rounded-md bg-slate-200 border border-white overflow-hidden">
-                          <img src={product.image} alt="" className="h-full w-full object-cover" />
+            {productLists.map((list) => {
+              const IconComponent = getListIcon(list.icon);
+              return (
+                <Card 
+                  key={list.id} 
+                  className={`overflow-hidden cursor-pointer transition-all hover:shadow-md ${
+                    selectedListId === list.id ? 'ring-2 ring-primary shadow-lg' : ''
+                  }`}
+                  onClick={() => handleListSelect(list.id)}
+                >
+                  <CardHeader className="p-4 pb-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1.5 rounded-md bg-${list.color || 'blue'}-100`}>
+                          <IconComponent className={`h-4 w-4 text-${list.color || 'blue'}-600`} />
                         </div>
-                      ))}
-                      {list.moreCount > 0 && (
-                        <div className="h-10 w-10 rounded-md bg-slate-100 border border-white flex items-center justify-center text-xs font-medium">
-                          +{list.moreCount}
+                        <CardTitle className="text-lg">{list.name}</CardTitle>
+                      </div>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="h-5 w-5" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            // TODO: Implementar edición
+                          }}>
+                            <Edit className="h-4 w-4 mr-2" />
+                            Editar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateList(list.id);
+                          }}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Duplicar
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteList(list.id);
+                            }}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Eliminar
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    {list.description && (
+                      <p className="text-sm text-muted-foreground mt-1">{list.description}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-center">
+                      <div className="flex -space-x-2">
+                        {list.products.slice(0, 4).map((product, idx) => (
+                          <div key={idx} className="h-10 w-10 rounded-md bg-slate-200 border-2 border-white overflow-hidden">
+                            <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                          </div>
+                        ))}
+                        {list.products.length > 4 && (
+                          <div className="h-10 w-10 rounded-md bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-medium">
+                            +{list.products.length - 4}
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm text-muted-foreground">
+                          {list.products.length} productos
                         </div>
-                      )}
+                        <div className="font-medium">{formatCurrency(list.total)}</div>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm text-muted-foreground">Total</div>
-                      <div className="font-medium">{formatCurrency(list.total)}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
 
         {/* Columna derecha - Vista detallada */}
         <div className="w-1/2 p-4 overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <h2 className="text-2xl font-semibold">{selectedList}</h2>
-              <span className="ml-2 text-2xl text-gray-400">6</span>
-            </div>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-              <MoreVertical className="h-5 w-5" />
-            </Button>
-          </div>
-          
-          <div className="mb-4 flex items-center">
-            <Button variant="outline" size="sm" className="flex items-center mr-2">
-              <CheckSquare className="h-4 w-4 mr-1" />
-            </Button>
-          </div>
-
-          <div className={`grid ${viewMode === "grid" ? "grid-cols-2" : "grid-cols-1"} gap-4 mb-4`}>
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className={`overflow-hidden ${viewMode === "list" ? "flex" : ""}`}>
-                <div className={`${viewMode === "list" ? "w-1/3" : "w-full h-40"} bg-gray-100 flex items-center justify-center`}>
-                  <img src={product.image} alt={product.name} className="w-full h-full object-contain p-2" />
+          {selectedList && (
+            <>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center">
+                  <h2 className="text-2xl font-semibold">{selectedList.name}</h2>
+                  <span className="ml-2 text-2xl text-gray-400">{selectedList.products.length}</span>
                 </div>
-                <CardContent className={`p-4 ${viewMode === "list" ? "w-2/3" : ""}`}>
-                  <h3 className="font-medium text-lg">{product.name}</h3>
-                  <div className="mt-2 font-semibold text-blue-600">{formatCurrency(product.price)}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          
-          <div className="mt-auto pt-4 border-t">
-            <div className="flex justify-between items-center mb-4">
-              <div className="text-lg">Total</div>
-              <div className="text-xl font-semibold">{formatCurrency(getSelectedListTotal())}</div>
-            </div>
-            
-            <Button className="w-full py-6 text-lg bg-slate-800 hover:bg-slate-700">
-              Comprar ahora
-            </Button>
-          </div>
+                <div className="flex gap-2">
+                  <AddProductDialog onAddProduct={handleAddProduct} availableProducts={products} />
+                  <div className="flex gap-1">
+                    <Button
+                      variant={viewMode === "grid" ? "default" : "outline"}
+                      size="icon"
+                      onClick={() => setViewMode("grid")}
+                    >
+                      <Grid3X3 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant={viewMode === "list" ? "default" : "outline"}
+                      size="icon"
+                      onClick={() => setViewMode("list")}
+                    >
+                      <List className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className={`grid ${viewMode === "grid" ? "grid-cols-2" : "grid-cols-1"} gap-4 mb-4`}>
+                {selectedListProducts.map((item) => (
+                  <Card key={item.productId} className={`overflow-hidden ${viewMode === "list" ? "flex" : ""}`}>
+                    <div className={`${viewMode === "list" ? "w-1/3" : "w-full h-40"} bg-gray-100 flex items-center justify-center`}>
+                      <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2" />
+                    </div>
+                    <CardContent className={`p-4 ${viewMode === "list" ? "w-2/3" : ""}`}>
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-medium text-lg">{item.name}</h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveProduct(item.productId)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="font-semibold text-blue-600">{formatCurrency(item.price)}</div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
+                            disabled={item.quantity <= 1}
+                          >
+                            -
+                          </Button>
+                          <span className="w-8 text-center">{item.quantity}</span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
+                          >
+                            +
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              <div className="mt-auto pt-4 border-t">
+                <div className="flex justify-between items-center mb-4">
+                  <div className="text-lg">Total</div>
+                  <div className="text-xl font-semibold">{formatCurrency(selectedList.total)}</div>
+                </div>
+                
+                <PurchaseDialog list={selectedList}>
+                  <Button className="w-full py-6 text-lg bg-slate-800 hover:bg-slate-700">
+                    Comprar ahora
+                  </Button>
+                </PurchaseDialog>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </DashboardLayout>
