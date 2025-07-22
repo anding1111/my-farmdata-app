@@ -19,7 +19,11 @@ import {
   Home,
   Stethoscope,
   Pill,
-  Baby
+  Baby,
+  ShoppingCart,
+  Receipt,
+  X,
+  Minus
 } from "lucide-react";
 import { useFarmaData } from "@/hooks/useFarmaData";
 import { CreateListDialog } from "@/components/dashboard/CreateListDialog";
@@ -122,8 +126,8 @@ const Dashboard = () => {
   return (
     <DashboardLayout>
       <div className="flex h-full overflow-hidden">
-        {/* Columna izquierda - Listas de medicamentos */}
-        <div className="w-1/2 p-4 bg-white border-r overflow-y-auto">
+        {/* Columna izquierda - Productos disponibles y listas */}
+        <div className="w-1/3 p-4 bg-white border-r overflow-y-auto">
           <div className="mb-4 flex items-center">
             <div className="relative flex-1 mr-2">
               <Input
@@ -240,93 +244,160 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Columna derecha - Vista detallada */}
-        <div className="w-1/2 p-4 overflow-y-auto">
-          {selectedList && (
-            <>
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <h2 className="text-2xl font-semibold">{selectedList.name}</h2>
-                  <span className="ml-2 text-2xl text-gray-400">{selectedList.products.length}</span>
+        {/* Columna central - Catálogo de productos */}
+        <div className="w-1/3 p-4 bg-slate-50 overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-semibold">Catálogo de Productos</h2>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === "grid" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("grid")}
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "outline"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className={`grid ${viewMode === "grid" ? "grid-cols-1" : "grid-cols-1"} gap-4`}>
+            {products.map((product) => (
+              <Card key={product.id} className="group hover:shadow-md transition-all cursor-pointer">
+                <div className="h-32 bg-gray-100 flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform" 
+                  />
                 </div>
-                <div className="flex gap-2">
-                  <AddProductDialog onAddProduct={handleAddProduct} availableProducts={products} />
-                  <div className="flex gap-1">
+                <CardContent className="p-4">
+                  <h3 className="font-medium text-sm mb-1">{product.name}</h3>
+                  <div className="flex justify-between items-center">
+                    <div className="font-semibold text-blue-600">{formatCurrency(product.price)}</div>
                     <Button
-                      variant={viewMode === "grid" ? "default" : "outline"}
-                      size="icon"
-                      onClick={() => setViewMode("grid")}
+                      size="sm"
+                      onClick={() => handleAddProduct(product, 1)}
+                      disabled={!selectedList}
+                      className="h-8"
                     >
-                      <Grid3X3 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant={viewMode === "list" ? "default" : "outline"}
-                      size="icon"
-                      onClick={() => setViewMode("list")}
-                    >
-                      <List className="h-4 w-4" />
+                      <Plus className="h-4 w-4 mr-1" />
+                      Agregar
                     </Button>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
 
-              <div className={`grid ${viewMode === "grid" ? "grid-cols-2" : "grid-cols-1"} gap-4 mb-4`}>
-                {selectedListProducts.map((item) => (
-                  <Card key={item.productId} className={`overflow-hidden ${viewMode === "list" ? "flex" : ""}`}>
-                    <div className={`${viewMode === "list" ? "w-1/3" : "w-full h-40"} bg-gray-100 flex items-center justify-center`}>
-                      <img src={item.image} alt={item.name} className="w-full h-full object-contain p-2" />
-                    </div>
-                    <CardContent className={`p-4 ${viewMode === "list" ? "w-2/3" : ""}`}>
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium text-lg">{item.name}</h3>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveProduct(item.productId)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+        {/* Columna derecha - Carrito de compras (Recibo) */}
+        <div className="w-1/3 p-4 bg-white border-l overflow-y-auto">
+          <div className="flex items-center gap-2 mb-6">
+            <Receipt className="h-6 w-6 text-blue-600" />
+            <h2 className="text-xl font-semibold">
+              {selectedList ? selectedList.name : "Selecciona una lista"}
+            </h2>
+          </div>
+
+          {selectedList ? (
+            <>
+              {/* Lista de productos en el carrito */}
+              <div className="space-y-3 mb-6">
+                {selectedListProducts.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <ShoppingCart className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                    <p>No hay productos en esta lista</p>
+                    <p className="text-sm">Agrega productos desde el catálogo</p>
+                  </div>
+                ) : (
+                  selectedListProducts.map((item) => (
+                    <div key={item.productId} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                      <div className="w-12 h-12 bg-white rounded-md flex items-center justify-center overflow-hidden">
+                        <img 
+                          src={item.image} 
+                          alt={item.name} 
+                          className="w-full h-full object-contain" 
+                        />
                       </div>
-                      <div className="flex justify-between items-center">
-                        <div className="font-semibold text-blue-600">{formatCurrency(item.price)}</div>
-                        <div className="flex items-center gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
-                          >
-                            -
-                          </Button>
-                          <span className="w-8 text-center">{item.quantity}</span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
-                          >
-                            +
-                          </Button>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm truncate">{item.name}</h4>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-sm font-semibold text-blue-600">
+                            {formatCurrency(item.price)}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </Button>
+                            <span className="w-8 text-center text-sm">{item.quantity}</span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveProduct(item.productId)}
+                        className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
               </div>
-              
-              <div className="mt-auto pt-4 border-t">
-                <div className="flex justify-between items-center mb-4">
-                  <div className="text-lg">Total</div>
-                  <div className="text-xl font-semibold">{formatCurrency(selectedList.total)}</div>
-                </div>
-                
-                <PurchaseDialog list={selectedList}>
-                  <Button className="w-full py-6 text-lg bg-slate-800 hover:bg-slate-700">
-                    Comprar ahora
-                  </Button>
-                </PurchaseDialog>
-              </div>
+
+              {/* Resumen y total */}
+              {selectedListProducts.length > 0 && (
+                <>
+                  <div className="border-t pt-4 space-y-2 mb-4">
+                    <div className="flex justify-between text-sm">
+                      <span>Subtotal ({selectedListProducts.length} productos)</span>
+                      <span>{formatCurrency(selectedList.total)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Envío</span>
+                      <span className="text-green-600">Gratis</span>
+                    </div>
+                    <div className="flex justify-between font-semibold text-lg pt-2 border-t">
+                      <span>Total</span>
+                      <span className="text-blue-600">{formatCurrency(selectedList.total)}</span>
+                    </div>
+                  </div>
+
+                  <PurchaseDialog list={selectedList}>
+                    <Button className="w-full py-3 text-lg bg-blue-600 hover:bg-blue-700">
+                      <ShoppingCart className="h-5 w-5 mr-2" />
+                      Proceder al pago
+                    </Button>
+                  </PurchaseDialog>
+                </>
+              )}
             </>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <Receipt className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+              <p>Selecciona una lista para comenzar</p>
+            </div>
           )}
         </div>
       </div>
