@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -55,6 +56,17 @@ const Dashboard = () => {
     updateProductQuantity,
     stats,
   } = useFarmaData();
+  
+  const [catalogMode, setCatalogMode] = useState<'categories' | 'products'>('categories');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
+  // Obtener categorías únicas de los productos
+  const categories = Array.from(new Set(products.map(p => p.category)));
+  
+  // Filtrar productos por categoría seleccionada
+  const filteredProductsByCategory = selectedCategory 
+    ? products.filter(p => p.category === selectedCategory)
+    : products;
   
   const { toast } = useToast();
 
@@ -121,6 +133,14 @@ const Dashboard = () => {
   const handleUpdateQuantity = (productId: number, newQuantity: number) => {
     if (!selectedList) return;
     updateProductQuantity(selectedList.id, productId, newQuantity);
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setSelectedCategory(category);
+  };
+
+  const handleBackToCategories = () => {
+    setSelectedCategory(null);
   };
 
   return (
@@ -244,56 +264,149 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Columna central - Catálogo de productos */}
+        {/* Columna central - Catálogo unificado */}
         <div className="w-1/3 p-4 bg-slate-50 overflow-y-auto">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">Catálogo de Productos</h2>
+            <h2 className="text-2xl font-semibold">
+              {catalogMode === 'categories' ? 'Categorías' : selectedCategory ? selectedCategory : 'Productos'}
+            </h2>
             <div className="flex gap-2">
+              {selectedCategory && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBackToCategories}
+                  className="text-sm"
+                >
+                  ← Volver
+                </Button>
+              )}
               <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("grid")}
+                variant={catalogMode === "categories" ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setCatalogMode("categories");
+                  setSelectedCategory(null);
+                }}
               >
-                <Grid3X3 className="h-4 w-4" />
+                Categorías
               </Button>
               <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="icon"
-                onClick={() => setViewMode("list")}
+                variant={catalogMode === "products" ? "default" : "outline"}
+                size="sm"
+                onClick={() => {
+                  setCatalogMode("products");
+                  setSelectedCategory(null);
+                }}
               >
-                <List className="h-4 w-4" />
+                Productos
               </Button>
             </div>
           </div>
 
-          <div className={`grid ${viewMode === "grid" ? "grid-cols-1" : "grid-cols-1"} gap-4`}>
-            {products.map((product) => (
-              <Card key={product.id} className="group hover:shadow-md transition-all cursor-pointer">
-                <div className="h-32 bg-gray-100 flex items-center justify-center overflow-hidden">
-                  <img 
-                    src={product.image} 
-                    alt={product.name} 
-                    className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform" 
-                  />
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-medium text-sm mb-1">{product.name}</h3>
-                  <div className="flex justify-between items-center">
-                    <div className="font-semibold text-blue-600">{formatCurrency(product.price)}</div>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAddProduct(product, 1)}
-                      disabled={!selectedList}
-                      className="h-8"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Agregar
-                    </Button>
+          {/* Vista de Categorías */}
+          {catalogMode === 'categories' && !selectedCategory && (
+            <div className="grid grid-cols-1 gap-4">
+              {categories.map((category) => {
+                const categoryProducts = products.filter(p => p.category === category);
+                const categoryIcon = category === 'Vitaminas' ? '💊' : 
+                                   category === 'Articulaciones' ? '🦴' :
+                                   category === 'Cardiovascular' ? '❤️' :
+                                   category === 'Pediátrico' ? '👶' :
+                                   category === 'Digestivo' ? '🌿' :
+                                   category === 'Minerales' ? '⚡' :
+                                   category === 'Ácidos grasos' ? '🐟' : '💊';
+                
+                return (
+                  <Card 
+                    key={category} 
+                    className="group hover:shadow-md transition-all cursor-pointer border-2 hover:border-blue-200"
+                    onClick={() => handleCategorySelect(category)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="text-4xl">{categoryIcon}</div>
+                        <div className="flex-1">
+                          <h3 className="font-semibold text-lg mb-1">{category}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {categoryProducts.length} productos disponibles
+                          </p>
+                        </div>
+                        <div className="text-2xl text-blue-600 group-hover:translate-x-1 transition-transform">
+                          →
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Vista de Productos por Categoría */}
+          {selectedCategory && (
+            <div className="grid grid-cols-1 gap-4">
+              {filteredProductsByCategory.map((product) => (
+                <Card key={product.id} className="group hover:shadow-md transition-all cursor-pointer">
+                  <div className="h-32 bg-gray-100 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform" 
+                    />
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-medium text-sm mb-1">{product.name}</h3>
+                    <div className="flex justify-between items-center">
+                      <div className="font-semibold text-blue-600">{formatCurrency(product.price)}</div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddProduct(product, 1)}
+                        disabled={!selectedList}
+                        className="h-8"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Agregar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Vista de Todos los Productos */}
+          {catalogMode === 'products' && !selectedCategory && (
+            <div className="grid grid-cols-1 gap-4">
+              {products.map((product) => (
+                <Card key={product.id} className="group hover:shadow-md transition-all cursor-pointer">
+                  <div className="h-32 bg-gray-100 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={product.image} 
+                      alt={product.name} 
+                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform" 
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-medium text-sm mb-1">{product.name}</h3>
+                    <p className="text-xs text-muted-foreground mb-2">{product.category}</p>
+                    <div className="flex justify-between items-center">
+                      <div className="font-semibold text-blue-600">{formatCurrency(product.price)}</div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddProduct(product, 1)}
+                        disabled={!selectedList}
+                        className="h-8"
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        Agregar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Columna derecha - Carrito de compras (Recibo) */}
