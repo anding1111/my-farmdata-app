@@ -57,16 +57,8 @@ const Dashboard = () => {
     stats,
   } = useFarmaData();
   
-  const [catalogMode, setCatalogMode] = useState<'categories' | 'products'>('categories');
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  
-  // Obtener categorías únicas de los productos
-  const categories = Array.from(new Set(products.map(p => p.category)));
-  
-  // Filtrar productos por categoría seleccionada
-  const filteredProductsByCategory = selectedCategory 
-    ? products.filter(p => p.category === selectedCategory)
-    : products;
+  const [catalogMode, setCatalogMode] = useState<'products' | 'lists'>('products');
+  const [shoppingCart, setShoppingCart] = useState<Array<{productId: number, product: any, quantity: number, image: string, name: string, price: number}>>([]);
   
   const { toast } = useToast();
 
@@ -117,31 +109,52 @@ const Dashboard = () => {
   };
 
   const handleAddProduct = (product: any, quantity: number) => {
-    if (!selectedList) return;
-    addProductToList(selectedList.id, product, quantity);
-  };
-
-  const handleRemoveProduct = (productId: number) => {
-    if (!selectedList) return;
-    removeProductFromList(selectedList.id, productId);
+    // Agregar al carrito independiente
+    const existingItem = shoppingCart.find(item => item.productId === product.id);
+    if (existingItem) {
+      setShoppingCart(prev => prev.map(item => 
+        item.productId === product.id 
+          ? {...item, quantity: item.quantity + quantity}
+          : item
+      ));
+    } else {
+      setShoppingCart(prev => [...prev, {
+        productId: product.id,
+        product,
+        quantity,
+        image: product.image,
+        name: product.name,
+        price: product.price
+      }]);
+    }
+    
     toast({
-      title: "Producto eliminado",
-      description: "El producto ha sido eliminado de la lista",
+      title: "Producto agregado",
+      description: `${product.name} agregado al carrito`,
     });
   };
 
-  const handleUpdateQuantity = (productId: number, newQuantity: number) => {
-    if (!selectedList) return;
-    updateProductQuantity(selectedList.id, productId, newQuantity);
+  const handleRemoveFromCart = (productId: number) => {
+    setShoppingCart(prev => prev.filter(item => item.productId !== productId));
+    toast({
+      title: "Producto eliminado",
+      description: "El producto ha sido eliminado del carrito",
+    });
   };
 
-  const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
+  const handleUpdateCartQuantity = (productId: number, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      handleRemoveFromCart(productId);
+      return;
+    }
+    setShoppingCart(prev => prev.map(item => 
+      item.productId === productId 
+        ? {...item, quantity: newQuantity}
+        : item
+    ));
   };
 
-  const handleBackToCategories = () => {
-    setSelectedCategory(null);
-  };
+  const cartTotal = shoppingCart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
   return (
     <DashboardLayout>
@@ -264,73 +277,58 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Columna central - Catálogo unificado */}
+        {/* Columna central - Catálogo de productos */}
         <div className="w-1/3 p-4 bg-slate-50 overflow-y-auto">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold">
-              {catalogMode === 'categories' ? 'Categorías' : selectedCategory ? selectedCategory : 'Productos'}
+              {catalogMode === 'lists' ? 'Listas' : 'Productos'}
             </h2>
             <div className="flex gap-2">
-              {selectedCategory && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBackToCategories}
-                  className="text-sm"
-                >
-                  ← Volver
-                </Button>
-              )}
               <Button
-                variant={catalogMode === "categories" ? "default" : "outline"}
+                variant={catalogMode === "lists" ? "default" : "outline"}
                 size="sm"
-                onClick={() => {
-                  setCatalogMode("categories");
-                  setSelectedCategory(null);
-                }}
+                onClick={() => setCatalogMode("lists")}
               >
-                Categorías
+                <List className="h-4 w-4 mr-1" />
+                Listas
               </Button>
               <Button
                 variant={catalogMode === "products" ? "default" : "outline"}
                 size="sm"
-                onClick={() => {
-                  setCatalogMode("products");
-                  setSelectedCategory(null);
-                }}
+                onClick={() => setCatalogMode("products")}
               >
+                <Grid3X3 className="h-4 w-4 mr-1" />
                 Productos
               </Button>
             </div>
           </div>
 
-          {/* Vista de Categorías */}
-          {catalogMode === 'categories' && !selectedCategory && (
+          {/* Vista de Listas */}
+          {catalogMode === 'lists' && (
             <div className="grid grid-cols-1 gap-4">
-              {categories.map((category) => {
-                const categoryProducts = products.filter(p => p.category === category);
-                const categoryIcon = category === 'Vitaminas' ? '💊' : 
-                                   category === 'Articulaciones' ? '🦴' :
-                                   category === 'Cardiovascular' ? '❤️' :
-                                   category === 'Pediátrico' ? '👶' :
-                                   category === 'Digestivo' ? '🌿' :
-                                   category === 'Minerales' ? '⚡' :
-                                   category === 'Ácidos grasos' ? '🐟' : '💊';
-                
+              {productLists.map((list) => {
+                const IconComponent = getListIcon(list.icon);
                 return (
                   <Card 
-                    key={category} 
-                    className="group hover:shadow-md transition-all cursor-pointer border-2 hover:border-blue-200"
-                    onClick={() => handleCategorySelect(category)}
+                    key={list.id} 
+                    className={`group hover:shadow-md transition-all cursor-pointer border-2 hover:border-blue-200 ${
+                      selectedListId === list.id ? 'ring-2 ring-primary shadow-lg border-blue-400' : ''
+                    }`}
+                    onClick={() => handleListSelect(list.id)}
                   >
                     <CardContent className="p-6">
                       <div className="flex items-center gap-4">
-                        <div className="text-4xl">{categoryIcon}</div>
+                        <div className={`p-2 rounded-md bg-${list.color || 'blue'}-100`}>
+                          <IconComponent className={`h-6 w-6 text-${list.color || 'blue'}-600`} />
+                        </div>
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">{category}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {categoryProducts.length} productos disponibles
+                          <h3 className="font-semibold text-lg mb-1">{list.name}</h3>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {list.description || `${list.products.length} productos`}
                           </p>
+                          <div className="font-medium text-blue-600">
+                            {formatCurrency(list.total)}
+                          </div>
                         </div>
                         <div className="text-2xl text-blue-600 group-hover:translate-x-1 transition-transform">
                           →
@@ -343,40 +341,8 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Vista de Productos por Categoría */}
-          {selectedCategory && (
-            <div className="grid grid-cols-1 gap-4">
-              {filteredProductsByCategory.map((product) => (
-                <Card key={product.id} className="group hover:shadow-md transition-all cursor-pointer">
-                  <div className="h-32 bg-gray-100 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform" 
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-medium text-sm mb-1">{product.name}</h3>
-                    <div className="flex justify-between items-center">
-                      <div className="font-semibold text-blue-600">{formatCurrency(product.price)}</div>
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddProduct(product, 1)}
-                        disabled={!selectedList}
-                        className="h-8"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Agregar
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-
-          {/* Vista de Todos los Productos */}
-          {catalogMode === 'products' && !selectedCategory && (
+          {/* Vista de Productos */}
+          {catalogMode === 'products' && (
             <div className="grid grid-cols-1 gap-4">
               {products.map((product) => (
                 <Card key={product.id} className="group hover:shadow-md transition-all cursor-pointer">
@@ -395,7 +361,6 @@ const Dashboard = () => {
                       <Button
                         size="sm"
                         onClick={() => handleAddProduct(product, 1)}
-                        disabled={!selectedList}
                         className="h-8"
                       >
                         <Plus className="h-4 w-4 mr-1" />
@@ -409,108 +374,94 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Columna derecha - Carrito de compras (Recibo) */}
+        {/* Columna derecha - Carrito de compras independiente */}
         <div className="w-1/3 p-4 bg-white border-l overflow-y-auto">
           <div className="flex items-center gap-2 mb-6">
-            <Receipt className="h-6 w-6 text-blue-600" />
-            <h2 className="text-xl font-semibold">
-              {selectedList ? selectedList.name : "Selecciona una lista"}
-            </h2>
+            <ShoppingCart className="h-6 w-6 text-blue-600" />
+            <h2 className="text-xl font-semibold">Carrito de Compras</h2>
           </div>
 
-          {selectedList ? (
-            <>
-              {/* Lista de productos en el carrito */}
-              <div className="space-y-3 mb-6">
-                {selectedListProducts.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <ShoppingCart className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-                    <p>No hay productos en esta lista</p>
-                    <p className="text-sm">Agrega productos desde el catálogo</p>
+          {/* Lista de productos en el carrito */}
+          <div className="space-y-3 mb-6">
+            {shoppingCart.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <ShoppingCart className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                <p>Tu carrito está vacío</p>
+                <p className="text-sm">Agrega productos desde el catálogo</p>
+              </div>
+            ) : (
+              shoppingCart.map((item) => (
+                <div key={item.productId} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                  <div className="w-12 h-12 bg-white rounded-md flex items-center justify-center overflow-hidden">
+                    <img 
+                      src={item.image} 
+                      alt={item.name} 
+                      className="w-full h-full object-contain" 
+                    />
                   </div>
-                ) : (
-                  selectedListProducts.map((item) => (
-                    <div key={item.productId} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                      <div className="w-12 h-12 bg-white rounded-md flex items-center justify-center overflow-hidden">
-                        <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          className="w-full h-full object-contain" 
-                        />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm truncate">{item.name}</h4>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-sm font-semibold text-blue-600">
+                        {formatCurrency(item.price)}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpdateCartQuantity(item.productId, item.quantity - 1)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Minus className="h-3 w-3" />
+                        </Button>
+                        <span className="w-8 text-center text-sm">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleUpdateCartQuantity(item.productId, item.quantity + 1)}
+                          className="h-6 w-6 p-0"
+                        >
+                          <Plus className="h-3 w-3" />
+                        </Button>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm truncate">{item.name}</h4>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-sm font-semibold text-blue-600">
-                            {formatCurrency(item.price)}
-                          </span>
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleUpdateQuantity(item.productId, item.quantity - 1)}
-                              disabled={item.quantity <= 1}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="w-8 text-center text-sm">{item.quantity}</span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleUpdateQuantity(item.productId, item.quantity + 1)}
-                              className="h-6 w-6 p-0"
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveProduct(item.productId)}
-                        className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
                     </div>
-                  ))
-                )}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRemoveFromCart(item.productId)}
+                    className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Resumen y total */}
+          {shoppingCart.length > 0 && (
+            <>
+              <div className="border-t pt-4 space-y-2 mb-4">
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal ({shoppingCart.length} productos)</span>
+                  <span>{formatCurrency(cartTotal)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Envío</span>
+                  <span className="text-green-600">Gratis</span>
+                </div>
+                <div className="flex justify-between font-semibold text-lg pt-2 border-t">
+                  <span>Total</span>
+                  <span className="text-blue-600">{formatCurrency(cartTotal)}</span>
+                </div>
               </div>
 
-              {/* Resumen y total */}
-              {selectedListProducts.length > 0 && (
-                <>
-                  <div className="border-t pt-4 space-y-2 mb-4">
-                    <div className="flex justify-between text-sm">
-                      <span>Subtotal ({selectedListProducts.length} productos)</span>
-                      <span>{formatCurrency(selectedList.total)}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span>Envío</span>
-                      <span className="text-green-600">Gratis</span>
-                    </div>
-                    <div className="flex justify-between font-semibold text-lg pt-2 border-t">
-                      <span>Total</span>
-                      <span className="text-blue-600">{formatCurrency(selectedList.total)}</span>
-                    </div>
-                  </div>
-
-                  <PurchaseDialog list={selectedList}>
-                    <Button className="w-full py-3 text-lg bg-blue-600 hover:bg-blue-700">
-                      <ShoppingCart className="h-5 w-5 mr-2" />
-                      Proceder al pago
-                    </Button>
-                  </PurchaseDialog>
-                </>
-              )}
+              <Button className="w-full py-3 text-lg bg-blue-600 hover:bg-blue-700">
+                <ShoppingCart className="h-5 w-5 mr-2" />
+                Proceder al pago
+              </Button>
             </>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Receipt className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-              <p>Selecciona una lista para comenzar</p>
-            </div>
           )}
         </div>
       </div>
