@@ -147,39 +147,41 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
         
       case 2:
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center gap-2 text-primary">
-              <Truck className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">Entrega y notas</h3>
+              <Truck className="h-4 w-4" />
+              <h3 className="text-base font-semibold">Entrega y notas</h3>
             </div>
             
             <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="deliveryAddress">Dirección de entrega (opcional)</Label>
+              <div className="space-y-1">
+                <Label htmlFor="deliveryAddress" className="text-xs">Dirección de entrega (opcional)</Label>
                 <Textarea
                   id="deliveryAddress"
                   value={purchaseData.deliveryAddress}
                   onChange={(e) => setPurchaseData({ ...purchaseData, deliveryAddress: e.target.value })}
                   placeholder="Calle 123 #45-67, Barrio, Ciudad"
-                  rows={3}
+                  rows={2}
+                  className="text-sm"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="notes">Notas adicionales (opcional)</Label>
+              <div className="space-y-1">
+                <Label htmlFor="notes" className="text-xs">Notas adicionales (opcional)</Label>
                 <Textarea
                   id="notes"
                   value={purchaseData.notes}
                   onChange={(e) => setPurchaseData({ ...purchaseData, notes: e.target.value })}
                   placeholder="Instrucciones especiales para la entrega..."
-                  rows={3}
+                  rows={2}
+                  className="text-sm"
                 />
               </div>
             </div>
             
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Información de entrega</h4>
-              <ul className="text-sm text-blue-800 space-y-1">
+            <div className="bg-blue-50 p-3 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2 text-sm">Información de entrega</h4>
+              <ul className="text-xs text-blue-800 space-y-1">
                 <li>• Entrega gratuita en Bogotá</li>
                 <li>• Tiempo estimado: 24-48 horas</li>
                 <li>• Horario: Lunes a viernes 8:00 AM - 6:00 PM</li>
@@ -191,41 +193,41 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
         
       case 3:
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center gap-2 text-primary">
-              <CreditCard className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">Método de pago</h3>
+              <CreditCard className="h-4 w-4" />
+              <h3 className="text-base font-semibold">Método de pago</h3>
             </div>
             
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  className={`p-4 border rounded-lg text-left ${
+                  className={`p-3 border rounded-lg text-left ${
                     purchaseData.paymentMethod === 'cash' ? 'border-primary bg-blue-50' : 'border-gray-200'
                   }`}
                   onClick={() => setPurchaseData({ ...purchaseData, paymentMethod: 'cash' })}
                 >
-                  <div className="font-medium">Efectivo</div>
-                  <div className="text-sm text-muted-foreground">Pago contraentrega</div>
+                  <div className="font-medium text-sm">Efectivo</div>
+                  <div className="text-xs text-muted-foreground">Pago contraentrega</div>
                 </button>
                 
                 <button
                   type="button"
-                  className={`p-4 border rounded-lg text-left ${
+                  className={`p-3 border rounded-lg text-left ${
                     purchaseData.paymentMethod === 'card' ? 'border-primary bg-blue-50' : 'border-gray-200'
                   }`}
                   onClick={() => setPurchaseData({ ...purchaseData, paymentMethod: 'card' })}
                 >
-                  <div className="font-medium">Tarjeta</div>
-                  <div className="text-sm text-muted-foreground">Débito o crédito</div>
+                  <div className="font-medium text-sm">Tarjeta</div>
+                  <div className="text-xs text-muted-foreground">Débito o crédito</div>
                 </button>
               </div>
             </div>
             
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-3">Resumen final</h4>
-              <div className="space-y-2 text-sm">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <h4 className="font-medium mb-2 text-sm">Resumen final</h4>
+              <div className="space-y-1 text-xs">
                 <div className="flex justify-between">
                   <span>Cliente:</span>
                   <span>{purchaseData.customerName}</span>
@@ -242,7 +244,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   <span>Pago:</span>
                   <span>{purchaseData.paymentMethod === 'card' ? 'Tarjeta' : 'Efectivo'}</span>
                 </div>
-                <div className="border-t pt-2 flex justify-between font-semibold">
+                <div className="border-t pt-1 flex justify-between font-semibold text-sm">
                   <span>Total a pagar:</span>
                   <span>{formatCurrency(list.total)}</span>
                 </div>
