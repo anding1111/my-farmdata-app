@@ -118,7 +118,7 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
         <div className="flex justify-end p-2">
           <button
             onClick={onClose}
-            className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition-colors rounded"
+            className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center hover:bg-gray-200 transition-colors"
           >
             <X className="w-4 h-4 text-gray-600" />
           </button>
@@ -127,16 +127,14 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
         {/* Contenido del recibo - con scroll */}
         <div className="flex-1 overflow-y-auto">
           <div id="receipt-content" className="px-4">
-            {/* Icono y monto principal */}
-            <div className="text-center mb-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                <FileText className="w-5 h-5 text-blue-600" />
-              </div>
-              <div className="text-xl font-bold text-gray-900 mb-1">
-                {formatCurrency(finalTotal)}
-              </div>
-              <div className="text-gray-500 text-xs">
-                No. {invoiceNumber}
+            {/* Datos de la droguería */}
+            <div className="text-center mb-3 border-b pb-3">
+              <h2 className="text-lg font-bold text-gray-900">Droguería FarmaVital</h2>
+              <p className="text-xs text-gray-600">NIT: 900.123.456-7</p>
+              <p className="text-xs text-gray-600">Calle 123 #45-67, Centro, Medellín</p>
+              <p className="text-xs text-gray-600">Tel: (604) 123-4567</p>
+              <div className="text-gray-500 text-xs mt-2">
+                Recibo No. {invoiceNumber}
               </div>
             </div>
 
