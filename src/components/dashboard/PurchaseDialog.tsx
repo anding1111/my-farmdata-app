@@ -79,63 +79,66 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div className="flex items-center gap-2 text-primary">
-              <ShoppingCart className="h-5 w-5" />
-              <h3 className="text-lg font-semibold">Resumen de la orden</h3>
+              <ShoppingCart className="h-4 w-4" />
+              <h3 className="text-base font-semibold">Resumen de la orden</h3>
             </div>
             
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium mb-2">{list.name}</h4>
-              <div className="space-y-2">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <h4 className="font-medium mb-2 text-sm">{list.name}</h4>
+              <div className="space-y-1">
                 {list.products.slice(0, 3).map((product, index) => (
-                  <div key={index} className="flex justify-between text-sm">
+                  <div key={index} className="flex justify-between text-xs">
                     <span>{product.name} x{product.quantity}</span>
                     <span>{formatCurrency(product.price * product.quantity)}</span>
                   </div>
                 ))}
                 {list.products.length > 3 && (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-xs text-muted-foreground">
                     +{list.products.length - 3} productos más...
                   </div>
                 )}
-                <div className="border-t pt-2 flex justify-between font-semibold">
+                <div className="border-t pt-1 flex justify-between font-semibold text-sm">
                   <span>Total:</span>
                   <span>{formatCurrency(list.total)}</span>
                 </div>
               </div>
             </div>
             
-            <div className="space-y-3">
-              <div className="space-y-2">
-                <Label htmlFor="customerName">Nombre completo (opcional)</Label>
+            <div className="space-y-2">
+              <div className="space-y-1">
+                <Label htmlFor="customerName" className="text-xs">Nombre completo (opcional)</Label>
                 <Input
                   id="customerName"
                   value={purchaseData.customerName}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerName: e.target.value })}
                   placeholder="Tu nombre completo"
+                  className="h-8 text-sm"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="customerEmail">Email (opcional)</Label>
+              <div className="space-y-1">
+                <Label htmlFor="customerEmail" className="text-xs">Email (opcional)</Label>
                 <Input
                   id="customerEmail"
                   type="email"
                   value={purchaseData.customerEmail}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerEmail: e.target.value })}
                   placeholder="tu@email.com"
+                  className="h-8 text-sm"
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="customerPhone">Teléfono (opcional)</Label>
+              <div className="space-y-1">
+                <Label htmlFor="customerPhone" className="text-xs">Teléfono (opcional)</Label>
                 <Input
                   id="customerPhone"
                   type="tel"
                   value={purchaseData.customerPhone}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerPhone: e.target.value })}
                   placeholder="+57 300 123 4567"
+                  className="h-8 text-sm"
                 />
               </div>
             </div>
@@ -266,12 +269,12 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
             </DialogTitle>
           </DialogHeader>
           
-          <div className="mb-4">
+          <div className="mb-3">
             <div className="flex gap-2">
               {[1, 2, 3].map((stepNumber) => (
                 <div
                   key={stepNumber}
-                  className={`flex-1 h-2 rounded ${
+                  className={`flex-1 h-1.5 rounded ${
                     step >= stepNumber ? 'bg-primary' : 'bg-gray-200'
                   }`}
                 />
@@ -287,15 +290,16 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
           <form onSubmit={handleSubmit}>
             {renderStep()}
             
-            <div className="flex justify-between gap-2 pt-6">
+            <div className="flex justify-between gap-2 pt-4">
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => step > 1 ? setStep(step - 1) : setOpen(false)}
+                className="h-9 text-sm"
               >
                 {step > 1 ? 'Anterior' : 'Cancelar'}
               </Button>
-              <Button type="submit">
+              <Button type="submit" className="h-9 text-sm">
                 {step < 3 ? 'Siguiente' : 'Confirmar compra'}
               </Button>
             </div>
