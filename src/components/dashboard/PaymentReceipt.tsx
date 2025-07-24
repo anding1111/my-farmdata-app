@@ -110,7 +110,7 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full mx-4 p-0 overflow-hidden bg-white">
+      <DialogContent className="max-w-md w-full mx-4 p-0 overflow-hidden bg-white h-[90vh] flex flex-col">
         {/* Header mínimo */}
         <div className="flex justify-end p-4">
           <button
@@ -121,86 +121,81 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
           </button>
         </div>
 
-        {/* Contenido del recibo */}
-        <div id="receipt-content" className="px-6 pb-6">
-          {/* Icono y monto principal */}
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <FileText className="w-8 h-8 text-blue-600" />
+        {/* Contenido del recibo - con scroll */}
+        <div className="flex-1 overflow-y-auto">
+          <div id="receipt-content" className="px-6">
+            {/* Icono y monto principal */}
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                <FileText className="w-6 h-6 text-blue-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">
+                {formatCurrency(finalTotal)}
+              </div>
+              <div className="text-gray-500 text-sm mb-2">
+                No. {invoiceNumber}
+              </div>
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                Pagado
+              </Badge>
             </div>
-            <div className="text-3xl font-bold text-gray-900 mb-2">
-              {formatCurrency(finalTotal)}
-            </div>
-            <div className="text-gray-500 text-sm mb-4">
-              No. {invoiceNumber}
-            </div>
-            <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-              Pagado
-            </Badge>
-          </div>
 
-          {/* Información de estado y fecha */}
-          <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-            <div>
-              <div className="text-gray-500 mb-1">Estado</div>
-              <div className="font-medium">Pagado</div>
-            </div>
-            <div>
-              <div className="text-gray-500 mb-1">Fecha de Pago</div>
-              <div className="font-medium">
-                Pagado el {new Date().toLocaleDateString('es-ES', { 
-                  day: '2-digit', 
-                  month: 'short', 
-                  year: 'numeric' 
-                })}
+            {/* Información de estado y fecha */}
+            <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+              <div>
+                <div className="text-gray-500 mb-1">Estado</div>
+                <div className="font-medium">Pagado</div>
+              </div>
+              <div>
+                <div className="text-gray-500 mb-1">Fecha de Pago</div>
+                <div className="font-medium">
+                  Pagado el {new Date().toLocaleDateString('es-ES', { 
+                    day: '2-digit', 
+                    month: 'short', 
+                    year: 'numeric' 
+                  })}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Pestañas */}
-          <div className="border-b border-gray-200 mb-4">
-            <div className="flex">
-              <button className="px-4 py-2 text-blue-600 border-b-2 border-blue-600 font-medium">
-                Detalles
-              </button>
-              <button className="px-4 py-2 text-gray-500">
-                Log de Actividad
-              </button>
-            </div>
-          </div>
 
           {/* Título del lote de pago */}
-          <div className="mb-4">
-            <h3 className="font-semibold text-lg">
+          <div className="mb-2">
+            <h3 className="font-semibold text-base">
               Lote de pago {new Date().toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
             </h3>
           </div>
 
           {/* Información de facturación */}
-          <div className="bg-gray-50 rounded-lg p-4 mb-4">
+          <div className="bg-gray-50 rounded-lg p-3 mb-3">
             <div className="text-sm">
               <div className="font-medium mb-2">Facturado a</div>
-              <div className="mb-1">{orderData.customerEmail}</div>
-              <div className="text-gray-600 mb-3">Detalles de facturación</div>
-              <div className="font-medium">{orderData.customerName}</div>
-              <div className="text-gray-600">{orderData.customerPhone}</div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="mb-1">{orderData.customerEmail}</div>
+                  <div className="font-medium">{orderData.customerName}</div>
+                </div>
+                <div>
+                  <div className="text-gray-600">Detalles de facturación</div>
+                  <div className="text-gray-600">{orderData.customerPhone}</div>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Lista de productos */}
-          <div className="mb-4">
-            <div className="text-sm text-gray-500 mb-2">Productos</div>
-            <div className="space-y-3">
+          <div className="mb-3">
+            <div className="text-sm text-gray-500 mb-1">Productos</div>
+            <div className="max-h-32 overflow-y-auto space-y-2">
               {orderData.list.products.map((product, index) => (
-                <div key={index} className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-lg flex-shrink-0"></div>
+                <div key={index} className="flex justify-between items-start">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm">{product.name}</div>
                     <div className="text-xs text-gray-500">
                       {product.quantity}x {formatCurrency(product.price)}
                     </div>
                   </div>
-                  <div className="text-sm font-medium">
+                  <div className="text-sm font-medium ml-2">
                     {formatCurrency(product.price * product.quantity)}
                   </div>
                 </div>
@@ -208,29 +203,24 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
             </div>
           </div>
 
-          {/* Totales */}
-          <div className="space-y-2 text-sm">
+          </div>
+        </div>
+
+        {/* Footer fijo con totales */}
+        <div className="bg-white border-t p-4">
+          <div className="space-y-1 text-sm mb-4">
             <div className="flex justify-between">
               <span className="text-gray-600">Subtotal</span>
               <span>{formatCurrency(subtotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Descuento 10%</span>
-              <span className="text-red-600">- {formatCurrency(discount)}</span>
             </div>
             <div className="flex justify-between font-bold text-base border-t pt-2">
               <span>Total</span>
               <span>{formatCurrency(finalTotal)}</span>
             </div>
-            <div className="flex justify-between font-bold text-base">
-              <span>Monto adeudado</span>
-              <span>{formatCurrency(finalTotal)}</span>
-            </div>
           </div>
-        </div>
 
-        {/* Botones de acción - Footer fijo */}
-        <div className="bg-white border-t p-4 flex gap-3">
+          {/* Botones de acción */}
+          <div className="flex gap-3">
           <Button
             variant="outline"
             className="flex-1 h-12"
@@ -248,6 +238,7 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
             <Printer className="w-4 h-4 mr-2" />
             Imprimir
           </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
