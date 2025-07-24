@@ -439,27 +439,13 @@ const Dashboard = () => {
 
           {/* Modal de información del producto */}
           {selectedProductInfo && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
-              <div className="bg-gray-50 rounded-3xl max-w-sm w-full mx-4 animate-scale-in overflow-hidden max-h-[90vh] overflow-y-auto">
-                {/* Header con navegación */}
-                <div className="flex items-center justify-between p-3 bg-white">
-                  <button
-                    onClick={() => setSelectedProductInfo(null)}
-                    className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors"
-                  >
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </div>
-                </div>
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in" onClick={() => setSelectedProductInfo(null)}>
+              <div className="bg-gray-50 rounded-3xl max-w-sm w-full mx-4 animate-scale-in overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                {/* Header mínimo solo por diseño */}
+                <div className="h-4 bg-white rounded-t-3xl"></div>
 
-                {/* Contenido principal */}
-                <div className="px-4 pb-4">
+                {/* Contenido scrolleable */}
+                <div className="flex-1 overflow-y-auto px-4">
                   {/* Información básica */}
                   <div className="mb-3">
                     <div className="text-gray-500 text-xs mb-1">{selectedProductInfo.manufacturer || 'FarmaData'}</div>
@@ -552,8 +538,10 @@ const Dashboard = () => {
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  {/* Botón de agregar compacto */}
+                {/* Footer fijo con botón */}
+                <div className="bg-gray-50 p-4 border-t border-gray-100">
                   <button
                     onClick={() => {
                       handleAddProduct(selectedProductInfo, 1);
