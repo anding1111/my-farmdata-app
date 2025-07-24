@@ -109,9 +109,9 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => {}}>
       <DialogContent 
-        className="max-w-md w-full mx-4 p-0 overflow-hidden bg-white h-[90vh] flex flex-col"
+        className="max-w-md w-full mx-4 p-0 overflow-hidden bg-white h-[90vh] flex flex-col [&>button]:hidden"
         onPointerDownOutside={(e) => e.preventDefault()}
       >
         {/* Header mínimo */}
