@@ -24,7 +24,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
     customerEmail: "",
     customerPhone: "",
     deliveryAddress: "",
-    paymentMethod: "card",
+    paymentMethod: "cash",
     notes: "",
   });
   const { toast } = useToast();
@@ -36,6 +36,17 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
       setStep(step + 1);
       return;
     }
+    
+    // Si no hay datos del cliente, asignar cliente genérico
+    const finalPurchaseData = {
+      ...purchaseData,
+      customerName: purchaseData.customerName || "Cliente Mostrador",
+      customerEmail: purchaseData.customerEmail || "mostrador@farmacia.local",
+      customerPhone: purchaseData.customerPhone || "000-000-0000",
+      deliveryAddress: purchaseData.deliveryAddress || "Entrega en mostrador"
+    };
+    
+    setPurchaseData(finalPurchaseData);
     
     // Simular proceso de compra
     setTimeout(() => {
@@ -59,7 +70,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
       customerEmail: "",
       customerPhone: "",
       deliveryAddress: "",
-      paymentMethod: "card",
+      paymentMethod: "cash",
       notes: "",
     });
   };
@@ -97,37 +108,34 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
             
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="customerName">Nombre completo *</Label>
+                <Label htmlFor="customerName">Nombre completo (opcional)</Label>
                 <Input
                   id="customerName"
                   value={purchaseData.customerName}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerName: e.target.value })}
                   placeholder="Tu nombre completo"
-                  required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="customerEmail">Email *</Label>
+                <Label htmlFor="customerEmail">Email (opcional)</Label>
                 <Input
                   id="customerEmail"
                   type="email"
                   value={purchaseData.customerEmail}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerEmail: e.target.value })}
                   placeholder="tu@email.com"
-                  required
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="customerPhone">Teléfono *</Label>
+                <Label htmlFor="customerPhone">Teléfono (opcional)</Label>
                 <Input
                   id="customerPhone"
                   type="tel"
                   value={purchaseData.customerPhone}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerPhone: e.target.value })}
                   placeholder="+57 300 123 4567"
-                  required
                 />
               </div>
             </div>
@@ -192,23 +200,23 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                 <button
                   type="button"
                   className={`p-4 border rounded-lg text-left ${
-                    purchaseData.paymentMethod === 'card' ? 'border-primary bg-blue-50' : 'border-gray-200'
-                  }`}
-                  onClick={() => setPurchaseData({ ...purchaseData, paymentMethod: 'card' })}
-                >
-                  <div className="font-medium">Tarjeta</div>
-                  <div className="text-sm text-muted-foreground">Débito o crédito</div>
-                </button>
-                
-                <button
-                  type="button"
-                  className={`p-4 border rounded-lg text-left ${
                     purchaseData.paymentMethod === 'cash' ? 'border-primary bg-blue-50' : 'border-gray-200'
                   }`}
                   onClick={() => setPurchaseData({ ...purchaseData, paymentMethod: 'cash' })}
                 >
                   <div className="font-medium">Efectivo</div>
                   <div className="text-sm text-muted-foreground">Pago contraentrega</div>
+                </button>
+                
+                <button
+                  type="button"
+                  className={`p-4 border rounded-lg text-left ${
+                    purchaseData.paymentMethod === 'card' ? 'border-primary bg-blue-50' : 'border-gray-200'
+                  }`}
+                  onClick={() => setPurchaseData({ ...purchaseData, paymentMethod: 'card' })}
+                >
+                  <div className="font-medium">Tarjeta</div>
+                  <div className="text-sm text-muted-foreground">Débito o crédito</div>
                 </button>
               </div>
             </div>
