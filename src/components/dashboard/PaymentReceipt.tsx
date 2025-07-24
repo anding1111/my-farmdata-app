@@ -115,12 +115,12 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
         onPointerDownOutside={(e) => e.preventDefault()}
       >
         {/* Header mínimo */}
-        <div className="flex justify-end p-2">
+        <div className="flex justify-end p-1">
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center hover:bg-gray-200 transition-colors"
+            className="w-6 h-6 bg-gray-100 rounded-md flex items-center justify-center hover:bg-gray-200 transition-colors"
           >
-            <X className="w-4 h-4 text-gray-600" />
+            <X className="w-3 h-3 text-gray-600" />
           </button>
         </div>
 
@@ -138,12 +138,10 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
             </div>
 
             {/* Información de estado y fecha */}
-            <div className="mb-2 text-xs">
-              <div className="flex justify-between">
-                <div className="flex gap-4">
-                  <span><span className="text-gray-500">Estado:</span> <span className="font-medium">Pagado</span></span>
-                  <span><span className="text-gray-500">Fecha:</span> <span className="font-medium">{new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}</span></span>
-                </div>
+            <div className="mb-2 text-xs text-center">
+              <div className="flex justify-center gap-4">
+                <span><span className="text-gray-500">Estado:</span> <span className="font-medium">Pagado</span></span>
+                <span><span className="text-gray-500">Fecha:</span> <span className="font-medium">{new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}</span></span>
               </div>
             </div>
 
