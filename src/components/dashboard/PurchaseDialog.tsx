@@ -114,7 +114,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   value={purchaseData.customerName}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerName: e.target.value })}
                   placeholder="Tu nombre completo"
-                  className="h-8 text-sm w-[90%] mx-auto"
+                  className="h-8 text-sm w-[98%] mx-auto"
                 />
               </div>
               
@@ -126,7 +126,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   value={purchaseData.customerEmail}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerEmail: e.target.value })}
                   placeholder="tu@email.com"
-                  className="h-8 text-sm w-[90%] mx-auto"
+                  className="h-8 text-sm w-[98%] mx-auto"
                 />
               </div>
               
@@ -138,7 +138,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   value={purchaseData.customerPhone}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerPhone: e.target.value })}
                   placeholder="+57 300 123 4567"
-                  className="h-8 text-sm w-[90%] mx-auto"
+                  className="h-8 text-sm w-[98%] mx-auto"
                 />
               </div>
             </div>
@@ -162,7 +162,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   onChange={(e) => setPurchaseData({ ...purchaseData, deliveryAddress: e.target.value })}
                   placeholder="Calle 123 #45-67, Barrio, Ciudad"
                   rows={2}
-                  className="text-sm w-[90%] mx-auto"
+                  className="text-sm w-[98%] mx-auto"
                 />
               </div>
               
@@ -174,7 +174,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   onChange={(e) => setPurchaseData({ ...purchaseData, notes: e.target.value })}
                   placeholder="Instrucciones especiales para la entrega..."
                   rows={2}
-                  className="text-sm w-[90%] mx-auto"
+                  className="text-sm w-[98%] mx-auto"
                 />
               </div>
             </div>
