@@ -110,12 +110,15 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md w-full mx-4 p-0 overflow-hidden bg-white h-[90vh] flex flex-col">
+      <DialogContent 
+        className="max-w-md w-full mx-4 p-0 overflow-hidden bg-white h-[90vh] flex flex-col"
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         {/* Header mínimo */}
-        <div className="flex justify-end p-4">
+        <div className="flex justify-end p-3">
           <button
             onClick={onClose}
-            className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
+            className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 transition-colors rounded"
           >
             <X className="w-4 h-4 text-gray-600" />
           </button>
@@ -185,10 +188,10 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
 
           {/* Lista de productos */}
           <div className="mb-3">
-            <div className="text-sm text-gray-500 mb-1">Productos</div>
-            <div className="max-h-32 overflow-y-auto space-y-2">
+            <div className="text-sm text-gray-500 mb-2">Productos</div>
+            <div className={`space-y-2 ${orderData.list.products.length > 5 ? 'max-h-40 overflow-y-auto' : ''}`}>
               {orderData.list.products.map((product, index) => (
-                <div key={index} className="flex justify-between items-start">
+                <div key={index} className="flex justify-between items-start py-1">
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm">{product.name}</div>
                     <div className="text-xs text-gray-500">

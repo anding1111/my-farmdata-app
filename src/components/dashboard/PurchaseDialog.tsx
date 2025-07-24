@@ -152,14 +152,13 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
             
             <div className="space-y-3">
               <div className="space-y-2">
-                <Label htmlFor="deliveryAddress">Dirección de entrega *</Label>
+                <Label htmlFor="deliveryAddress">Dirección de entrega (opcional)</Label>
                 <Textarea
                   id="deliveryAddress"
                   value={purchaseData.deliveryAddress}
                   onChange={(e) => setPurchaseData({ ...purchaseData, deliveryAddress: e.target.value })}
                   placeholder="Calle 123 #45-67, Barrio, Ciudad"
                   rows={3}
-                  required
                 />
               </div>
               
@@ -260,7 +259,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
         <DialogTrigger asChild>
           {children}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px]" onPointerDownOutside={(e) => e.preventDefault()}>
           <DialogHeader>
             <DialogTitle>
               Comprar lista: {list.name}
