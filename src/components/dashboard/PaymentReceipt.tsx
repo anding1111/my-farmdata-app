@@ -128,31 +128,31 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
         <div className="flex-1 overflow-y-auto">
           <div id="receipt-content" className="px-4">
             {/* Datos de la droguería */}
-            <div className="text-center mb-3 border-b pb-3">
-              <h2 className="text-lg font-bold text-gray-900">Droguería FarmaVital</h2>
+            <div className="text-center mb-2 border-b pb-2">
+              <h2 className="text-base font-bold text-gray-900">Droguería FarmaVital</h2>
               <p className="text-xs text-gray-600">NIT: 900.123.456-7</p>
               <p className="text-xs text-gray-600">Calle 123 #45-67, Centro, Medellín</p>
               <p className="text-xs text-gray-600">Tel: (604) 123-4567</p>
-              <div className="text-gray-500 text-xs mt-2">
+              <div className="text-gray-500 text-xs mt-1">
                 Recibo No. {invoiceNumber}
               </div>
             </div>
 
             {/* Información de estado y fecha */}
-            <div className="grid grid-cols-2 gap-3 mb-3 text-xs">
-              <div>
-                <div className="text-gray-500 mb-1">Estado</div>
-                <div className="font-medium">Pagado</div>
+            <div className="mb-2 text-xs">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Estado:</span>
+                <span className="font-medium">Pagado</span>
               </div>
-              <div>
-                <div className="text-gray-500 mb-1">Fecha de Pago</div>
-                <div className="font-medium">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Fecha:</span>
+                <span className="font-medium">
                   {new Date().toLocaleDateString('es-ES', { 
                     day: '2-digit', 
                     month: 'short', 
                     year: 'numeric' 
                   })}
-                </div>
+                </span>
               </div>
             </div>
 
@@ -210,22 +210,22 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
           </div>
 
           {/* Botones de acción */}
-          <div className="flex gap-3">
+          <div className="flex gap-2">
           <Button
             variant="outline"
-            className="flex-1 h-12"
+            className="flex-1 h-9 text-xs"
             onClick={handleGeneratePDF}
             disabled={isGeneratingPDF}
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="w-3 h-3 mr-1" />
             {isGeneratingPDF ? 'Generando...' : 'Enviar PDF'}
           </Button>
           <Button
             variant="outline"
-            className="flex-1 h-12"
+            className="flex-1 h-9 text-xs"
             onClick={handlePrint}
           >
-            <Printer className="w-4 h-4 mr-2" />
+            <Printer className="w-3 h-3 mr-1" />
             Imprimir
           </Button>
           </div>
