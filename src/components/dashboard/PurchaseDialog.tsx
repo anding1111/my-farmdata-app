@@ -106,7 +106,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
               </div>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-2 px-2">
               <div className="space-y-1">
                 <Label htmlFor="customerName" className="text-xs">Nombre completo (opcional)</Label>
                 <Input
@@ -114,7 +114,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   value={purchaseData.customerName}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerName: e.target.value })}
                   placeholder="Tu nombre completo"
-                  className="h-8 text-sm"
+                  className="h-8 text-sm w-[90%] mx-auto"
                 />
               </div>
               
@@ -126,7 +126,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   value={purchaseData.customerEmail}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerEmail: e.target.value })}
                   placeholder="tu@email.com"
-                  className="h-8 text-sm"
+                  className="h-8 text-sm w-[90%] mx-auto"
                 />
               </div>
               
@@ -138,7 +138,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   value={purchaseData.customerPhone}
                   onChange={(e) => setPurchaseData({ ...purchaseData, customerPhone: e.target.value })}
                   placeholder="+57 300 123 4567"
-                  className="h-8 text-sm"
+                  className="h-8 text-sm w-[90%] mx-auto"
                 />
               </div>
             </div>
@@ -153,7 +153,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
               <h3 className="text-base font-semibold">Entrega y notas</h3>
             </div>
             
-            <div className="space-y-3">
+            <div className="space-y-3 px-2">
               <div className="space-y-1">
                 <Label htmlFor="deliveryAddress" className="text-xs">Dirección de entrega (opcional)</Label>
                 <Textarea
@@ -162,7 +162,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   onChange={(e) => setPurchaseData({ ...purchaseData, deliveryAddress: e.target.value })}
                   placeholder="Calle 123 #45-67, Barrio, Ciudad"
                   rows={2}
-                  className="text-sm"
+                  className="text-sm w-[90%] mx-auto"
                 />
               </div>
               
@@ -174,7 +174,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
                   onChange={(e) => setPurchaseData({ ...purchaseData, notes: e.target.value })}
                   placeholder="Instrucciones especiales para la entrega..."
                   rows={2}
-                  className="text-sm"
+                  className="text-sm w-[90%] mx-auto"
                 />
               </div>
             </div>
