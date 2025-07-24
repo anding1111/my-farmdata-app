@@ -237,35 +237,86 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Vista de Listas */}
+          {/* Vista de Listas con diseño original mejorado */}
           {catalogMode === 'lists' && (
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-6">
               {productLists.map((list) => {
                 const IconComponent = getListIcon(list.icon);
                 return (
                   <Card 
                     key={list.id} 
-                    className={`group hover:shadow-md transition-all cursor-pointer border-2 hover:border-blue-200 ${
-                      selectedListId === list.id ? 'ring-2 ring-primary shadow-lg border-blue-400' : ''
+                    className={`overflow-hidden cursor-pointer transition-all hover:shadow-lg ${
+                      selectedListId === list.id ? 'ring-2 ring-blue-500 shadow-lg border-blue-200' : 'hover:border-blue-200'
                     }`}
                     onClick={() => handleListSelect(list.id)}
                   >
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-md bg-${list.color || 'blue'}-100`}>
-                          <IconComponent className={`h-6 w-6 text-${list.color || 'blue'}-600`} />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-lg mb-1">{list.name}</h3>
-                          <p className="text-sm text-muted-foreground mb-2">
-                            {list.description || `${list.products.length} productos`}
-                          </p>
-                          <div className="font-medium text-blue-600">
-                            {formatCurrency(list.total)}
+                    <CardHeader className="p-6 pb-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg bg-${list.color || 'blue'}-100`}>
+                            <IconComponent className={`h-5 w-5 text-${list.color || 'blue'}-600`} />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl font-semibold">{list.name}</CardTitle>
+                            {list.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{list.description}</p>
+                            )}
                           </div>
                         </div>
-                        <div className="text-2xl text-blue-600 group-hover:translate-x-1 transition-transform">
-                          →
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-5 w-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              // TODO: Implementar edición
+                            }}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleDuplicateList(list.id);
+                            }}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteList(list.id);
+                              }}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="flex justify-between items-center">
+                        <div className="flex -space-x-2">
+                          {list.products.slice(0, 4).map((product, idx) => (
+                            <div key={idx} className="h-12 w-12 rounded-lg bg-slate-200 border-2 border-white overflow-hidden shadow-sm">
+                              <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                            </div>
+                          ))}
+                          {list.products.length > 4 && (
+                            <div className="h-12 w-12 rounded-lg bg-slate-100 border-2 border-white flex items-center justify-center text-sm font-medium shadow-sm">
+                              +{list.products.length - 4}
+                            </div>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm text-muted-foreground">
+                            {list.products.length} productos
+                          </div>
+                          <div className="text-lg font-bold text-blue-600">{formatCurrency(list.total)}</div>
                         </div>
                       </div>
                     </CardContent>
