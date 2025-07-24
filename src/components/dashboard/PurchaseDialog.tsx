@@ -8,6 +8,7 @@ import { ProductList } from "@/types/product";
 import { formatCurrency } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, CreditCard, Truck } from "lucide-react";
+import { PaymentReceipt } from "./PaymentReceipt";
 
 interface PurchaseDialogProps {
   list: ProductList;
@@ -17,6 +18,7 @@ interface PurchaseDialogProps {
 export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
+  const [showReceipt, setShowReceipt] = useState(false);
   const [purchaseData, setPurchaseData] = useState({
     customerName: "",
     customerEmail: "",
@@ -39,20 +41,27 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
     setTimeout(() => {
       toast({
         title: "¡Compra realizada con éxito!",
-        description: `La orden para "${list.name}" ha sido procesada. Recibirás un email de confirmación.`,
+        description: `La orden para "${list.name}" ha sido procesada.`,
       });
       
+      // Cerrar el modal de compra y mostrar el recibo
       setOpen(false);
+      setShowReceipt(true);
       setStep(1);
-      setPurchaseData({
-        customerName: "",
-        customerEmail: "",
-        customerPhone: "",
-        deliveryAddress: "",
-        paymentMethod: "card",
-        notes: "",
-      });
     }, 1500);
+  };
+
+  const handleCloseReceipt = () => {
+    setShowReceipt(false);
+    // Resetear datos después de cerrar el recibo
+    setPurchaseData({
+      customerName: "",
+      customerEmail: "",
+      customerPhone: "",
+      deliveryAddress: "",
+      paymentMethod: "card",
+      notes: "",
+    });
   };
 
   const renderStep = () => {
@@ -238,52 +247,69 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle>
-            Comprar lista: {list.name}
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="mb-4">
-          <div className="flex gap-2">
-            {[1, 2, 3].map((stepNumber) => (
-              <div
-                key={stepNumber}
-                className={`flex-1 h-2 rounded ${
-                  step >= stepNumber ? 'bg-primary' : 'bg-gray-200'
-                }`}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>Datos</span>
-            <span>Entrega</span>
-            <span>Pago</span>
-          </div>
-        </div>
-        
-        <form onSubmit={handleSubmit}>
-          {renderStep()}
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children}
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              Comprar lista: {list.name}
+            </DialogTitle>
+          </DialogHeader>
           
-          <div className="flex justify-between gap-2 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => step > 1 ? setStep(step - 1) : setOpen(false)}
-            >
-              {step > 1 ? 'Anterior' : 'Cancelar'}
-            </Button>
-            <Button type="submit">
-              {step < 3 ? 'Siguiente' : 'Confirmar compra'}
-            </Button>
+          <div className="mb-4">
+            <div className="flex gap-2">
+              {[1, 2, 3].map((stepNumber) => (
+                <div
+                  key={stepNumber}
+                  className={`flex-1 h-2 rounded ${
+                    step >= stepNumber ? 'bg-primary' : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="flex justify-between text-xs text-muted-foreground mt-1">
+              <span>Datos</span>
+              <span>Entrega</span>
+              <span>Pago</span>
+            </div>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          
+          <form onSubmit={handleSubmit}>
+            {renderStep()}
+            
+            <div className="flex justify-between gap-2 pt-6">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => step > 1 ? setStep(step - 1) : setOpen(false)}
+              >
+                {step > 1 ? 'Anterior' : 'Cancelar'}
+              </Button>
+              <Button type="submit">
+                {step < 3 ? 'Siguiente' : 'Confirmar compra'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Recibo de pago */}
+      <PaymentReceipt
+        isOpen={showReceipt}
+        onClose={handleCloseReceipt}
+        orderData={{
+          list,
+          customerName: purchaseData.customerName,
+          customerEmail: purchaseData.customerEmail,
+          customerPhone: purchaseData.customerPhone,
+          deliveryAddress: purchaseData.deliveryAddress,
+          paymentMethod: purchaseData.paymentMethod,
+          notes: purchaseData.notes,
+        }}
+      />
+    </>
   );
 }

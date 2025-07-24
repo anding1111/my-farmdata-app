@@ -5,6 +5,7 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PurchaseDialog } from "@/components/dashboard/PurchaseDialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
@@ -31,7 +32,6 @@ import {
 import { useFarmaData } from "@/hooks/useFarmaData";
 import { CreateListDialog } from "@/components/dashboard/CreateListDialog";
 import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
-import { PurchaseDialog } from "@/components/dashboard/PurchaseDialog";
 import { formatCurrency } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 
@@ -662,9 +662,19 @@ const Dashboard = () => {
               </div>
 
               {/* Botón de proceder al pago */}
-              <Button className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 rounded-2xl transition-all duration-200 hover:scale-105">
-                Proceder al pago
-              </Button>
+              <PurchaseDialog 
+                 list={{
+                   id: 'cart' as any,
+                   name: 'Carrito de Compras',
+                   products: shoppingCart,
+                   total: cartTotal,
+                   moreCount: 0
+                 }}
+              >
+                <Button className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 rounded-2xl transition-all duration-200 hover:scale-105">
+                  Proceder al pago
+                </Button>
+              </PurchaseDialog>
             </div>
           )}
         </div>
