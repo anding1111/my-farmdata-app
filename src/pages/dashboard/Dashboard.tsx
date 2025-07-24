@@ -538,94 +538,113 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Columna derecha - Carrito de compras independiente */}
-        <div className="w-1/3 p-4 bg-white border-l overflow-y-auto">
-          <div className="flex items-center gap-2 mb-6">
-            <ShoppingCart className="h-6 w-6 text-blue-600" />
-            <h2 className="text-xl font-semibold">Carrito de Compras</h2>
+        {/* Columna derecha - Carrito de compras moderno */}
+        <div className="w-1/3 bg-gray-50 flex flex-col h-full">
+          {/* Header del carrito */}
+          <div className="p-6 bg-white border-b">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Mi Carrito</h2>
+              <span className="text-sm text-gray-500">
+                {shoppingCart.length} {shoppingCart.length === 1 ? 'producto' : 'productos'}
+              </span>
+            </div>
           </div>
 
-          {/* Lista de productos en el carrito */}
-          <div className="space-y-3 mb-6">
+          {/* Lista de productos - Scrolleable */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {shoppingCart.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
-                <ShoppingCart className="h-12 w-12 mx-auto mb-2 text-gray-300" />
-                <p>Tu carrito está vacío</p>
-                <p className="text-sm">Agrega productos desde el catálogo</p>
+              <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+                  <ShoppingCart className="h-12 w-12 text-gray-400" />
+                </div>
+                <p className="text-lg font-medium mb-2">Tu carrito está vacío</p>
+                <p className="text-sm text-center">Agrega productos desde el catálogo para comenzar</p>
               </div>
             ) : (
               shoppingCart.map((item) => (
-                <div key={item.productId} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
-                  <div className="w-12 h-12 bg-white rounded-md flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={item.image} 
-                      alt={item.name} 
-                      className="w-full h-full object-contain" 
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-medium text-sm truncate">{item.name}</h4>
-                    <div className="flex items-center justify-between mt-1">
-                      <span className="text-sm font-semibold text-blue-600">
+                <div key={item.productId} className="bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    {/* Imagen del producto */}
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="w-full h-full object-contain p-2" 
+                      />
+                    </div>
+                    
+                    {/* Información del producto */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                        {item.name}
+                      </h4>
+                      <div className="text-xl font-bold text-gray-900 mb-2">
                         {formatCurrency(item.price)}
-                      </span>
-                      <div className="flex items-center gap-1">
+                      </div>
+                      
+                      {/* Controles de cantidad */}
+                      <div className="flex items-center gap-3">
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleUpdateCartQuantity(item.productId, item.quantity - 1)}
-                          className="h-6 w-6 p-0"
+                          className="h-8 w-8 p-0 rounded-full bg-gray-100 hover:bg-gray-200"
                         >
-                          <Minus className="h-3 w-3" />
+                          <Minus className="h-4 w-4" />
                         </Button>
-                        <span className="w-8 text-center text-sm">{item.quantity}</span>
+                        <span className="w-8 text-center font-semibold">{item.quantity}</span>
                         <Button
-                          variant="outline"
+                          variant="ghost"
                           size="sm"
                           onClick={() => handleUpdateCartQuantity(item.productId, item.quantity + 1)}
-                          className="h-6 w-6 p-0"
+                          className="h-8 w-8 p-0 rounded-full bg-gray-100 hover:bg-gray-200"
                         >
-                          <Plus className="h-3 w-3" />
+                          <Plus className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
+                    
+                    {/* Botón eliminar */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveFromCart(item.productId)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRemoveFromCart(item.productId)}
-                    className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
                 </div>
               ))
             )}
           </div>
 
-          {/* Resumen y total */}
+          {/* Footer del carrito - Fijo */}
           {shoppingCart.length > 0 && (
-            <>
-              <div className="border-t pt-4 space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal ({shoppingCart.length} productos)</span>
+            <div className="bg-white border-t p-6 space-y-4">
+              {/* Resumen de precios */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
                   <span>{formatCurrency(cartTotal)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-gray-600">
                   <span>Envío</span>
-                  <span className="text-green-600">Gratis</span>
+                  <span className="text-green-600 font-medium">Gratis</span>
                 </div>
-                <div className="flex justify-between font-semibold text-lg pt-2 border-t">
-                  <span>Total</span>
-                  <span className="text-blue-600">{formatCurrency(cartTotal)}</span>
+                <div className="border-t pt-2">
+                  <div className="flex justify-between font-bold text-xl text-gray-900">
+                    <span>TOTAL</span>
+                    <span>{formatCurrency(cartTotal)}</span>
+                  </div>
                 </div>
               </div>
 
-              <Button className="w-full py-3 text-lg bg-blue-600 hover:bg-blue-700">
-                <ShoppingCart className="h-5 w-5 mr-2" />
+              {/* Botón de proceder al pago */}
+              <Button className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 rounded-2xl transition-all duration-200 hover:scale-105">
                 Proceder al pago
               </Button>
-            </>
+            </div>
           )}
         </div>
       </div>
