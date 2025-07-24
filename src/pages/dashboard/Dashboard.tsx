@@ -25,7 +25,8 @@ import {
   ShoppingCart,
   Receipt,
   X,
-  Minus
+  Minus,
+  Info
 } from "lucide-react";
 import { useFarmaData } from "@/hooks/useFarmaData";
 import { CreateListDialog } from "@/components/dashboard/CreateListDialog";
@@ -61,6 +62,7 @@ const Dashboard = () => {
   const [catalogMode, setCatalogMode] = useState<'products' | 'lists'>('products');
   const [shoppingCart, setShoppingCart] = useState<Array<{productId: number, product: any, quantity: number, image: string, name: string, price: number}>>([]);
   const [selectedListForView, setSelectedListForView] = useState<number | null>(null);
+  const [selectedProductInfo, setSelectedProductInfo] = useState<any>(null);
   
   const { toast } = useToast();
 
@@ -354,47 +356,155 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Vista de Productos optimizada para venta rápida */}
+          {/* Vista de Productos optimizada y responsive */}
           {catalogMode === 'products' && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3">
               {filteredProducts.length === 0 ? (
-                <div className="col-span-2 text-center py-8 text-gray-500">
+                <div className="col-span-full text-center py-8 text-gray-500">
                   <div className="text-6xl mb-4">🔍</div>
                   <p className="text-lg">No se encontraron productos</p>
                   <p className="text-sm">Intenta con otra búsqueda</p>
                 </div>
               ) : (
                 filteredProducts.map((product) => (
-                  <Card key={product.id} className="group hover:shadow-lg transition-all cursor-pointer border hover:border-blue-300">
-                    <div className="h-32 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+                  <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer border hover:border-blue-300 hover:scale-105 animate-fade-in relative">
+                    {/* Botón de información flotante */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedProductInfo(product);
+                      }}
+                      className="absolute top-2 right-2 z-10 h-7 w-7 p-0 bg-white/80 hover:bg-white shadow-md rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200"
+                    >
+                      <Info className="h-3 w-3 text-blue-600" />
+                    </Button>
+                    
+                    <div className="h-24 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden rounded-t-lg">
                       <img 
                         src={product.image} 
                         alt={product.name} 
-                        className="w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-200" 
+                        className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-300" 
                       />
                     </div>
-                    <CardContent className="p-4">
+                    <CardContent className="p-3">
                       <div className="mb-2">
-                        <h3 className="font-semibold text-base mb-1 text-gray-900 line-clamp-1">{product.name}</h3>
+                        <h3 className="font-semibold text-sm mb-1 text-gray-900 line-clamp-2 leading-tight">{product.name}</h3>
                         <span className="inline-block text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                           {product.category}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <div className="text-xl font-bold text-blue-600">{formatCurrency(product.price)}</div>
+                        <div className="text-lg font-bold text-blue-600">{formatCurrency(product.price)}</div>
                         <Button
                           size="sm"
-                          onClick={() => handleAddProduct(product, 1)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddProduct(product, 1);
+                          }}
+                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg font-medium transition-all duration-200 hover:scale-105"
                         >
-                          <Plus className="h-4 w-4 mr-1" />
-                          Agregar
+                          <Plus className="h-3 w-3 mr-1" />
+                          <span className="hidden sm:inline">Agregar</span>
+                          <span className="sm:hidden">+</span>
                         </Button>
                       </div>
                     </CardContent>
                   </Card>
                 ))
               )}
+            </div>
+          )}
+
+          {/* Modal de información del producto */}
+          {selectedProductInfo && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
+              <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">{selectedProductInfo.name}</h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedProductInfo(null)}
+                    className="h-8 w-8 p-0 hover:bg-gray-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="flex gap-4 mb-4">
+                  <div className="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center">
+                    <img 
+                      src={selectedProductInfo.image} 
+                      alt={selectedProductInfo.name} 
+                      className="w-full h-full object-contain p-2" 
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-2xl font-bold text-blue-600 mb-2">{formatCurrency(selectedProductInfo.price)}</div>
+                    <span className="inline-block text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                      {selectedProductInfo.category}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mb-6">
+                  {selectedProductInfo.description && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">Descripción</h4>
+                      <p className="text-gray-600 text-sm">{selectedProductInfo.description}</p>
+                    </div>
+                  )}
+                  {selectedProductInfo.manufacturer && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">Fabricante</h4>
+                      <p className="text-gray-600 text-sm">{selectedProductInfo.manufacturer}</p>
+                    </div>
+                  )}
+                  {selectedProductInfo.activeIngredient && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">Ingrediente Activo</h4>
+                      <p className="text-gray-600 text-sm">{selectedProductInfo.activeIngredient}</p>
+                    </div>
+                  )}
+                  {selectedProductInfo.dosage && (
+                    <div>
+                      <h4 className="font-semibold text-gray-900 mb-1">Dosificación</h4>
+                      <p className="text-gray-600 text-sm">{selectedProductInfo.dosage}</p>
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Disponibilidad</h4>
+                    <span className={`inline-block text-sm px-3 py-1 rounded-full ${
+                      selectedProductInfo.inStock 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {selectedProductInfo.inStock ? 'En stock' : 'Sin stock'}
+                    </span>
+                  </div>
+                  {selectedProductInfo.prescription && (
+                    <div>
+                      <span className="inline-block text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full">
+                        Requiere prescripción médica
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  onClick={() => {
+                    handleAddProduct(selectedProductInfo, 1);
+                    setSelectedProductInfo(null);
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors"
+                  disabled={!selectedProductInfo.inStock}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Agregar al carrito
+                </Button>
+              </div>
             </div>
           )}
         </div>
