@@ -440,90 +440,132 @@ const Dashboard = () => {
           {/* Modal de información del producto */}
           {selectedProductInfo && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in">
-              <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-bold text-gray-900">{selectedProductInfo.name}</h3>
-                  <Button
-                    variant="ghost"
-                    size="sm"
+              <div className="bg-gray-50 rounded-3xl max-w-sm w-full mx-4 animate-scale-in overflow-hidden">
+                {/* Header con navegación */}
+                <div className="flex items-center justify-between p-4 bg-white">
+                  <button
                     onClick={() => setSelectedProductInfo(null)}
-                    className="h-8 w-8 p-0 hover:bg-gray-100"
+                    className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors"
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
                 </div>
-                
-                <div className="flex gap-4 mb-4">
-                  <div className="w-24 h-24 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg flex items-center justify-center">
+
+                {/* Contenido principal */}
+                <div className="px-6 pb-6">
+                  {/* Información básica */}
+                  <div className="mb-4">
+                    <div className="text-gray-500 text-sm mb-1">{selectedProductInfo.manufacturer || 'FarmaData'}</div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-1">{selectedProductInfo.name}</h2>
+                    <div className="text-gray-500 text-sm mb-3">{selectedProductInfo.category}</div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="text-2xl font-bold text-blue-600">{formatCurrency(selectedProductInfo.price)}</div>
+                      <div className={`w-6 h-6 rounded-full ${
+                        selectedProductInfo.inStock ? 'bg-green-500' : 'bg-red-500'
+                      }`}></div>
+                    </div>
+                  </div>
+
+                  {/* Imagen del producto grande */}
+                  <div className="relative h-64 bg-white rounded-2xl mb-6 flex items-center justify-center">
                     <img 
                       src={selectedProductInfo.image} 
                       alt={selectedProductInfo.name} 
-                      className="w-full h-full object-contain p-2" 
+                      className="w-full h-full object-contain p-4" 
                     />
+                    
+                    {/* Botones de navegación */}
+                    <button className="absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button className="absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
                   </div>
-                  <div className="flex-1">
-                    <div className="text-2xl font-bold text-blue-600 mb-2">{formatCurrency(selectedProductInfo.price)}</div>
-                    <span className="inline-block text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
-                      {selectedProductInfo.category}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="space-y-3 mb-6">
-                  {selectedProductInfo.description && (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-1">Descripción</h4>
-                      <p className="text-gray-600 text-sm">{selectedProductInfo.description}</p>
-                    </div>
-                  )}
-                  {selectedProductInfo.manufacturer && (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-1">Fabricante</h4>
-                      <p className="text-gray-600 text-sm">{selectedProductInfo.manufacturer}</p>
-                    </div>
-                  )}
-                  {selectedProductInfo.activeIngredient && (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-1">Ingrediente Activo</h4>
-                      <p className="text-gray-600 text-sm">{selectedProductInfo.activeIngredient}</p>
-                    </div>
-                  )}
-                  {selectedProductInfo.dosage && (
-                    <div>
-                      <h4 className="font-semibold text-gray-900 mb-1">Dosificación</h4>
-                      <p className="text-gray-600 text-sm">{selectedProductInfo.dosage}</p>
-                    </div>
-                  )}
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">Disponibilidad</h4>
-                    <span className={`inline-block text-sm px-3 py-1 rounded-full ${
-                      selectedProductInfo.inStock 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {selectedProductInfo.inStock ? 'En stock' : 'Sin stock'}
-                    </span>
+                  {/* Descripción */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Descripción</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {selectedProductInfo.description || `${selectedProductInfo.name} es un producto farmacéutico de alta calidad diseñado para brindar los mejores resultados.`}
+                    </p>
                   </div>
-                  {selectedProductInfo.prescription && (
-                    <div>
-                      <span className="inline-block text-sm bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full">
-                        Requiere prescripción médica
+
+                  {/* Información adicional */}
+                  <div className="space-y-3 mb-6">
+                    {selectedProductInfo.activeIngredient && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Ingrediente Activo</span>
+                        <span className="font-medium text-blue-600">{selectedProductInfo.activeIngredient}</span>
+                      </div>
+                    )}
+                    {selectedProductInfo.dosage && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600">Dosificación</span>
+                        <span className="font-medium text-blue-600">{selectedProductInfo.dosage}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Disponibilidad</span>
+                      <span className={`font-medium ${selectedProductInfo.inStock ? 'text-green-600' : 'text-red-600'}`}>
+                        {selectedProductInfo.inStock ? 'En Stock' : 'Agotado'}
                       </span>
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                <Button
-                  onClick={() => {
-                    handleAddProduct(selectedProductInfo, 1);
-                    setSelectedProductInfo(null);
-                  }}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-medium transition-colors"
-                  disabled={!selectedProductInfo.inStock}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Agregar al carrito
-                </Button>
+                  {/* Selectores */}
+                  <div className="bg-blue-50 rounded-2xl p-4 mb-6">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="text-gray-600 text-sm mb-2">Cantidad</div>
+                        <div className="flex items-center justify-center">
+                          <span className="text-xl font-semibold">1</span>
+                          <svg className="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-gray-600 text-sm mb-2">Tipo</div>
+                        <div className="w-6 h-6 bg-blue-600 rounded-full mx-auto"></div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-gray-600 text-sm mb-2">Unidad</div>
+                        <div className="flex items-center justify-center">
+                          <span className="text-xl font-semibold">1</span>
+                          <svg className="w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Botón de agregar */}
+                  <button
+                    onClick={() => {
+                      handleAddProduct(selectedProductInfo, 1);
+                      setSelectedProductInfo(null);
+                    }}
+                    disabled={!selectedProductInfo.inStock}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 rounded-2xl font-semibold text-lg transition-colors flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart className="w-5 h-5" />
+                    Agregar al Carrito
+                  </button>
+                </div>
               </div>
             </div>
           )}
