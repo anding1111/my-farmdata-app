@@ -367,50 +367,79 @@ const Dashboard = () => {
                 </div>
               ) : (
                 filteredProducts.map((product) => (
-                  <Card key={product.id} className="group hover:shadow-xl transition-all duration-300 cursor-pointer border hover:border-blue-300 hover:scale-105 animate-fade-in relative">
+                  <Card 
+                    key={product.id} 
+                    className="group hover:shadow-2xl transition-all duration-300 cursor-pointer border-0 bg-white hover:scale-105 animate-fade-in relative overflow-hidden"
+                    onClick={(e) => {
+                      // No agregar si se hace clic en el botón de información
+                      const target = e.target as HTMLElement;
+                      if (!target.closest('[data-info-button]')) {
+                        handleAddProduct(product, 1);
+                      }
+                    }}
+                  >
                     {/* Botón de información flotante */}
                     <Button
                       variant="ghost"
                       size="sm"
+                      data-info-button="true"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedProductInfo(product);
                       }}
-                      className="absolute top-2 right-2 z-10 h-7 w-7 p-0 bg-white/80 hover:bg-white shadow-md rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200"
+                      className="absolute top-3 right-3 z-10 h-8 w-8 p-0 bg-white/90 hover:bg-white shadow-lg rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
                     >
-                      <Info className="h-3 w-3 text-blue-600" />
+                      <Info className="h-4 w-4 text-blue-600" />
                     </Button>
                     
-                    <div className="h-24 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden rounded-t-lg">
+                    {/* Indicador de stock */}
+                    <div className="absolute top-3 left-3 z-10">
+                      <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${
+                        product.inStock 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {product.inStock ? 'Disponible' : 'Sin stock'}
+                      </span>
+                    </div>
+
+                    {/* Fondo degradado suave */}
+                    <div className="h-32 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center overflow-hidden relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent opacity-50"></div>
                       <img 
                         src={product.image} 
                         alt={product.name} 
-                        className="w-full h-full object-contain p-2 group-hover:scale-110 transition-transform duration-300" 
+                        className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-300 relative z-10" 
                       />
                     </div>
-                    <CardContent className="p-3">
-                      <div className="mb-2">
-                        <h3 className="font-semibold text-sm mb-1 text-gray-900 line-clamp-2 leading-tight">{product.name}</h3>
-                        <span className="inline-block text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+
+                    <CardContent className="p-4">
+                      <div className="mb-3">
+                        <h3 className="font-bold text-base mb-2 text-gray-900 line-clamp-2 leading-tight group-hover:text-blue-700 transition-colors">
+                          {product.name}
+                        </h3>
+                        <span className="inline-block text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">
                           {product.category}
                         </span>
                       </div>
+                      
                       <div className="flex justify-between items-center">
-                        <div className="text-lg font-bold text-blue-600">{formatCurrency(product.price)}</div>
-                        <Button
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleAddProduct(product, 1);
-                          }}
-                          className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-lg font-medium transition-all duration-200 hover:scale-105"
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          <span className="hidden sm:inline">Agregar</span>
-                          <span className="sm:hidden">+</span>
-                        </Button>
+                        <div className="text-xl font-bold text-blue-600 group-hover:text-blue-700 transition-colors">
+                          {formatCurrency(product.price)}
+                        </div>
+                        
+                        {/* Botón circular de agregar - más sutil */}
+                        <div className="w-10 h-10 bg-blue-600 group-hover:bg-blue-700 rounded-full flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-110">
+                          <Plus className="h-5 w-5 text-white" />
+                        </div>
                       </div>
+
+                      {/* Barra de hover para indicar que es clickeable */}
+                      <div className="mt-3 h-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </CardContent>
+
+                    {/* Efecto de brillo al hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full animate-pulse"></div>
                   </Card>
                 ))
               )}
