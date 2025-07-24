@@ -128,11 +128,10 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
         <div className="flex-1 overflow-y-auto">
           <div id="receipt-content" className="px-4">
             {/* Datos de la droguería */}
-            <div className="text-center mb-2 border-b pb-2">
-              <h2 className="text-base font-bold text-gray-900">Droguería FarmaVital</h2>
-              <p className="text-xs text-gray-600">NIT: 900.123.456-7</p>
+            <div className="text-center mb-1 border-b pb-1">
+              <h2 className="text-sm font-bold text-gray-900">Droguería FarmaVital</h2>
+              <p className="text-xs text-gray-600">NIT: 900.123.456-7 | Tel: (604) 123-4567</p>
               <p className="text-xs text-gray-600">Calle 123 #45-67, Centro, Medellín</p>
-              <p className="text-xs text-gray-600">Tel: (604) 123-4567</p>
               <div className="text-gray-500 text-xs mt-1">
                 Recibo No. {invoiceNumber}
               </div>
@@ -141,18 +140,10 @@ export function PaymentReceipt({ isOpen, onClose, orderData }: PaymentReceiptPro
             {/* Información de estado y fecha */}
             <div className="mb-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-500">Estado:</span>
-                <span className="font-medium">Pagado</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Fecha:</span>
-                <span className="font-medium">
-                  {new Date().toLocaleDateString('es-ES', { 
-                    day: '2-digit', 
-                    month: 'short', 
-                    year: 'numeric' 
-                  })}
-                </span>
+                <div className="flex gap-4">
+                  <span><span className="text-gray-500">Estado:</span> <span className="font-medium">Pagado</span></span>
+                  <span><span className="text-gray-500">Fecha:</span> <span className="font-medium">{new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })}</span></span>
+                </div>
               </div>
             </div>
 
