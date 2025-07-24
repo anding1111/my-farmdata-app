@@ -262,14 +262,14 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
         <DialogTrigger asChild>
           {children}
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[500px]" onPointerDownOutside={(e) => e.preventDefault()}>
-          <DialogHeader>
+        <DialogContent className="sm:max-w-[500px] h-[580px] flex flex-col" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>
               Comprar lista: {list.name}
             </DialogTitle>
           </DialogHeader>
           
-          <div className="mb-3">
+          <div className="mb-3 flex-shrink-0">
             <div className="flex gap-2">
               {[1, 2, 3].map((stepNumber) => (
                 <div
@@ -287,10 +287,12 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
             </div>
           </div>
           
-          <form onSubmit={handleSubmit}>
-            {renderStep()}
+          <form onSubmit={handleSubmit} className="flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto">
+              {renderStep()}
+            </div>
             
-            <div className="flex justify-between gap-2 pt-4">
+            <div className="flex justify-between gap-2 pt-4 flex-shrink-0">
               <Button 
                 type="button" 
                 variant="outline" 
