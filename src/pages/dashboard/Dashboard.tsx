@@ -60,6 +60,7 @@ const Dashboard = () => {
   
   const [catalogMode, setCatalogMode] = useState<'products' | 'lists'>('products');
   const [shoppingCart, setShoppingCart] = useState<Array<{productId: number, product: any, quantity: number, image: string, name: string, price: number}>>([]);
+  const [selectedListForView, setSelectedListForView] = useState<number | null>(null);
   
   const { toast } = useToast();
 
@@ -78,10 +79,15 @@ const Dashboard = () => {
   // Manejadores de eventos
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    // Resetear vista de lista específica al buscar
+    setSelectedListForView(null);
   };
 
   const handleListSelect = (listId: number) => {
-    setSelectedListId(listId);
+    // Al hacer clic en una lista, cambiar a vista de productos y mostrar solo esos productos
+    setSelectedListForView(listId);
+    setCatalogMode('products');
+    setSearchQuery(''); // Limpiar búsqueda para mostrar solo productos de la lista
   };
 
   const handleDeleteList = (listId: number) => {
@@ -157,16 +163,31 @@ const Dashboard = () => {
 
   const cartTotal = shoppingCart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
-  // Filtrar productos según la búsqueda
-  const filteredProducts = products.filter(product => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return (
-      product.name.toLowerCase().includes(query) ||
-      product.category.toLowerCase().includes(query) ||
-      (product.description && product.description.toLowerCase().includes(query))
-    );
-  });
+  // Filtrar productos según la búsqueda y lista seleccionada
+  const filteredProducts = (() => {
+    // Si hay una lista seleccionada para vista, mostrar solo sus productos
+    if (selectedListForView) {
+      const selectedListData = productLists.find(list => list.id === selectedListForView);
+      if (selectedListData) {
+        return selectedListData.products.map(listProduct => 
+          products.find(product => product.id === listProduct.productId)
+        ).filter(Boolean) as typeof products;
+      }
+    }
+    
+    // Si hay búsqueda, filtrar todos los productos
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return products.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query) ||
+        (product.description && product.description.toLowerCase().includes(query))
+      );
+    }
+    
+    // Por defecto, mostrar todos los productos
+    return products;
+  })();
 
   return (
     <DashboardLayout>
@@ -177,13 +198,20 @@ const Dashboard = () => {
           <div className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-3xl font-bold text-gray-900">
-                {catalogMode === 'lists' ? 'Mis Listas' : 'Catálogo de Productos'}
+                {catalogMode === 'lists' 
+                  ? 'Mis Listas' 
+                  : selectedListForView 
+                    ? `${productLists.find(list => list.id === selectedListForView)?.name || 'Lista'} - Productos`
+                    : 'Catálogo de Productos'
+                }
               </h1>
-              
               {/* Toggle muy intuitivo */}
               <div className="flex items-center bg-gray-100 rounded-full p-1">
                 <button
-                  onClick={() => setCatalogMode('products')}
+                  onClick={() => {
+                    setCatalogMode('products');
+                    setSelectedListForView(null); // Resetear vista de lista específica
+                  }}
                   className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
                     catalogMode === 'products' 
                       ? 'bg-blue-600 text-white shadow-md' 
