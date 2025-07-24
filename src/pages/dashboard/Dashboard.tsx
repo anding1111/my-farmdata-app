@@ -157,151 +157,84 @@ const Dashboard = () => {
 
   const cartTotal = shoppingCart.reduce((total, item) => total + (item.price * item.quantity), 0);
 
+  // Filtrar productos según la búsqueda
+  const filteredProducts = products.filter(product => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      product.name.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query) ||
+      (product.description && product.description.toLowerCase().includes(query))
+    );
+  });
+
   return (
     <DashboardLayout>
       <div className="flex h-full overflow-hidden">
-        {/* Columna izquierda - Productos disponibles y listas */}
-        <div className="w-1/3 p-4 bg-white border-r overflow-y-auto">
-          <div className="mb-4 flex items-center">
-            <div className="relative flex-1 mr-2">
-              <Input
-                type="text"
-                placeholder="Buscar listas o productos..."
-                className="pl-8 w-full"
-                value={searchQuery}
-                onChange={handleSearchChange}
-              />
-              <svg
-                className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground"
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.3-4.3" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="border border-dashed border-blue-300 rounded-md p-4 mb-4 flex items-center justify-center">
-            <CreateListDialog onCreateList={createList} />
-          </div>
-
-          <div className="space-y-4">
-            {productLists.map((list) => {
-              const IconComponent = getListIcon(list.icon);
-              return (
-                <Card 
-                  key={list.id} 
-                  className={`overflow-hidden cursor-pointer transition-all hover:shadow-md ${
-                    selectedListId === list.id ? 'ring-2 ring-primary shadow-lg' : ''
+        {/* Columna principal unificada - Productos y Listas */}
+        <div className="w-2/3 p-6 bg-white border-r overflow-y-auto">
+          {/* Header con toggle y búsqueda */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {catalogMode === 'lists' ? 'Mis Listas' : 'Catálogo de Productos'}
+              </h1>
+              
+              {/* Toggle muy intuitivo */}
+              <div className="flex items-center bg-gray-100 rounded-full p-1">
+                <button
+                  onClick={() => setCatalogMode('products')}
+                  className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    catalogMode === 'products' 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-gray-600 hover:text-gray-900'
                   }`}
-                  onClick={() => handleListSelect(list.id)}
                 >
-                  <CardHeader className="p-4 pb-0">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-md bg-${list.color || 'blue'}-100`}>
-                          <IconComponent className={`h-4 w-4 text-${list.color || 'blue'}-600`} />
-                        </div>
-                        <CardTitle className="text-lg">{list.name}</CardTitle>
-                      </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-5 w-5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            // TODO: Implementar edición
-                          }}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Editar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={(e) => {
-                            e.stopPropagation();
-                            handleDuplicateList(list.id);
-                          }}>
-                            <Copy className="h-4 w-4 mr-2" />
-                            Duplicar
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteList(list.id);
-                            }}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Eliminar
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                    {list.description && (
-                      <p className="text-sm text-muted-foreground mt-1">{list.description}</p>
-                    )}
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-center">
-                      <div className="flex -space-x-2">
-                        {list.products.slice(0, 4).map((product, idx) => (
-                          <div key={idx} className="h-10 w-10 rounded-md bg-slate-200 border-2 border-white overflow-hidden">
-                            <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
-                          </div>
-                        ))}
-                        {list.products.length > 4 && (
-                          <div className="h-10 w-10 rounded-md bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-medium">
-                            +{list.products.length - 4}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm text-muted-foreground">
-                          {list.products.length} productos
-                        </div>
-                        <div className="font-medium">{formatCurrency(list.total)}</div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Columna central - Catálogo de productos */}
-        <div className="w-1/3 p-4 bg-slate-50 overflow-y-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-semibold">
-              {catalogMode === 'lists' ? 'Listas' : 'Productos'}
-            </h2>
-            <div className="flex gap-2">
-              <Button
-                variant={catalogMode === "lists" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCatalogMode("lists")}
-              >
-                <List className="h-4 w-4 mr-1" />
-                Listas
-              </Button>
-              <Button
-                variant={catalogMode === "products" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setCatalogMode("products")}
-              >
-                <Grid3X3 className="h-4 w-4 mr-1" />
-                Productos
-              </Button>
+                  <Grid3X3 className="h-4 w-4 mr-2" />
+                  Productos
+                </button>
+                <button
+                  onClick={() => setCatalogMode('lists')}
+                  className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    catalogMode === 'lists' 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <List className="h-4 w-4 mr-2" />
+                  Listas
+                </button>
+              </div>
             </div>
+
+            {/* Barra de búsqueda mejorada */}
+            {catalogMode === 'products' && (
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Buscar productos por nombre o categoría..."
+                  className="pl-12 h-12 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                />
+                <svg
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            )}
+
+            {/* Botón para crear nueva lista cuando está en modo listas */}
+            {catalogMode === 'lists' && (
+              <div className="border-2 border-dashed border-blue-300 rounded-xl p-6 mb-6 flex items-center justify-center bg-blue-50">
+                <CreateListDialog onCreateList={createList} />
+              </div>
+            )}
           </div>
 
           {/* Vista de Listas */}
@@ -342,35 +275,47 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* Vista de Productos */}
+          {/* Vista de Productos optimizada para venta rápida */}
           {catalogMode === 'products' && (
-            <div className="grid grid-cols-1 gap-4">
-              {products.map((product) => (
-                <Card key={product.id} className="group hover:shadow-md transition-all cursor-pointer">
-                  <div className="h-32 bg-gray-100 flex items-center justify-center overflow-hidden">
-                    <img 
-                      src={product.image} 
-                      alt={product.name} 
-                      className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform" 
-                    />
-                  </div>
-                  <CardContent className="p-4">
-                    <h3 className="font-medium text-sm mb-1">{product.name}</h3>
-                    <p className="text-xs text-muted-foreground mb-2">{product.category}</p>
-                    <div className="flex justify-between items-center">
-                      <div className="font-semibold text-blue-600">{formatCurrency(product.price)}</div>
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddProduct(product, 1)}
-                        className="h-8"
-                      >
-                        <Plus className="h-4 w-4 mr-1" />
-                        Agregar
-                      </Button>
+            <div className="grid grid-cols-2 gap-4">
+              {filteredProducts.length === 0 ? (
+                <div className="col-span-2 text-center py-8 text-gray-500">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <p className="text-lg">No se encontraron productos</p>
+                  <p className="text-sm">Intenta con otra búsqueda</p>
+                </div>
+              ) : (
+                filteredProducts.map((product) => (
+                  <Card key={product.id} className="group hover:shadow-lg transition-all cursor-pointer border hover:border-blue-300">
+                    <div className="h-32 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center overflow-hidden">
+                      <img 
+                        src={product.image} 
+                        alt={product.name} 
+                        className="w-full h-full object-contain p-3 group-hover:scale-110 transition-transform duration-200" 
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardContent className="p-4">
+                      <div className="mb-2">
+                        <h3 className="font-semibold text-base mb-1 text-gray-900 line-clamp-1">{product.name}</h3>
+                        <span className="inline-block text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                          {product.category}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div className="text-xl font-bold text-blue-600">{formatCurrency(product.price)}</div>
+                        <Button
+                          size="sm"
+                          onClick={() => handleAddProduct(product, 1)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        >
+                          <Plus className="h-4 w-4 mr-1" />
+                          Agregar
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           )}
         </div>
