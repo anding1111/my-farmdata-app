@@ -258,6 +258,25 @@ export const useAdjustStock = () => {
   });
 };
 
+// Hook para ingreso de productos desde proveedores
+export const useProductReceipt = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryApi.receiveProducts,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-stats'] });
+      toast.success('Productos recibidos exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al recibir productos');
+    },
+  });
+};
+
 // Hook para reportes
 export const useInventoryReport = () => {
   return useQuery({

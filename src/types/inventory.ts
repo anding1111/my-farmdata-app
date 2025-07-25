@@ -41,11 +41,25 @@ export interface ProductFormData {
 export interface BatchFormData {
   product_id: number;
   batch_number: string;
+  manufacture_date: string;
   expiry_date: string;
   purchase_date: string;
   quantity: number;
   purchase_price: number;
   supplier_id?: number;
+}
+
+export interface ProductReceiptFormData {
+  product_id: number;
+  batch_number: string;
+  manufacture_date: string;
+  expiry_date: string;
+  purchase_date: string;
+  quantity: number;
+  purchase_price: number;
+  supplier_id?: number;
+  reference_document?: string;
+  notes?: string;
 }
 
 export interface CategoryFormData {

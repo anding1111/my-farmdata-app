@@ -79,6 +79,7 @@ export interface Batch {
   product_id: number;
   product?: Product;
   batch_number: string;
+  manufacture_date: string;
   expiry_date: string;
   purchase_date: string;
   quantity: number;
@@ -355,6 +356,26 @@ export const inventoryApi = {
     const response = await authenticatedFetch('/api/inventory/adjust-stock', {
       method: 'POST',
       body: JSON.stringify(adjustmentData),
+    });
+    return handleApiResponse(response);
+  },
+
+  // ========== INGRESO DE PRODUCTOS ==========
+  receiveProducts: async (receiptData: {
+    product_id: number;
+    batch_number: string;
+    manufacture_date: string;
+    expiry_date: string;
+    purchase_date: string;
+    quantity: number;
+    purchase_price: number;
+    supplier_id?: number;
+    reference_document?: string;
+    notes?: string;
+  }) => {
+    const response = await authenticatedFetch('/api/inventory/receive-products', {
+      method: 'POST',
+      body: JSON.stringify(receiptData),
     });
     return handleApiResponse(response);
   },

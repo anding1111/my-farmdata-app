@@ -9,7 +9,8 @@ import {
   TrendingDown, 
   Calendar,
   BarChart3,
-  Settings
+  Settings,
+  PackageOpen
 } from "lucide-react";
 import ProductsTab from "@/components/inventory/ProductsTab";
 import CategoriesTab from "@/components/inventory/CategoriesTab";
@@ -17,6 +18,7 @@ import BatchesTab from "@/components/inventory/BatchesTab";
 import MovementsTab from "@/components/inventory/MovementsTab";
 import AlertsTab from "@/components/inventory/AlertsTab";
 import ReportsTab from "@/components/inventory/ReportsTab";
+import ReceiptsTab from "@/components/inventory/ReceiptsTab";
 import { useAlerts } from "@/hooks/useInventory";
 
 const Inventory = () => {
@@ -29,10 +31,14 @@ const Inventory = () => {
     <DashboardLayout>
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Productos
+            </TabsTrigger>
+            <TabsTrigger value="receipts" className="flex items-center gap-2">
+              <PackageOpen className="h-4 w-4" />
+              Ingresos
             </TabsTrigger>
             <TabsTrigger value="categories" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -63,6 +69,10 @@ const Inventory = () => {
 
           <TabsContent value="products" className="space-y-4">
             <ProductsTab />
+          </TabsContent>
+
+          <TabsContent value="receipts" className="space-y-4">
+            <ReceiptsTab />
           </TabsContent>
 
           <TabsContent value="categories" className="space-y-4">
