@@ -58,89 +58,93 @@ const RoleForm = ({ role, onSubmit, isLoading = false, onCancel }: RoleFormProps
   }, {} as Record<string, Permission[]>);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="name">Nombre del Rol *</Label>
-          <Input
-            id="name"
-            value={formData.name}
-            onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-            placeholder="Ej: Vendedor"
-            required
-            disabled={isLoading}
-          />
-        </div>
+    <div className="flex flex-col h-full min-h-0">
+      <form onSubmit={handleSubmit} className="flex flex-col h-full space-y-4">
+        <div className="flex-shrink-0 space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Nombre del Rol *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                placeholder="Ej: Vendedor"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="description">Descripción</Label>
-          <Textarea
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="Describe las responsabilidades del rol"
-            disabled={isLoading}
-            rows={3}
-          />
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Permisos</CardTitle>
-          <CardDescription>Selecciona los permisos que tendrá este rol</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {Object.entries(groupedPermissions).map(([group, groupPermissions]) => (
-              <div key={group} className="space-y-3">
-                <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide">
-                  {group}
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {groupPermissions.map((permission) => (
-                    <div key={permission.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`permission-${permission.id}`}
-                        checked={formData.permission_ids.includes(permission.id)}
-                        onCheckedChange={(checked) => 
-                          handlePermissionChange(permission.id, checked as boolean)
-                        }
-                        disabled={isLoading}
-                      />
-                      <Label 
-                        htmlFor={`permission-${permission.id}`}
-                        className="text-sm font-normal cursor-pointer"
-                      >
-                        {permission.description}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+            <div className="space-y-2">
+              <Label htmlFor="description">Descripción</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                placeholder="Describe las responsabilidades del rol"
+                disabled={isLoading}
+                rows={2}
+              />
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      <div className="flex justify-end space-x-2">
-        <Button 
-          type="button" 
-          variant="outline" 
-          onClick={onCancel}
-          disabled={isLoading}
-        >
-          Cancelar
-        </Button>
-        <Button 
-          type="submit" 
-          disabled={isLoading || !formData.name.trim()}
-        >
-          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {role ? "Actualizar" : "Crear"} Rol
-        </Button>
-      </div>
-    </form>
+        <Card className="flex-1 min-h-0 flex flex-col">
+          <CardHeader className="flex-shrink-0 pb-3">
+            <CardTitle className="text-base">Permisos</CardTitle>
+            <CardDescription>Selecciona los permisos que tendrá este rol</CardDescription>
+          </CardHeader>
+          <CardContent className="flex-1 min-h-0 overflow-y-auto">
+            <div className="space-y-4 pr-2">
+              {Object.entries(groupedPermissions).map(([group, groupPermissions]) => (
+                <div key={group} className="space-y-2">
+                  <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide sticky top-0 bg-background py-1">
+                    {group}
+                  </h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    {groupPermissions.map((permission) => (
+                      <div key={permission.id} className="flex items-center space-x-2 py-1">
+                        <Checkbox
+                          id={`permission-${permission.id}`}
+                          checked={formData.permission_ids.includes(permission.id)}
+                          onCheckedChange={(checked) => 
+                            handlePermissionChange(permission.id, checked as boolean)
+                          }
+                          disabled={isLoading}
+                        />
+                        <Label 
+                          htmlFor={`permission-${permission.id}`}
+                          className="text-sm font-normal cursor-pointer flex-1"
+                        >
+                          {permission.description}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex-shrink-0 flex justify-end space-x-2 pt-2">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={onCancel}
+            disabled={isLoading}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            type="submit" 
+            disabled={isLoading || !formData.name.trim()}
+          >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {role ? "Actualizar" : "Crear"} Rol
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 };
 
