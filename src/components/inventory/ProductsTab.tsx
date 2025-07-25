@@ -232,7 +232,7 @@ const ProductsTab = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        ${product.sale_price.toLocaleString()}
+                        ${(product.sale_price || 0).toLocaleString()}
                       </TableCell>
                       <TableCell>
                         <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>

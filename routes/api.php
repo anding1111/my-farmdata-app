@@ -171,15 +171,17 @@ Route::prefix('inventory')->group(function () {
         });
     });
     
-    // Categories routes
-    Route::prefix('categories')->group(function () {
+    // Laboratories routes
+    Route::prefix('laboratories')->group(function () {
         Route::get('/', function () {
             try {
                 return response()->json([
                     'data' => [
-                        ['id' => 1, 'name' => 'Medicamentos', 'description' => 'Productos farmacéuticos'],
-                        ['id' => 2, 'name' => 'Suplementos', 'description' => 'Vitaminas y suplementos'],
-                        ['id' => 3, 'name' => 'Cuidado Personal', 'description' => 'Productos de higiene']
+                        ['id' => 1, 'name' => 'Laboratorios ABC S.A.S', 'code' => 'LAB001'],
+                        ['id' => 2, 'name' => 'Farmacéutica XYZ Ltda', 'code' => 'LAB002'],
+                        ['id' => 3, 'name' => 'Distribuidora MED S.A', 'code' => 'LAB003'],
+                        ['id' => 4, 'name' => 'Laboratorio Nacional', 'code' => 'LAB004'],
+                        ['id' => 5, 'name' => 'Pharma Internacional', 'code' => 'LAB005']
                     ],
                     'success' => true
                 ]);
