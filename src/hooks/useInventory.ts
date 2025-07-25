@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { inventoryApi, type Product, type Category, type Laboratory, type Supplier, type InventoryAlert } from '@/api/inventory';
+import { inventoryApi, type Product, type Category, type Laboratory, type Supplier, type InventoryAlert, type Batch } from '@/api/inventory';
 import { toast } from 'sonner';
 
 // Hook para productos
@@ -207,6 +207,47 @@ export const useCreateBatch = () => {
     },
     onError: (error: any) => {
       toast.error(error.message || 'Error al crear el lote');
+    },
+  });
+};
+
+export const useAllBatches = () => {
+  return useQuery({
+    queryKey: ['batches'],
+    queryFn: () => inventoryApi.getBatches(),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+};
+
+export const useUpdateBatch = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<Batch> }) =>
+      inventoryApi.updateBatch(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Lote actualizado exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al actualizar el lote');
+    },
+  });
+};
+
+export const useDeleteBatch = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryApi.deleteBatch,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['batches'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success('Lote eliminado exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al eliminar el lote');
     },
   });
 };

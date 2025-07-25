@@ -45,7 +45,72 @@ let mockCategories: Category[] = [
   }
 ];
 
+// Mock data for batches
+let mockBatches: Batch[] = [
+  {
+    id: 1,
+    product_id: 1,
+    batch_number: "LOT001-2024",
+    quantity: 100,
+    remaining_quantity: 75,
+    manufacture_date: "2024-01-15",
+    expiry_date: "2025-12-31",
+    purchase_date: "2024-01-15",
+    purchase_price: 28000,
+    supplier_id: 1,
+    status: "active",
+    created_at: "2024-01-15T10:30:00Z",
+    updated_at: "2024-01-15T10:30:00Z"
+  },
+  {
+    id: 2,
+    product_id: 1,
+    batch_number: "LOT002-2024",
+    quantity: 200,
+    remaining_quantity: 200,
+    manufacture_date: "2024-02-10",
+    expiry_date: "2026-06-30",
+    purchase_date: "2024-02-10",
+    purchase_price: 27000,
+    supplier_id: 1,
+    status: "active",
+    created_at: "2024-02-10T14:20:00Z",
+    updated_at: "2024-02-10T14:20:00Z"
+  },
+  {
+    id: 3,
+    product_id: 2,
+    batch_number: "LOT003-2024",
+    quantity: 50,
+    remaining_quantity: 30,
+    manufacture_date: "2024-01-20",
+    expiry_date: "2025-08-15",
+    purchase_date: "2024-01-20",
+    purchase_price: 25000,
+    supplier_id: 2,
+    status: "active",
+    created_at: "2024-01-20T09:15:00Z",
+    updated_at: "2024-01-20T09:15:00Z"
+  },
+  {
+    id: 4,
+    product_id: 3,
+    batch_number: "LOT004-2023",
+    quantity: 80,
+    remaining_quantity: 0,
+    manufacture_date: "2023-12-01",
+    expiry_date: "2024-12-01",
+    purchase_date: "2023-12-01",
+    purchase_price: 30000,
+    supplier_id: 1,
+    status: "expired",
+    created_at: "2023-12-01T11:45:00Z",
+    updated_at: "2024-01-25T16:30:00Z"
+  }
+];
+
 let nextCategoryId = 6;
+let nextBatchId = 5;
 
 // Función helper para hacer requests autenticados
 const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
@@ -54,6 +119,11 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
   // Mock implementation for categories
   if (url.includes('/api/inventory/categories')) {
     return mockFetchCategories(url, options);
+  }
+  
+  // Mock implementation for batches
+  if (url.includes('/api/inventory/batches')) {
+    return mockFetchBatches(url, options);
   }
   
   return fetch(`${API_URL}${url}`, {
@@ -144,6 +214,102 @@ const mockFetchCategories = async (url: string, options: RequestInit = {}) => {
     return new Response(JSON.stringify({
       success: true,
       message: 'Categoría eliminada exitosamente'
+    }), { status: 200 });
+  }
+  
+  return new Response(JSON.stringify({
+    success: false,
+    message: 'Endpoint no encontrado'
+  }), { status: 404 });
+};
+
+// Mock fetch for batches
+const mockFetchBatches = async (url: string, options: RequestInit = {}) => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const method = options.method || 'GET';
+  const urlParts = url.split('?');
+  const basePath = urlParts[0];
+  const searchParams = new URLSearchParams(urlParts[1] || '');
+  
+  if (method === 'GET' && basePath === '/api/inventory/batches') {
+    const productId = searchParams.get('product_id');
+    let filteredBatches = mockBatches;
+    
+    if (productId) {
+      filteredBatches = mockBatches.filter(batch => batch.product_id === parseInt(productId));
+    }
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: filteredBatches
+    }), { status: 200 });
+  }
+  
+  if (method === 'POST' && basePath === '/api/inventory/batches') {
+    const body = JSON.parse(options.body as string);
+    const newBatch: Batch = {
+      id: nextBatchId++,
+      ...body,
+      remaining_quantity: body.quantity, // Initially, remaining equals total quantity
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    mockBatches.push(newBatch);
+    return new Response(JSON.stringify({
+      success: true,
+      data: newBatch
+    }), { status: 201 });
+  }
+  
+  if (method === 'PUT' && basePath.match(/\/api\/inventory\/batches\/\d+/)) {
+    const id = parseInt(basePath.split('/').pop()!);
+    const body = JSON.parse(options.body as string);
+    const batchIndex = mockBatches.findIndex(b => b.id === id);
+    
+    if (batchIndex === -1) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Lote no encontrado'
+      }), { status: 404 });
+    }
+    
+    mockBatches[batchIndex] = {
+      ...mockBatches[batchIndex],
+      ...body,
+      updated_at: new Date().toISOString()
+    };
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: mockBatches[batchIndex]
+    }), { status: 200 });
+  }
+  
+  if (method === 'DELETE' && basePath.match(/\/api\/inventory\/batches\/\d+/)) {
+    const id = parseInt(basePath.split('/').pop()!);
+    const batchIndex = mockBatches.findIndex(b => b.id === id);
+    
+    if (batchIndex === -1) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Lote no encontrado'
+      }), { status: 404 });
+    }
+    
+    // Check if batch has remaining stock
+    if (mockBatches[batchIndex].remaining_quantity > 0) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'No se puede eliminar un lote con stock disponible'
+      }), { status: 400 });
+    }
+    
+    mockBatches.splice(batchIndex, 1);
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Lote eliminado exitosamente'
     }), { status: 200 });
   }
   
@@ -390,6 +556,13 @@ export const inventoryApi = {
     const response = await authenticatedFetch(`/api/inventory/batches/${id}`, {
       method: 'PUT',
       body: JSON.stringify(batchData),
+    });
+    return handleApiResponse(response);
+  },
+
+  deleteBatch: async (id: number) => {
+    const response = await authenticatedFetch(`/api/inventory/batches/${id}`, {
+      method: 'DELETE',
     });
     return handleApiResponse(response);
   },
