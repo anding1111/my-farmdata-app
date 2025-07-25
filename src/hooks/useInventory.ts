@@ -667,3 +667,50 @@ export const useSearchLocations = () => {
     searchLocations,
   };
 };
+
+// Movement hooks
+export const useMovements = (filters?: any) => {
+  return useQuery({
+    queryKey: ['movements', filters],
+    queryFn: () => inventoryApi.getMovements(filters),
+  });
+};
+
+export const useUpdateMovement = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) =>
+      inventoryApi.updateMovement(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      toast.success('Movimiento actualizado exitosamente');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al actualizar el movimiento');
+    },
+  });
+};
+
+export const useDeleteMovement = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: (id: number) => inventoryApi.deleteMovement(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['movements'] });
+      toast.success('Movimiento eliminado exitosamente');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Error al eliminar el movimiento');
+    },
+  });
+};
+
+export const useSearchMovements = (query: string) => {
+  return useQuery({
+    queryKey: ['search-movements', query],
+    queryFn: () => inventoryApi.searchMovements(query),
+    enabled: query.length > 0,
+  });
+};

@@ -211,10 +211,44 @@ let mockProductLocations: ProductLocation[] = [
   }
 ];
 
+// Mock data for movements
+let mockMovements: Movement[] = [
+  {
+    id: 1,
+    product_id: 1,
+    product_name: "Vitamina D3",
+    product_code: "VIT-D3-001",
+    type: "entry",
+    subtype: "purchase",
+    quantity: 100,
+    unit_cost: 15000,
+    total_cost: 1500000,
+    location_to_id: 3,
+    location_to_name: "Estante A1",
+    reason: "Compra inicial de inventario",
+    reference_document: "FC-001",
+    notes: "Proveedor: Laboratorios ABC",
+    user_id: 1,
+    user_name: "Juan Pérez",
+    created_at: "2024-01-15T10:00:00Z",
+    updated_at: "2024-01-15T10:00:00Z"
+  }
+];
+
+// Mock data for products
+let mockProducts: any[] = [
+  { id: 1, name: "Vitamina D3", code: "VIT-D3-001" },
+  { id: 2, name: "Omega 3", code: "OMG-001" }
+];
+
 let nextCategoryId = 6;
 let nextBatchId = 5;
 let nextLocationId = 6;
 let nextProductLocationId = 3;
+let nextMovementId = 2;
+
+// Helper function for API simulation
+const simulateApiCall = () => new Promise(resolve => setTimeout(resolve, 300));
 
 // Función helper para hacer requests autenticados
 const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
@@ -832,6 +866,63 @@ export interface InventoryAlert {
   updated_at: string;
 }
 
+// Movement interfaces
+export interface Movement {
+  id: number;
+  product_id: number;
+  product_name?: string;
+  product_code?: string;
+  type: 'entry' | 'exit' | 'transfer' | 'adjustment';
+  subtype: MovementSubtype;
+  quantity: number;
+  unit_cost?: number;
+  total_cost?: number;
+  location_from_id?: number;
+  location_from_name?: string;
+  location_to_id?: number;
+  location_to_name?: string;
+  reason: string;
+  reference_document?: string;
+  notes?: string;
+  user_id?: number;
+  user_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type MovementSubtype = 
+  | 'purchase' | 'customer_return' | 'production' | 'positive_adjustment'
+  | 'sale' | 'supplier_return' | 'loss' | 'damage' | 'negative_adjustment'
+  | 'location_transfer' | 'warehouse_transfer';
+
+export interface CreateMovementData {
+  product_id: number;
+  type: Movement['type'];
+  subtype: MovementSubtype;
+  quantity: number;
+  unit_cost?: number;
+  location_from_id?: number;
+  location_to_id?: number;
+  reason: string;
+  reference_document?: string;
+  notes?: string;
+}
+
+export interface UpdateMovementData extends Partial<CreateMovementData> {
+  id: number;
+}
+
+export interface MovementFilters {
+  search?: string;
+  type?: string;
+  subtype?: string;
+  product_id?: number;
+  location_id?: number;
+  date_from?: string;
+  date_to?: string;
+  user_id?: number;
+}
+
 // API del inventario
 export const inventoryApi = {
   // ========== PRODUCTOS ==========
@@ -1176,4 +1267,52 @@ export const inventoryApi = {
     const response = await authenticatedFetch(`/api/inventory/locations/search?q=${encodeURIComponent(query)}`);
     return handleApiResponse(response);
   },
+
+  // Movements API
+  getMovements: async (filters?: any) => {
+    await simulateApiCall();
+    return { data: mockMovements };
+  },
+
+  getMovement: async (id: number) => {
+    await simulateApiCall();
+    return mockMovements.find(m => m.id === id);
+  },
+
+  createMovement: async (data: any) => {
+    await simulateApiCall();
+    const newMovement = {
+      id: nextMovementId++,
+      ...data,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    mockMovements.push(newMovement);
+    return newMovement;
+  },
+
+  updateMovement: async (id: number, data: any) => {
+    await simulateApiCall();
+    const index = mockMovements.findIndex(m => m.id === id);
+    if (index !== -1) {
+      mockMovements[index] = { ...mockMovements[index], ...data };
+      return mockMovements[index];
+    }
+    throw new Error('Movimiento no encontrado');
+  },
+
+  deleteMovement: async (id: number) => {
+    await simulateApiCall();
+    const index = mockMovements.findIndex(m => m.id === id);
+    if (index !== -1) {
+      mockMovements.splice(index, 1);
+    }
+  },
+
+  searchMovements: async (query: string) => {
+    await simulateApiCall();
+    return mockMovements.filter(m => 
+      m.product_name?.toLowerCase().includes(query.toLowerCase())
+    );
+  }
 };
