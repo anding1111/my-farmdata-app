@@ -27,9 +27,11 @@ import {
   Receipt,
   X,
   Minus,
-  Info
+  Info,
+  Users
 } from "lucide-react";
 import { useFarmaData } from "@/hooks/useFarmaData";
+import { TurnosTab } from "@/components/dashboard/TurnosTab";
 import { CreateListDialog } from "@/components/dashboard/CreateListDialog";
 import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
 import { formatCurrency } from "@/data/mockData";
@@ -60,7 +62,7 @@ const Dashboard = () => {
     stats,
   } = useFarmaData();
   
-  const [catalogMode, setCatalogMode] = useState<'products' | 'lists'>('products');
+  const [catalogMode, setCatalogMode] = useState<'products' | 'lists' | 'turnos'>('products');
   const [shoppingCart, setShoppingCart] = useLocalStorage<Array<{productId: number, product: any, quantity: number, image: string, name: string, price: number}>>('shopping-cart', []);
   const [selectedListForView, setSelectedListForView] = useState<number | null>(null);
   const [selectedProductInfo, setSelectedProductInfo] = useState<any>(null);
@@ -239,6 +241,17 @@ const Dashboard = () => {
                   <List className="h-4 w-4 mr-2" />
                   Listas
                 </button>
+                <button
+                  onClick={() => setCatalogMode('turnos')}
+                  className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    catalogMode === 'turnos' 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Turnos
+                </button>
               </div>
             </div>
 
@@ -359,6 +372,11 @@ const Dashboard = () => {
                 );
               })}
             </div>
+            )}
+
+          {/* Vista de Turnos - Sistema de Cola */}
+          {catalogMode === 'turnos' && (
+            <TurnosTab />
           )}
 
           {/* Vista de Productos optimizada y responsive */}
