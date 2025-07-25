@@ -32,10 +32,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Modo desarrollo - deshabilitar autenticación temporalmente
   const isDevelopment = import.meta.env.DEV;
+  
+  console.log("🔑 AuthContext - import.meta.env.DEV:", import.meta.env.DEV);
+  console.log("🔑 AuthContext - isDevelopment:", isDevelopment);
 
   // Verificar autenticación al cargar la aplicación
   useEffect(() => {
+    console.log("🔑 AuthContext useEffect - isDevelopment:", isDevelopment);
     if (isDevelopment) {
+      console.log("🔑 AuthContext - Configurando usuario demo para desarrollo");
       // En desarrollo, simular usuario autenticado inmediatamente
       setUser({
         id: 1,

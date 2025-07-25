@@ -51,35 +51,40 @@ const App = () => (
         <BrowserRouter>
           <Routes>
           {/* Rutas públicas */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={
+            (() => {
+              console.log("🚀 App - Redirigiendo de / a /dashboard");
+              return <Navigate to="/dashboard" replace />;
+            })()
+          } />
           <Route path="/login" element={<GuestGuard><Login /></GuestGuard>} />
           <Route path="/registro" element={<GuestGuard><Register /></GuestGuard>} />
           <Route path="/recuperar-contrasena" element={<GuestGuard><ResetPassword /></GuestGuard>} />
           
-          {/* Rutas protegidas */}
+          {/* Rutas protegidas - En desarrollo, sin AuthGuard */}
           <Route
             path="/dashboard"
-            element={<AuthGuard><Dashboard /></AuthGuard>}
+            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Dashboard /> : <AuthGuard><Dashboard /></AuthGuard>}
           />
           <Route
             path="/dashboard/inventario"
-            element={<AuthGuard><Inventory /></AuthGuard>}
+            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Inventory /> : <AuthGuard><Inventory /></AuthGuard>}
           />
           <Route
             path="/dashboard/clientes"
-            element={<AuthGuard><Clients /></AuthGuard>}
+            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Clients /> : <AuthGuard><Clients /></AuthGuard>}
           />
           <Route
             path="/dashboard/proveedores"
-            element={<AuthGuard><Suppliers /></AuthGuard>}
+            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Suppliers /> : <AuthGuard><Suppliers /></AuthGuard>}
           />
           <Route
             path="/dashboard/reportes"
-            element={<AuthGuard><Reports /></AuthGuard>}
+            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Reports /> : <AuthGuard><Reports /></AuthGuard>}
           />
           <Route
             path="/dashboard/configuracion"
-            element={<AuthGuard><Settings /></AuthGuard>}
+            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Settings /> : <AuthGuard><Settings /></AuthGuard>}
           />
           
           {/* Ruta 404 */}
