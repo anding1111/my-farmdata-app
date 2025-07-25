@@ -4,14 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/layouts/DashboardLayout";
+import SuppliersTable from "@/components/suppliers/SuppliersTable";
+import SupplierDialog from "@/components/suppliers/SupplierDialog";
 import SupplierFilters from "@/components/suppliers/SupplierFilters";
 import { Supplier, SupplierFilters as SupplierFiltersType } from "@/types/suppliers";
 import { suppliersApi } from "@/api/suppliers";
 
 const Suppliers = () => {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [filteredSuppliers, setFilteredSuppliers] = useState<Supplier[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filters, setFilters] = useState<SupplierFiltersType>({});
+  const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
+  const [selectedSupplier, setSelectedSupplier] = useState<Supplier | undefined>();
   const { toast } = useToast();
 
   const loadSuppliers = async () => {
@@ -19,6 +24,7 @@ const Suppliers = () => {
       setIsLoading(true);
       const data = await suppliersApi.getSuppliers(filters);
       setSuppliers(data);
+      setFilteredSuppliers(data);
     } catch (error) {
       toast({
         title: "Error",
@@ -42,11 +48,29 @@ const Suppliers = () => {
     setFilters({});
   };
 
+  const handleNewSupplier = () => {
+    setSelectedSupplier(undefined);
+    setSupplierDialogOpen(true);
+  };
+
+  const handleEditSupplier = (supplier: Supplier) => {
+    setSelectedSupplier(supplier);
+    setSupplierDialogOpen(true);
+  };
+
+  const handleSupplierSaved = () => {
+    loadSuppliers();
+  };
+
+  const handleSupplierDeleted = () => {
+    loadSuppliers();
+  };
+
   return (
     <DashboardLayout>
       <div className="flex items-center justify-between h-16 p-4 border-b bg-white">
         <h1 className="text-2xl font-semibold">Proveedores</h1>
-        <Button>
+        <Button onClick={handleNewSupplier}>
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Proveedor
         </Button>
@@ -59,15 +83,21 @@ const Suppliers = () => {
           onClearFilters={handleClearFilters}
         />
         
-        <div className="text-center py-8">
-          <p className="text-lg text-muted-foreground">
-            {isLoading ? "Cargando proveedores..." : `${suppliers.length} proveedores encontrados`}
-          </p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Tabla y funcionalidades CRUD en desarrollo...
-          </p>
-        </div>
+        <SuppliersTable
+          suppliers={filteredSuppliers}
+          onSupplierSelect={handleEditSupplier}
+          onSupplierEdit={handleEditSupplier}
+          onSupplierDeleted={handleSupplierDeleted}
+          isLoading={isLoading}
+        />
       </div>
+
+      <SupplierDialog
+        open={supplierDialogOpen}
+        onOpenChange={setSupplierDialogOpen}
+        supplier={selectedSupplier}
+        onSupplierSaved={handleSupplierSaved}
+      />
     </DashboardLayout>
   );
 };
