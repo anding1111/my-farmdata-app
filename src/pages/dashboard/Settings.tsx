@@ -16,6 +16,7 @@ import DashboardLayout from "@/layouts/DashboardLayout";
 import { PharmacySettings, User, Role, WEEKDAYS, DEFAULT_PERMISSIONS } from "@/types/settings";
 import { settingsApi } from "@/api/settings";
 import UserDialog from "@/components/settings/UserDialog";
+import RoleDialog from "@/components/settings/RoleDialog";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("pharmacy");
@@ -25,6 +26,8 @@ const Settings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userDialog, setUserDialog] = useState<{ open: boolean; user?: User | null }>({ open: false });
   const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; user?: User | null }>({ open: false });
+  const [roleDialog, setRoleDialog] = useState<{ open: boolean; role?: Role | null }>({ open: false });
+  const [deleteRoleDialog, setDeleteRoleDialog] = useState<{ open: boolean; role?: Role | null }>({ open: false });
   const { toast } = useToast();
 
   const loadData = async () => {
@@ -84,6 +87,24 @@ const Settings = () => {
       toast({
         title: "Error",
         description: "Error al eliminar el usuario",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteRole = async (role: Role) => {
+    try {
+      await settingsApi.deleteRole(role.id);
+      toast({
+        title: "Rol eliminado",
+        description: "El rol se ha eliminado exitosamente",
+      });
+      loadData();
+      setDeleteRoleDialog({ open: false });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error al eliminar el rol",
         variant: "destructive",
       });
     }
@@ -283,7 +304,7 @@ const Settings = () => {
             <CardTitle>Roles y Permisos</CardTitle>
             <CardDescription>Define los roles y sus permisos en el sistema</CardDescription>
           </div>
-          <Button>
+          <Button onClick={() => setRoleDialog({ open: true, role: null })}>
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Rol
           </Button>
@@ -310,11 +331,19 @@ const Settings = () => {
                   <TableCell>{role.users_count}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setRoleDialog({ open: true, role })}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
                       {!role.is_system && (
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setDeleteRoleDialog({ open: true, role })}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}
@@ -385,6 +414,13 @@ const Settings = () => {
         onSuccess={loadData}
       />
 
+      <RoleDialog
+        open={roleDialog.open}
+        onClose={() => setRoleDialog({ open: false })}
+        role={roleDialog.role}
+        onSuccess={loadData}
+      />
+
       <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false })}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -397,6 +433,26 @@ const Settings = () => {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => deleteDialog.user && handleDeleteUser(deleteDialog.user)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={deleteRoleDialog.open} onOpenChange={(open) => !open && setDeleteRoleDialog({ open: false })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar rol?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El rol "{deleteRoleDialog.role?.name}" será eliminado permanentemente del sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteRoleDialog.role && handleDeleteRole(deleteRoleDialog.role)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Eliminar

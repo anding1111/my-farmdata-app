@@ -202,6 +202,43 @@ const mockFetchSettings = async (url: string, options: RequestInit = {}) => {
     mockRoles.push(newRole);
     return new Response(JSON.stringify({ success: true, data: newRole }), { status: 201 });
   }
+
+  if (method === 'PUT' && basePath.startsWith('/api/settings/roles/')) {
+    const roleId = parseInt(basePath.split('/').pop() || '0');
+    const body = JSON.parse(options.body as string);
+    const roleIndex = mockRoles.findIndex(r => r.id === roleId);
+    
+    if (roleIndex === -1) {
+      return new Response(JSON.stringify({ success: false, message: 'Rol no encontrado' }), { status: 404 });
+    }
+
+    const permissions = DEFAULT_PERMISSIONS.filter(p => body.permission_ids.includes(p.id));
+    const updatedRole = {
+      ...mockRoles[roleIndex],
+      ...body,
+      permissions,
+      updated_at: new Date().toISOString()
+    };
+    
+    mockRoles[roleIndex] = updatedRole;
+    return new Response(JSON.stringify({ success: true, data: updatedRole }), { status: 200 });
+  }
+
+  if (method === 'DELETE' && basePath.startsWith('/api/settings/roles/')) {
+    const roleId = parseInt(basePath.split('/').pop() || '0');
+    const roleIndex = mockRoles.findIndex(r => r.id === roleId);
+    
+    if (roleIndex === -1) {
+      return new Response(JSON.stringify({ success: false, message: 'Rol no encontrado' }), { status: 404 });
+    }
+
+    if (mockRoles[roleIndex].is_system) {
+      return new Response(JSON.stringify({ success: false, message: 'No se puede eliminar un rol del sistema' }), { status: 400 });
+    }
+
+    mockRoles.splice(roleIndex, 1);
+    return new Response(JSON.stringify({ success: true, message: 'Rol eliminado exitosamente' }), { status: 200 });
+  }
   
   // Permissions
   if (method === 'GET' && basePath === '/api/settings/permissions') {
@@ -282,6 +319,24 @@ export const settingsApi = {
     const data = await response.json();
     if (!data.success) throw new Error(data.message);
     return data.data;
+  },
+
+  updateRole: async (id: number, roleData: Partial<RoleFormData>): Promise<Role> => {
+    const response = await authenticatedFetch(`/api/settings/roles/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(roleData),
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.message);
+    return data.data;
+  },
+
+  deleteRole: async (id: number): Promise<void> => {
+    const response = await authenticatedFetch(`/api/settings/roles/${id}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.message);
   },
 
   // Permissions
