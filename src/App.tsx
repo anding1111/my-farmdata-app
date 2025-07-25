@@ -14,7 +14,7 @@ import ResetPassword from "./pages/auth/ResetPassword";
 // Dashboard Pages
 import Dashboard from "./pages/dashboard/Dashboard";
 import Inventory from "./pages/dashboard/Inventory";
-import Sales from "./pages/dashboard/Sales";
+
 import Clients from "./pages/dashboard/Clients";
 import Suppliers from "./pages/dashboard/Suppliers";
 import Reports from "./pages/dashboard/Reports";
@@ -64,10 +64,6 @@ const App = () => (
           <Route
             path="/dashboard/inventario"
             element={<AuthGuard><Inventory /></AuthGuard>}
-          />
-          <Route
-            path="/dashboard/ventas"
-            element={<AuthGuard><Sales /></AuthGuard>}
           />
           <Route
             path="/dashboard/clientes"
