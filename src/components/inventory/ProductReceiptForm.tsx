@@ -24,6 +24,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useProducts, useSuppliers, useProductReceipt } from "@/hooks/useInventory";
 import { ProductReceiptFormData } from "@/types/inventory";
 import { CalendarIcon, Package, User, FileText } from "lucide-react";
+import ProductSearchInput from "./ProductSearchInput";
+import { type Product } from "@/api/inventory";
 
 const receiptSchema = z.object({
   product_id: z.number().min(1, "Selecciona un producto"),
@@ -86,6 +88,15 @@ const ProductReceiptForm = ({ onSuccess, onCancel }: ProductReceiptFormProps) =>
 
   const selectedProduct = products?.data?.find(p => p.id === form.watch("product_id"));
 
+  const handleProductSelect = (product: Product) => {
+    if (product.id === 0) {
+      // Handle clear/reset
+      form.setValue("product_id", 0);
+      return;
+    }
+    form.setValue("product_id", product.id);
+  };
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -105,32 +116,42 @@ const ProductReceiptForm = ({ onSuccess, onCancel }: ProductReceiptFormProps) =>
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Producto *</FormLabel>
-                    <Select 
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      value={field.value?.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar producto" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {products?.data?.map((product) => (
-                          <SelectItem key={product.id} value={product.id.toString()}>
-                            {product.code} - {product.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormControl>
+                      <ProductSearchInput
+                        value={field.value}
+                        onSelect={handleProductSelect}
+                        placeholder="Buscar producto por nombre o código de barras..."
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
               {selectedProduct && (
-                <div className="bg-muted/50 p-3 rounded-lg">
-                  <p className="text-sm text-muted-foreground">Stock actual: {selectedProduct.current_stock}</p>
-                  <p className="text-sm text-muted-foreground">Precio de venta: ${selectedProduct.sale_price}</p>
+                <div className="bg-muted/50 p-3 rounded-lg space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Package className="h-4 w-4 text-primary" />
+                    <span className="font-medium">{selectedProduct.name}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Stock actual:</span>
+                      <span className="ml-2 font-medium">{selectedProduct.current_stock}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Precio venta:</span>
+                      <span className="ml-2 font-medium">${selectedProduct.sale_price}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Stock mínimo:</span>
+                      <span className="ml-2 font-medium">{selectedProduct.min_stock}</span>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Categoría:</span>
+                      <span className="ml-2 font-medium">{selectedProduct.category?.name || 'Sin categoría'}</span>
+                    </div>
+                  </div>
                 </div>
               )}
 
