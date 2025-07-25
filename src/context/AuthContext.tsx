@@ -30,8 +30,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Modo desarrollo - deshabilitar autenticación temporalmente
+  const isDevelopment = import.meta.env.DEV;
+
   // Verificar autenticación al cargar la aplicación
   useEffect(() => {
+    if (isDevelopment) {
+      // En desarrollo, simular usuario autenticado
+      setUser({
+        id: 1,
+        name: 'Usuario Demo',
+        email: 'demo@farmacia.com',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+      setIsLoading(false);
+      return;
+    }
+
     const initAuth = async () => {
       try {
         if (authApi.isAuthenticated()) {
@@ -55,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
 
     initAuth();
-  }, []);
+  }, [isDevelopment]);
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
