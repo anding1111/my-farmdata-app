@@ -1,23 +1,15 @@
 
 import { useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
   Package, 
-  Plus, 
-  Search, 
   AlertTriangle, 
   TrendingDown, 
   Calendar,
   BarChart3,
-  FileText,
-  Settings,
-  Filter
+  Settings
 } from "lucide-react";
 import ProductsTab from "@/components/inventory/ProductsTab";
 import CategoriesTab from "@/components/inventory/CategoriesTab";
@@ -25,53 +17,17 @@ import BatchesTab from "@/components/inventory/BatchesTab";
 import MovementsTab from "@/components/inventory/MovementsTab";
 import AlertsTab from "@/components/inventory/AlertsTab";
 import ReportsTab from "@/components/inventory/ReportsTab";
-import InventoryStats from "@/components/inventory/InventoryStats";
-import { useInventoryStats, useAlerts } from "@/hooks/useInventory";
+import { useAlerts } from "@/hooks/useInventory";
 
 const Inventory = () => {
   const [activeTab, setActiveTab] = useState("products");
-  const stats = useInventoryStats();
   const { data: alerts } = useAlerts({ is_read: false });
 
   const unreadAlertsCount = alerts?.data?.length || 0;
 
   return (
     <DashboardLayout>
-      <DashboardHeader title="Gestión de Inventario" />
-      
-      <div className="p-6 space-y-6">
-        {/* Estadísticas principales */}
-        <InventoryStats stats={stats} />
-
-        {/* Alertas rápidas */}
-        {unreadAlertsCount > 0 && (
-          <Card className="border-amber-200 bg-amber-50">
-            <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-amber-600" />
-                <CardTitle className="text-amber-800">Alertas Pendientes</CardTitle>
-                <Badge variant="secondary" className="bg-amber-100 text-amber-800">
-                  {unreadAlertsCount}
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <p className="text-amber-700 text-sm">
-                Tienes {unreadAlertsCount} alerta{unreadAlertsCount > 1 ? 's' : ''} pendiente{unreadAlertsCount > 1 ? 's' : ''} que requieren tu atención.
-              </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-2 border-amber-300 text-amber-700 hover:bg-amber-100"
-                onClick={() => setActiveTab("alerts")}
-              >
-                Ver Alertas
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Tabs principales */}
+      <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="products" className="flex items-center gap-2">
