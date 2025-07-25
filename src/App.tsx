@@ -42,6 +42,16 @@ if (typeof window !== 'undefined') {
   }
 }
 
+// Función para detectar modo desarrollo en Lovable
+const isDevelopmentMode = () => {
+  return (
+    window.location.hostname.includes('lovable.app') ||
+    window.location.hostname === 'localhost' ||
+    import.meta.env.DEV ||
+    process.env.NODE_ENV === 'development'
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -64,27 +74,27 @@ const App = () => (
           {/* Rutas protegidas - En desarrollo, sin AuthGuard */}
           <Route
             path="/dashboard"
-            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Dashboard /> : <AuthGuard><Dashboard /></AuthGuard>}
+            element={isDevelopmentMode() ? <Dashboard /> : <AuthGuard><Dashboard /></AuthGuard>}
           />
           <Route
             path="/dashboard/inventario"
-            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Inventory /> : <AuthGuard><Inventory /></AuthGuard>}
+            element={isDevelopmentMode() ? <Inventory /> : <AuthGuard><Inventory /></AuthGuard>}
           />
           <Route
             path="/dashboard/clientes"
-            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Clients /> : <AuthGuard><Clients /></AuthGuard>}
+            element={isDevelopmentMode() ? <Clients /> : <AuthGuard><Clients /></AuthGuard>}
           />
           <Route
             path="/dashboard/proveedores"
-            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Suppliers /> : <AuthGuard><Suppliers /></AuthGuard>}
+            element={isDevelopmentMode() ? <Suppliers /> : <AuthGuard><Suppliers /></AuthGuard>}
           />
           <Route
             path="/dashboard/reportes"
-            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Reports /> : <AuthGuard><Reports /></AuthGuard>}
+            element={isDevelopmentMode() ? <Reports /> : <AuthGuard><Reports /></AuthGuard>}
           />
           <Route
             path="/dashboard/configuracion"
-            element={process.env.NODE_ENV === 'development' || import.meta.env.DEV ? <Settings /> : <AuthGuard><Settings /></AuthGuard>}
+            element={isDevelopmentMode() ? <Settings /> : <AuthGuard><Settings /></AuthGuard>}
           />
           
           {/* Ruta 404 */}
