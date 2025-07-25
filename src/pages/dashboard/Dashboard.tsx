@@ -1,365 +1,686 @@
-import { useState, useEffect } from "react";
+
+// FarmaData Dashboard - Shopping Cart Implementation
+import { useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { PurchaseDialog } from "@/components/dashboard/PurchaseDialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { 
-  TrendingUp,
-  Package,
+  Plus, 
+  MoreVertical, 
+  CheckSquare, 
+  Grid3X3, 
+  List, 
+  ArrowUpDown,
+  Edit,
+  Copy,
+  Trash2,
+  Heart,
+  Home,
+  Stethoscope,
+  Pill,
+  Baby,
   ShoppingCart,
-  AlertTriangle,
-  DollarSign,
-  Users,
-  Activity,
-  BarChart3,
-  Calendar,
-  Clock,
-  ArrowUp,
-  ArrowDown,
-  MapPin,
-  Play
+  Receipt,
+  X,
+  Minus,
+  Info
 } from "lucide-react";
-
-
-// Mock data adaptado para farmacia
-const mockStats = {
-  totalSales: 125430000, // Ventas totales del mes
-  totalProducts: 9178,   // Productos en inventario
-  totalValue: 748000000, // Valor total del inventario
-  target: 9200,          // Meta de productos
-  monthlyGrowth: 12.5,   // Crecimiento mensual
-  lowStockAlerts: 3,     // Alertas de stock bajo
-  expiringProducts: 8,   // Productos próximos a vencer
-  activeUsers: 12,       // Usuarios activos
-  totalCustomers: 856,   // Total de clientes
-  pendingOrders: 23,     // Órdenes pendientes
-  topCategories: [
-    { name: "Vitaminas", sales: 45, icon: "💊" },
-    { name: "Analgésicos", sales: 32, icon: "🩹" },
-    { name: "Antibióticos", sales: 18, icon: "💉" }
-  ]
-};
-
-const mockActivities = [
-  {
-    id: 1,
-    type: "Inventario Crítico",
-    description: "Productos con stock bajo",
-    progress: 15,
-    timeLeft: "Requiere atención",
-    distance: `${mockStats.lowStockAlerts} productos`,
-    icon: "📦",
-    bgColor: "from-red-500 to-red-600",
-    priority: "high"
-  },
-  {
-    id: 2,
-    type: "Productos por Vencer",
-    description: "Próximos a expirar",
-    progress: 70,
-    timeLeft: "30 días o menos",
-    distance: `${mockStats.expiringProducts} productos`,
-    icon: "⏰",
-    bgColor: "from-orange-500 to-orange-600",
-    priority: "medium"
-  },
-  {
-    id: 3,
-    type: "Ventas del Mes",
-    description: "Meta mensual",
-    progress: 90,
-    timeLeft: "5 días restantes",
-    distance: `${mockStats.totalProducts}/${mockStats.target}`,
-    icon: "💰",
-    bgColor: "from-green-500 to-green-600",
-    priority: "low"
-  }
-];
-
-const mockTeam = [
-  { name: "Dr. García", role: "Farmacéutico Jefe", time: "Activo ahora", avatar: "/lovable-uploads/19ed890b-739f-4aeb-9f51-79ea5f291bd7.png", status: "online" },
-  { name: "Ana López", role: "Auxiliar Farmacia", time: "5 min ago", avatar: "/lovable-uploads/19ed890b-739f-4aeb-9f51-79ea5f291bd7.png", status: "online" },
-  { name: "Carlos Ruiz", role: "Vendedor", time: "15 min ago", avatar: "/lovable-uploads/19ed890b-739f-4aeb-9f51-79ea5f291bd7.png", status: "away" },
-  { name: "María Santos", role: "Administradora", time: "1 hora ago", avatar: "/lovable-uploads/19ed890b-739f-4aeb-9f51-79ea5f291bd7.png", status: "online" },
-  { name: "Pedro Mora", role: "Bodeguero", time: "2 horas ago", avatar: "/lovable-uploads/19ed890b-739f-4aeb-9f51-79ea5f291bd7.png", status: "offline" }
-];
+import { useFarmaData } from "@/hooks/useFarmaData";
+import { CreateListDialog } from "@/components/dashboard/CreateListDialog";
+import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
+import { formatCurrency } from "@/data/mockData";
+import { useToast } from "@/hooks/use-toast";
 
 const Dashboard = () => {
-  const [currentMonth] = useState("Abril");
-  const [salesData] = useState([
-    { month: "Ene", value: 850 },
-    { month: "Feb", value: 920 },
-    { month: "Mar", value: 870 },
-    { month: "Abr", value: 918 },
-    { month: "May", value: 950 },
-    { month: "Jun", value: 880 },
-    { month: "Jul", value: 920 },
-    { month: "Ago", value: 940 },
-    { month: "Sep", value: 890 },
-    { month: "Oct", value: 930 }
-  ]);
+  const {
+    products,
+    productLists,
+    selectedList,
+    selectedListId,
+    searchQuery,
+    viewMode,
+    sortBy,
+    selectedListProducts,
+    setSelectedListId,
+    setSearchQuery,
+    setViewMode,
+    setSortBy,
+    createList,
+    updateList,
+    deleteList,
+    duplicateList,
+    addProductToList,
+    removeProductFromList,
+    updateProductQuantity,
+    stats,
+  } = useFarmaData();
+  
+  const [catalogMode, setCatalogMode] = useState<'products' | 'lists'>('products');
+  const [shoppingCart, setShoppingCart] = useState<Array<{productId: number, product: any, quantity: number, image: string, name: string, price: number}>>([]);
+  const [selectedListForView, setSelectedListForView] = useState<number | null>(null);
+  const [selectedProductInfo, setSelectedProductInfo] = useState<any>(null);
+  
+  const { toast, dismiss } = useToast();
 
-  const formatNumber = (num: number) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
+  // Iconos para las listas
+  const getListIcon = (iconName?: string) => {
+    switch (iconName) {
+      case 'heart': return Heart;
+      case 'home': return Home;
+      case 'stethoscope': return Stethoscope;
+      case 'pill': return Pill;
+      case 'baby': return Baby;
+      default: return Heart;
     }
-    if (num >= 1000) {
-      return (num / 1000).toFixed(0) + 'K';
-    }
-    return num.toLocaleString();
   };
+
+  // Manejadores de eventos
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    // Resetear vista de lista específica al buscar
+    setSelectedListForView(null);
+  };
+
+  const handleListSelect = (listId: number) => {
+    // Al hacer clic en una lista, cambiar a vista de productos y mostrar solo esos productos
+    setSelectedListForView(listId);
+    setCatalogMode('products');
+    setSearchQuery(''); // Limpiar búsqueda para mostrar solo productos de la lista
+  };
+
+  const handleDeleteList = (listId: number) => {
+    if (productLists.length <= 1) {
+      toast({
+        title: "No se puede eliminar",
+        description: "Debe haber al menos una lista",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    deleteList(listId);
+    toast({
+      title: "Lista eliminada",
+      description: "La lista ha sido eliminada exitosamente",
+    });
+  };
+
+  const handleDuplicateList = (listId: number) => {
+    duplicateList(listId);
+    toast({
+      title: "Lista duplicada",
+      description: "Se ha creado una copia de la lista",
+    });
+  };
+
+  const handleAddProduct = (product: any, quantity: number) => {
+    // Dismissar todos los toasts previos
+    dismiss();
+    
+    // Agregar al carrito independiente
+    const existingItem = shoppingCart.find(item => item.productId === product.id);
+    if (existingItem) {
+      setShoppingCart(prev => prev.map(item => 
+        item.productId === product.id 
+          ? {...item, quantity: item.quantity + quantity}
+          : item
+      ));
+    } else {
+      setShoppingCart(prev => [...prev, {
+        productId: product.id,
+        product,
+        quantity,
+        image: product.image,
+        name: product.name,
+        price: product.price
+      }]);
+    }
+    
+    toast({
+      title: "Producto agregado",
+      description: `${product.name} agregado al carrito`,
+      duration: 2000, // Solo 2 segundos
+    });
+  };
+
+  const handleRemoveFromCart = (productId: number) => {
+    setShoppingCart(prev => prev.filter(item => item.productId !== productId));
+    toast({
+      title: "Producto eliminado",
+      description: "El producto ha sido eliminado del carrito",
+    });
+  };
+
+  const handleUpdateCartQuantity = (productId: number, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      handleRemoveFromCart(productId);
+      return;
+    }
+    setShoppingCart(prev => prev.map(item => 
+      item.productId === productId 
+        ? {...item, quantity: newQuantity}
+        : item
+    ));
+  };
+
+  const cartTotal = shoppingCart.reduce((total, item) => total + (item.price * item.quantity), 0);
+
+  // Filtrar productos según la búsqueda y lista seleccionada
+  const filteredProducts = (() => {
+    // Si hay una lista seleccionada para vista, mostrar solo sus productos
+    if (selectedListForView) {
+      const selectedListData = productLists.find(list => list.id === selectedListForView);
+      if (selectedListData) {
+        return selectedListData.products.map(listProduct => 
+          products.find(product => product.id === listProduct.productId)
+        ).filter(Boolean) as typeof products;
+      }
+    }
+    
+    // Si hay búsqueda, filtrar todos los productos
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return products.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        product.category.toLowerCase().includes(query) ||
+        (product.description && product.description.toLowerCase().includes(query))
+      );
+    }
+    
+    // Por defecto, mostrar todos los productos
+    return products;
+  })();
 
   return (
     <DashboardLayout>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50">
-        {/* Header */}
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">FarmaData Dashboard</h1>
-              <p className="text-slate-500">Panel Principal</p>
+      <div className="flex h-full overflow-hidden">
+        {/* Columna principal unificada - Productos y Listas */}
+        <div className="w-2/3 p-6 bg-white border-r overflow-y-auto">
+          {/* Header con toggle y búsqueda */}
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-3xl font-bold text-gray-900">
+                {catalogMode === 'lists' 
+                  ? 'Mis Listas' 
+                  : selectedListForView 
+                    ? `${productLists.find(list => list.id === selectedListForView)?.name || 'Lista'} - Productos`
+                    : 'Catálogo de Productos'
+                }
+              </h1>
+              {/* Toggle muy intuitivo */}
+              <div className="flex items-center bg-gray-100 rounded-full p-1">
+                <button
+                  onClick={() => {
+                    setCatalogMode('products');
+                    setSelectedListForView(null); // Resetear vista de lista específica
+                  }}
+                  className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    catalogMode === 'products' 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Grid3X3 className="h-4 w-4 mr-2" />
+                  Productos
+                </button>
+                <button
+                  onClick={() => setCatalogMode('lists')}
+                  className={`flex items-center px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    catalogMode === 'lists' 
+                      ? 'bg-blue-600 text-white shadow-md' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <List className="h-4 w-4 mr-2" />
+                  Listas
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
+
+            {/* Barra de búsqueda mejorada */}
+            {catalogMode === 'products' && (
               <div className="relative">
-                <input 
-                  type="text" 
-                  placeholder="Search"
-                  className="pl-10 pr-4 py-2 bg-white rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                <Input
+                  type="text"
+                  placeholder="Buscar productos por nombre o categoría..."
+                  className="pl-12 h-12 text-lg border-2 border-gray-200 focus:border-blue-500 rounded-xl"
+                  value={searchQuery}
+                  onChange={handleSearchChange}
                 />
-                <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <div className="flex items-center gap-2 bg-white rounded-xl px-3 py-2 border border-slate-200">
-                <Activity className="h-4 w-4 text-purple-600" />
-                <span className="text-sm font-medium text-slate-700">Equipo</span>
-                <span className="text-xs text-slate-500">Ver Todo</span>
+            )}
+
+            {/* Botón para crear nueva lista cuando está en modo listas */}
+            {catalogMode === 'lists' && (
+              <div className="border-2 border-dashed border-blue-300 rounded-xl p-6 mb-6 flex items-center justify-center bg-blue-50">
+                <CreateListDialog onCreateList={createList} />
               </div>
-              <Avatar className="h-10 w-10">
-                <AvatarImage src="/lovable-uploads/19ed890b-739f-4aeb-9f51-79ea5f291bd7.png" alt="Usuario" />
-                <AvatarFallback>U</AvatarFallback>
-              </Avatar>
-            </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-12 gap-6">
-            {/* Overview Card - Main Chart */}
-            <div className="col-span-8">
-              <Card className="h-80 bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800 border-0 shadow-2xl overflow-hidden">
-                <CardHeader className="text-white">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="text-white text-lg font-medium">Resumen General</CardTitle>
-                    </div>
-                    <select className="bg-white/20 text-white border-white/30 rounded-lg px-3 py-1 text-sm">
-                      <option>Mensual</option>
-                    </select>
-                  </div>
-                </CardHeader>
-                <CardContent className="text-white">
-                  {/* Simple chart simulation */}
-                  <div className="relative h-32 mb-6">
-                    <svg className="w-full h-full" viewBox="0 0 400 100">
-                      <polyline
-                        fill="none"
-                        stroke="rgba(255,255,255,0.8)"
-                        strokeWidth="3"
-                        points="0,80 50,70 100,75 150,60 200,45 250,55 300,40 350,35 400,30"
-                        className="drop-shadow-lg"
-                      />
-                      {/* Highlight point */}
-                      <circle cx="200" cy="45" r="6" fill="white" className="drop-shadow-lg animate-pulse" />
-                    </svg>
-                    <div className="absolute top-4 left-48 bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 text-sm">
-                      <div className="text-2xl font-bold">{formatNumber(mockStats.totalProducts)}</div>
-                      <div className="text-xs opacity-80">Productos</div>
-                    </div>
-                  </div>
-                  
-                  {/* Month indicators */}
-                  <div className="flex justify-between text-xs opacity-70 mb-6">
-                    {["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct"].map((month, idx) => (
-                      <span key={month} className={month === "Abr" ? "text-white font-medium" : ""}>{month}</span>
-                    ))}
-                  </div>
-
-                  {/* Stats row */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
-                      <div className="text-xs opacity-80 mb-1">Ventas Totales</div>
-                      <div className="text-2xl font-bold">{formatNumber(mockStats.totalSales)} COP</div>
-                      <div className="text-xs opacity-80">{currentMonth}</div>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
-                      <div className="text-xs opacity-80 mb-1">Total Productos</div>
-                      <div className="text-2xl font-bold">{formatNumber(mockStats.totalProducts)}</div>
-                      <div className="text-xs opacity-80">{currentMonth}</div>
-                    </div>
-                    <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
-                      <div className="text-xs opacity-80 mb-1">Meta</div>
-                      <div className="text-2xl font-bold">{formatNumber(mockStats.target)}</div>
-                      <div className="text-xs opacity-80">{currentMonth}</div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Right column cards */}
-            <div className="col-span-4 space-y-6">
-              {/* Alertas de Inventario */}
-              <Card className="bg-gradient-to-br from-red-500 to-red-600 border-0 shadow-xl text-white overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-white/20 rounded-2xl">
-                      <AlertTriangle className="h-6 w-6" />
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 h-8 w-8 p-0 rounded-full">
-                      →
-                    </Button>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-1">Alertas Críticas</h3>
-                  <p className="text-white/80 text-sm">{mockStats.lowStockAlerts} productos con stock bajo</p>
-                </CardContent>
-              </Card>
-
-              {/* Ventas del Día */}
-              <Card className="bg-gradient-to-br from-green-400 to-green-500 border-0 shadow-xl text-white overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="p-3 bg-white/20 rounded-2xl">
-                      <TrendingUp className="h-6 w-6" />
-                    </div>
-                    <Button variant="ghost" size="sm" className="text-white hover:bg-white/20 h-8 w-8 p-0 rounded-full">
-                      →
-                    </Button>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-1">Ventas Hoy</h3>
-                  <div className="mt-4">
-                    <div className="text-xs opacity-80 mb-1">Valor Total</div>
-                    <div className="text-2xl font-bold">{formatNumber(mockStats.totalSales / 30)} COP</div>
-                    <div className="text-xs opacity-80">Promedio diario</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Activities Section */}
-            <div className="col-span-8">
-              <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6">Alertas del Sistema</Button>
-                <Button variant="ghost" className="text-slate-600">Reportes</Button>
-              </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                {mockActivities.map((activity) => (
-                  <Card key={activity.id} className="bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
+          {/* Vista de Listas con diseño original mejorado */}
+          {catalogMode === 'lists' && (
+            <div className="grid grid-cols-1 gap-6">
+              {productLists.map((list) => {
+                const IconComponent = getListIcon(list.icon);
+                return (
+                  <Card 
+                    key={list.id} 
+                    className={`overflow-hidden cursor-pointer transition-all hover:shadow-lg ${
+                      selectedListId === list.id ? 'ring-2 ring-blue-500 shadow-lg border-blue-200' : 'hover:border-blue-200'
+                    }`}
+                    onClick={() => handleListSelect(list.id)}
+                  >
+                    <CardHeader className="p-6 pb-0">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2 rounded-lg bg-${list.color || 'blue'}-100`}>
+                            <IconComponent className={`h-5 w-5 text-${list.color || 'blue'}-600`} />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl font-semibold">{list.name}</CardTitle>
+                            {list.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{list.description}</p>
+                            )}
+                          </div>
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-5 w-5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              // TODO: Implementar edición
+                            }}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Editar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleDuplicateList(list.id);
+                            }}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              Duplicar
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteList(list.id);
+                              }}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Eliminar
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </CardHeader>
                     <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className={`p-3 bg-gradient-to-r ${activity.bgColor} rounded-2xl text-white relative`}>
-                          <span className="text-lg">{activity.icon}</span>
-                          {activity.priority === 'high' && (
-                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                      <div className="flex justify-between items-center">
+                        <div className="flex -space-x-2">
+                          {list.products.slice(0, 4).map((product, idx) => (
+                            <div key={idx} className="h-12 w-12 rounded-lg bg-slate-200 border-2 border-white overflow-hidden shadow-sm">
+                              <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+                            </div>
+                          ))}
+                          {list.products.length > 4 && (
+                            <div className="h-12 w-12 rounded-lg bg-slate-100 border-2 border-white flex items-center justify-center text-sm font-medium shadow-sm">
+                              +{list.products.length - 4}
+                            </div>
                           )}
                         </div>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          •••
-                        </Button>
-                      </div>
-                      
-                      <h3 className="font-semibold text-slate-800 mb-1">{activity.type}</h3>
-                      <p className="text-sm text-slate-500 mb-4">{activity.description}</p>
-                      
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-600">Progress</span>
-                          <span className="font-medium text-slate-800">{activity.progress}%</span>
-                        </div>
-                        <Progress value={activity.progress} className="h-2 bg-slate-100">
-                          <div 
-                            className={`h-full bg-gradient-to-r ${activity.bgColor} rounded-full transition-all duration-500`}
-                            style={{ width: `${activity.progress}%` }}
-                          />
-                        </Progress>
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500">{activity.distance}</span>
-                          <span className={`font-medium ${
-                            activity.priority === 'high' ? 'text-red-500' :
-                            activity.priority === 'medium' ? 'text-orange-500' : 'text-green-500'
-                          }`}>{activity.timeLeft}</span>
+                        <div className="text-right">
+                          <div className="text-sm text-muted-foreground">
+                            {list.products.length} productos
+                          </div>
+                          <div className="text-lg font-bold text-blue-600">{formatCurrency(list.total)}</div>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-                ))}
-              </div>
+                );
+              })}
             </div>
+          )}
 
-            {/* Equipo de Trabajo */}
-            <div className="col-span-4">
-              <div className="space-y-4">
-                {mockTeam.map((member, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-200 hover:shadow-md transition-all duration-200">
-                    <div className="relative">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={member.avatar} alt={member.name} />
-                        <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                        member.status === 'online' ? 'bg-green-500' :
-                        member.status === 'away' ? 'bg-yellow-500' : 'bg-gray-400'
+          {/* Vista de Productos optimizada y responsive */}
+          {catalogMode === 'products' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+              {filteredProducts.length === 0 ? (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  <div className="text-6xl mb-4">🔍</div>
+                  <p className="text-lg">No se encontraron productos</p>
+                  <p className="text-sm">Intenta con otra búsqueda</p>
+                </div>
+              ) : (
+                filteredProducts.map((product) => (
+                  <Card 
+                    key={product.id} 
+                    className="group relative overflow-hidden bg-white border border-gray-100 rounded-2xl hover:shadow-lg transition-all duration-300 cursor-pointer hover:-translate-y-1"
+                    onClick={(e) => {
+                      // No agregar si se hace clic en el botón de información
+                      const target = e.target as HTMLElement;
+                      if (!target.closest('[data-info-button]')) {
+                        handleAddProduct(product, 1);
+                      }
+                    }}
+                  >
+                    {/* Precio en esquina superior izquierda */}
+                    <div className="absolute top-3 left-3 z-10 bg-gray-900/90 text-white text-sm font-semibold px-2 py-1 rounded-lg">
+                      {formatCurrency(product.price)}
+                    </div>
+                    
+                    {/* Indicador de stock animado en esquina superior derecha */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className={`w-4 h-4 rounded-full relative ${
+                        product.inStock 
+                          ? 'bg-green-500' 
+                          : 'bg-red-500'
+                      }`}>
+                        {product.inStock && (
+                          <div className="absolute inset-0 rounded-full bg-green-500 animate-pulse opacity-75"></div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Botón de información flotante */}
+                    <button
+                      data-info-button="true"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setSelectedProductInfo(product);
+                      }}
+                      className="absolute bottom-3 right-3 z-20 w-8 h-8 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 opacity-0 group-hover:opacity-100"
+                    >
+                      <Info className="w-4 h-4 text-blue-600" />
+                    </button>
+
+                    {/* Imagen del producto */}
+                    <div className="relative h-36 bg-gradient-to-br from-gray-50 via-white to-gray-50 flex items-center justify-center p-4">
+                      <img 
+                        src={product.image} 
+                        alt={product.name} 
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300" 
+                      />
+                    </div>
+
+                    <CardContent className="p-4">
+                      {/* Nombre del producto */}
+                      <h3 className="font-semibold text-base text-gray-900 mb-1 line-clamp-2 leading-snug">
+                        {product.name}
+                      </h3>
+                      
+                      {/* Etiqueta de categoría */}
+                      <div>
+                        <span className="inline-block text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-medium">
+                          {product.category}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Modal de información del producto */}
+          {selectedProductInfo && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-fade-in" onClick={() => setSelectedProductInfo(null)}>
+              <div className="bg-gray-50 rounded-3xl max-w-sm w-full mx-4 animate-scale-in overflow-hidden max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+                {/* Header mínimo solo por diseño */}
+                <div className="h-4 bg-white rounded-t-3xl"></div>
+
+                {/* Contenido scrolleable */}
+                <div className="flex-1 overflow-y-auto px-4">
+                  {/* Información básica */}
+                  <div className="mb-3">
+                    <div className="text-gray-500 text-xs mb-1">{selectedProductInfo.manufacturer || 'FarmaData'}</div>
+                    <h2 className="text-xl font-bold text-gray-900 mb-1">{selectedProductInfo.name}</h2>
+                    <div className="text-gray-500 text-sm mb-2">{selectedProductInfo.category}</div>
+                    
+                    <div className="flex items-center gap-3">
+                      <div className="text-xl font-bold text-blue-600">{formatCurrency(selectedProductInfo.price)}</div>
+                      <div className={`w-4 h-4 rounded-full ${
+                        selectedProductInfo.inStock ? 'bg-green-500' : 'bg-red-500'
                       }`}></div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-800 text-sm">{member.name}</p>
-                      <p className="text-xs text-slate-500 truncate">{member.role}</p>
-                      <p className="text-xs text-slate-400">{member.time}</p>
-                    </div>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-full">
-                      💬
-                    </Button>
                   </div>
-                ))}
 
-                {/* Mapa de Sucursales */}
-                <Card className="bg-white border border-slate-200 shadow-sm">
-                  <CardHeader className="pb-3">
+                  {/* Imagen del producto compacta */}
+                  <div className="relative h-40 bg-white rounded-2xl mb-4 flex items-center justify-center">
+                    <img 
+                      src={selectedProductInfo.image} 
+                      alt={selectedProductInfo.name} 
+                      className="w-full h-full object-contain p-3" 
+                    />
+                    
+                    {/* Botones de navegación más pequeños */}
+                    <button className="absolute left-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                    </button>
+                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center hover:bg-blue-200 transition-colors">
+                      <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Descripción compacta */}
+                  <div className="mb-4">
+                    <h3 className="text-base font-semibold text-gray-900 mb-2">Descripción</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {selectedProductInfo.description || `${selectedProductInfo.name} es un producto farmacéutico de alta calidad.`}
+                    </p>
+                  </div>
+
+                  {/* Información adicional compacta */}
+                  <div className="space-y-2 mb-4">
+                    {selectedProductInfo.activeIngredient && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 text-sm">Ingrediente Activo</span>
+                        <span className="font-medium text-blue-600 text-sm">{selectedProductInfo.activeIngredient}</span>
+                      </div>
+                    )}
+                    {selectedProductInfo.dosage && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-gray-600 text-sm">Dosificación</span>
+                        <span className="font-medium text-blue-600 text-sm">{selectedProductInfo.dosage}</span>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-slate-600" />
-                        <span className="font-medium text-sm text-slate-800">Sucursales</span>
-                      </div>
-                      <span className="text-xs text-slate-500">Ver mapa</span>
+                      <span className="text-gray-600 text-sm">Disponibilidad</span>
+                      <span className={`font-medium text-sm ${selectedProductInfo.inStock ? 'text-green-600' : 'text-red-600'}`}>
+                        {selectedProductInfo.inStock ? 'En Stock' : 'Agotado'}
+                      </span>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-24 bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg relative overflow-hidden">
-                      {/* Mapa simulado */}
-                      <div className="absolute inset-0 opacity-30">
-                        <div className="w-full h-full bg-gradient-to-br from-blue-200 to-green-200"></div>
+                  </div>
+
+                  {/* Selectores compactos */}
+                  <div className="bg-blue-50 rounded-2xl p-3 mb-4">
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="text-center">
+                        <div className="text-gray-600 text-xs mb-1">Cantidad</div>
+                        <div className="flex items-center justify-center">
+                          <span className="text-lg font-semibold">1</span>
+                          <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
                       </div>
-                      {/* Indicadores de sucursales */}
-                      <div className="absolute bottom-2 left-2 flex gap-1">
-                        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white font-bold">3</span>
-                        </div>
-                        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white font-bold">2</span>
-                        </div>
-                        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs text-white font-bold">1</span>
+                      <div className="text-center">
+                        <div className="text-gray-600 text-xs mb-1">Tipo</div>
+                        <div className="w-5 h-5 bg-blue-600 rounded-full mx-auto"></div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-gray-600 text-xs mb-1">Unidad</div>
+                        <div className="flex items-center justify-center">
+                          <span className="text-lg font-semibold">1</span>
+                          <svg className="w-3 h-3 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
+
+                {/* Footer fijo con botón */}
+                <div className="bg-gray-50 p-4 border-t border-gray-100">
+                  <button
+                    onClick={() => {
+                      handleAddProduct(selectedProductInfo, 1);
+                      setSelectedProductInfo(null);
+                    }}
+                    disabled={!selectedProductInfo.inStock}
+                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-2xl font-semibold transition-colors flex items-center justify-center gap-2"
+                  >
+                    <ShoppingCart className="w-4 h-4" />
+                    Agregar al Carrito
+                  </button>
+                </div>
               </div>
             </div>
+          )}
+        </div>
+
+        {/* Columna derecha - Carrito de compras moderno */}
+        <div className="w-1/3 bg-gray-50 flex flex-col h-full">
+          {/* Header del carrito */}
+          <div className="p-6 bg-white border-b">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">Mi Carrito</h2>
+              <span className="text-sm text-gray-500">
+                {shoppingCart.length} {shoppingCart.length === 1 ? 'producto' : 'productos'}
+              </span>
+            </div>
           </div>
+
+          {/* Lista de productos - Scrolleable */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {shoppingCart.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
+                  <ShoppingCart className="h-12 w-12 text-gray-400" />
+                </div>
+                <p className="text-lg font-medium mb-2">Tu carrito está vacío</p>
+                <p className="text-sm text-center">Agrega productos desde el catálogo para comenzar</p>
+              </div>
+            ) : (
+              shoppingCart.map((item) => (
+                <div key={item.productId} className="bg-white rounded-2xl p-4 shadow-sm">
+                  <div className="flex items-center gap-4">
+                    {/* Imagen del producto */}
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                      <img 
+                        src={item.image} 
+                        alt={item.name} 
+                        className="w-full h-full object-contain p-2" 
+                      />
+                    </div>
+                    
+                    {/* Información del producto */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1 truncate">
+                        {item.name}
+                      </h4>
+                      <div className="text-xl font-bold text-gray-900 mb-2">
+                        {formatCurrency(item.price)}
+                      </div>
+                      
+                      {/* Controles de cantidad */}
+                      <div className="flex items-center gap-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUpdateCartQuantity(item.productId, item.quantity - 1)}
+                          className="h-8 w-8 p-0 rounded-full bg-gray-100 hover:bg-gray-200"
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleUpdateCartQuantity(item.productId, item.quantity + 1)}
+                          className="h-8 w-8 p-0 rounded-full bg-gray-100 hover:bg-gray-200"
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {/* Botón eliminar */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRemoveFromCart(item.productId)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 rounded-full"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Footer del carrito - Fijo */}
+          {shoppingCart.length > 0 && (
+            <div className="bg-white border-t p-6 space-y-4">
+              {/* Resumen de precios */}
+              <div className="space-y-2">
+                <div className="flex justify-between text-gray-600">
+                  <span>Subtotal</span>
+                  <span>{formatCurrency(cartTotal)}</span>
+                </div>
+                <div className="flex justify-between text-gray-600">
+                  <span>Envío</span>
+                  <span className="text-green-600 font-medium">Gratis</span>
+                </div>
+                <div className="border-t pt-2">
+                  <div className="flex justify-between font-bold text-xl text-gray-900">
+                    <span>TOTAL</span>
+                    <span>{formatCurrency(cartTotal)}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botón de proceder al pago */}
+              <PurchaseDialog 
+                 list={{
+                   id: 'cart' as any,
+                   name: 'Carrito de Compras',
+                   products: shoppingCart,
+                   total: cartTotal,
+                   moreCount: 0
+                 }}
+              >
+                <Button className="w-full h-14 text-lg font-semibold bg-blue-600 hover:bg-blue-700 rounded-2xl transition-all duration-200 hover:scale-105">
+                  Proceder al pago
+                </Button>
+              </PurchaseDialog>
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
