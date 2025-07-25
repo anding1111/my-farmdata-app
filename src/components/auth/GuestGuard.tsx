@@ -9,6 +9,13 @@ interface GuestGuardProps {
 const GuestGuard = ({ children }: GuestGuardProps) => {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Modo desarrollo - redireccionar automáticamente al dashboard
+  const isDevelopment = import.meta.env.DEV;
+  
+  if (isDevelopment) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
