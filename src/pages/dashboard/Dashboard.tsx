@@ -34,6 +34,7 @@ import { CreateListDialog } from "@/components/dashboard/CreateListDialog";
 import { AddProductDialog } from "@/components/dashboard/AddProductDialog";
 import { formatCurrency } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 const Dashboard = () => {
   const {
@@ -60,7 +61,7 @@ const Dashboard = () => {
   } = useFarmaData();
   
   const [catalogMode, setCatalogMode] = useState<'products' | 'lists'>('products');
-  const [shoppingCart, setShoppingCart] = useState<Array<{productId: number, product: any, quantity: number, image: string, name: string, price: number}>>([]);
+  const [shoppingCart, setShoppingCart] = useLocalStorage<Array<{productId: number, product: any, quantity: number, image: string, name: string, price: number}>>('shopping-cart', []);
   const [selectedListForView, setSelectedListForView] = useState<number | null>(null);
   const [selectedProductInfo, setSelectedProductInfo] = useState<any>(null);
   
