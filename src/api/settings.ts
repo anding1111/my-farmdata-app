@@ -147,6 +147,40 @@ const mockFetchSettings = async (url: string, options: RequestInit = {}) => {
     mockUsers.push(newUser);
     return new Response(JSON.stringify({ success: true, data: newUser }), { status: 201 });
   }
+
+  if (method === 'PUT' && basePath.startsWith('/api/settings/users/')) {
+    const userId = parseInt(basePath.split('/').pop() || '0');
+    const body = JSON.parse(options.body as string);
+    const userIndex = mockUsers.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+      return new Response(JSON.stringify({ success: false, message: 'Usuario no encontrado' }), { status: 404 });
+    }
+
+    const role = mockRoles.find(r => r.id === body.role_id);
+    const updatedUser = {
+      ...mockUsers[userIndex],
+      ...body,
+      role_name: role?.name || mockUsers[userIndex].role_name,
+      permissions: role?.permissions.map(p => p.name) || mockUsers[userIndex].permissions,
+      updated_at: new Date().toISOString()
+    };
+    
+    mockUsers[userIndex] = updatedUser;
+    return new Response(JSON.stringify({ success: true, data: updatedUser }), { status: 200 });
+  }
+
+  if (method === 'DELETE' && basePath.startsWith('/api/settings/users/')) {
+    const userId = parseInt(basePath.split('/').pop() || '0');
+    const userIndex = mockUsers.findIndex(u => u.id === userId);
+    
+    if (userIndex === -1) {
+      return new Response(JSON.stringify({ success: false, message: 'Usuario no encontrado' }), { status: 404 });
+    }
+
+    mockUsers.splice(userIndex, 1);
+    return new Response(JSON.stringify({ success: true, message: 'Usuario eliminado exitosamente' }), { status: 200 });
+  }
   
   // Roles
   if (method === 'GET' && basePath === '/api/settings/roles') {
@@ -212,6 +246,24 @@ export const settingsApi = {
     const data = await response.json();
     if (!data.success) throw new Error(data.message);
     return data.data;
+  },
+
+  updateUser: async (id: number, userData: Partial<UserFormData>): Promise<User> => {
+    const response = await authenticatedFetch(`/api/settings/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(userData),
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.message);
+    return data.data;
+  },
+
+  deleteUser: async (id: number): Promise<void> => {
+    const response = await authenticatedFetch(`/api/settings/users/${id}`, {
+      method: 'DELETE',
+    });
+    const data = await response.json();
+    if (!data.success) throw new Error(data.message);
   },
 
   // Roles

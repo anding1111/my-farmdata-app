@@ -9,11 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Building, Users, Shield, Save, Plus, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { PharmacySettings, User, Role, WEEKDAYS, DEFAULT_PERMISSIONS } from "@/types/settings";
 import { settingsApi } from "@/api/settings";
+import UserDialog from "@/components/settings/UserDialog";
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState("pharmacy");
@@ -21,6 +23,8 @@ const Settings = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userDialog, setUserDialog] = useState<{ open: boolean; user?: User | null }>({ open: false });
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; user?: User | null }>({ open: false });
   const { toast } = useToast();
 
   const loadData = async () => {
@@ -62,6 +66,24 @@ const Settings = () => {
       toast({
         title: "Error",
         description: "Error al guardar la configuración",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteUser = async (user: User) => {
+    try {
+      await settingsApi.deleteUser(user.id);
+      toast({
+        title: "Usuario eliminado",
+        description: "El usuario se ha eliminado exitosamente",
+      });
+      loadData();
+      setDeleteDialog({ open: false });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Error al eliminar el usuario",
         variant: "destructive",
       });
     }
@@ -190,7 +212,7 @@ const Settings = () => {
             <CardTitle>Usuarios del Sistema</CardTitle>
             <CardDescription>Gestiona los usuarios y sus accesos</CardDescription>
           </div>
-          <Button>
+          <Button onClick={() => setUserDialog({ open: true, user: null })}>
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Usuario
           </Button>
@@ -228,10 +250,18 @@ const Settings = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setUserDialog({ open: true, user })}
+                      >
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => setDeleteDialog({ open: true, user })}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -347,6 +377,33 @@ const Settings = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <UserDialog
+        open={userDialog.open}
+        onClose={() => setUserDialog({ open: false })}
+        user={userDialog.user}
+        onSuccess={loadData}
+      />
+
+      <AlertDialog open={deleteDialog.open} onOpenChange={(open) => !open && setDeleteDialog({ open: false })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Eliminar usuario?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta acción no se puede deshacer. El usuario "{deleteDialog.user?.name}" será eliminado permanentemente del sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteDialog.user && handleDeleteUser(deleteDialog.user)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
