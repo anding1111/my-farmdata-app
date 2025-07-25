@@ -35,8 +35,8 @@ const LocationsTab = () => {
   // Filtros
   const [filters, setFilters] = useState({
     search: '',
-    type: '',
-    status: '',
+    type: 'all',
+    status: 'all',
     parent_id: undefined as number | undefined,
   });
 
@@ -62,8 +62,8 @@ const LocationsTab = () => {
   const clearFilters = () => {
     setFilters({
       search: '',
-      type: '',
-      status: '',
+      type: 'all',
+      status: 'all',
       parent_id: undefined,
     });
   };
@@ -154,7 +154,7 @@ const LocationsTab = () => {
                   <SelectValue placeholder="Todos los tipos" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los tipos</SelectItem>
+                  <SelectItem value="all">Todos los tipos</SelectItem>
                   {LOCATION_TYPE_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}
@@ -174,7 +174,7 @@ const LocationsTab = () => {
                   <SelectValue placeholder="Todos los estados" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los estados</SelectItem>
+                  <SelectItem value="all">Todos los estados</SelectItem>
                   {LOCATION_STATUS_OPTIONS.map((option) => (
                     <SelectItem key={option.value} value={option.value}>
                       {option.label}

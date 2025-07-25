@@ -227,8 +227,8 @@ const LocationForm = ({ location, onSuccess, onCancel }: LocationFormProps) => {
                     <FormItem>
                       <FormLabel>Ubicación Padre</FormLabel>
                       <Select
-                        value={field.value?.toString() || ""}
-                        onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
+                        value={field.value?.toString() || "none"}
+                        onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -236,7 +236,7 @@ const LocationForm = ({ location, onSuccess, onCancel }: LocationFormProps) => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Sin ubicación padre</SelectItem>
+                          <SelectItem value="none">Sin ubicación padre</SelectItem>
                           {getAvailableParents().map((parent) => (
                             <SelectItem key={parent.id} value={parent.id.toString()}>
                               {parent.name} ({parent.code})
