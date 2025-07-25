@@ -57,6 +57,15 @@ const RoleForm = ({ role, onSubmit, isLoading = false, onCancel }: RoleFormProps
     return acc;
   }, {} as Record<string, Permission[]>);
 
+  const groupLabels: Record<string, string> = {
+    sales: 'VENTAS',
+    inventory: 'INVENTARIO', 
+    clients: 'CLIENTES',
+    suppliers: 'PROVEEDORES',
+    reports: 'REPORTES',
+    settings: 'CONFIGURACIÓN'
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <Tabs defaultValue="basic" className="w-full">
@@ -107,9 +116,9 @@ const RoleForm = ({ role, onSubmit, isLoading = false, onCancel }: RoleFormProps
             {Object.entries(groupedPermissions).map(([group, groupPermissions]) => (
               <div key={group} className="space-y-2">
                 <h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide border-b pb-1">
-                  {group}
+                  {groupLabels[group] || group.toUpperCase()}
                 </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2">
+                <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
                   {groupPermissions.map((permission) => (
                     <div key={permission.id} className="flex items-center space-x-2">
                       <Checkbox

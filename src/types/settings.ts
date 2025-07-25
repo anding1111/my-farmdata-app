@@ -92,7 +92,6 @@ export const USER_STATUS_OPTIONS = [
 ];
 
 export const PERMISSION_MODULES = [
-  'dashboard',
   'sales',
   'inventory', 
   'clients',
@@ -110,14 +109,14 @@ export const PERMISSION_ACTIONS = [
 ];
 
 export const DEFAULT_PERMISSIONS = [
-  { id: 1, name: 'dashboard.view', description: 'Ver dashboard', module: 'dashboard', action: 'view', resource: 'dashboard' },
-  { id: 2, name: 'sales.view', description: 'Ver ventas', module: 'sales', action: 'view', resource: 'sales' },
-  { id: 3, name: 'sales.create', description: 'Crear ventas', module: 'sales', action: 'create', resource: 'sales' },
-  { id: 4, name: 'inventory.view', description: 'Ver inventario', module: 'inventory', action: 'view', resource: 'inventory' },
-  { id: 5, name: 'inventory.edit', description: 'Editar inventario', module: 'inventory', action: 'edit', resource: 'inventory' },
-  { id: 6, name: 'clients.view', description: 'Ver clientes', module: 'clients', action: 'view', resource: 'clients' },
-  { id: 7, name: 'clients.create', description: 'Crear clientes', module: 'clients', action: 'create', resource: 'clients' },
-  { id: 8, name: 'suppliers.view', description: 'Ver proveedores', module: 'suppliers', action: 'view', resource: 'suppliers' },
+  { id: 1, name: 'sales.view', description: 'Ver ventas', module: 'sales', action: 'view', resource: 'sales' },
+  { id: 2, name: 'sales.create', description: 'Crear ventas', module: 'sales', action: 'create', resource: 'sales' },
+  { id: 3, name: 'inventory.view', description: 'Ver inventario', module: 'inventory', action: 'view', resource: 'inventory' },
+  { id: 4, name: 'inventory.edit', description: 'Editar inventario', module: 'inventory', action: 'edit', resource: 'inventory' },
+  { id: 5, name: 'clients.view', description: 'Ver clientes', module: 'clients', action: 'view', resource: 'clients' },
+  { id: 6, name: 'clients.create', description: 'Crear clientes', module: 'clients', action: 'create', resource: 'clients' },
+  { id: 7, name: 'suppliers.view', description: 'Ver proveedores', module: 'suppliers', action: 'view', resource: 'suppliers' },
+  { id: 8, name: 'suppliers.create', description: 'Crear proveedores', module: 'suppliers', action: 'create', resource: 'suppliers' },
   { id: 9, name: 'reports.view', description: 'Ver reportes', module: 'reports', action: 'view', resource: 'reports' },
   { id: 10, name: 'settings.view', description: 'Ver configuración', module: 'settings', action: 'view', resource: 'settings' },
   { id: 11, name: 'settings.edit', description: 'Editar configuración', module: 'settings', action: 'edit', resource: 'settings' }
