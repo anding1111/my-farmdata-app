@@ -36,14 +36,14 @@ const Sidebar = ({ className }: SidebarProps) => {
       icon: <Home className="h-5 w-5" />,
     },
     {
-      name: "Inventario",
-      path: "/dashboard/inventario",
-      icon: <Package className="h-5 w-5" />,
-    },
-    {
       name: "Ventas",
       path: "/dashboard/ventas",
       icon: <ShoppingCart className="h-5 w-5" />,
+    },
+    {
+      name: "Inventario",
+      path: "/dashboard/inventario",
+      icon: <Package className="h-5 w-5" />,
     },
     {
       name: "Clientes",
