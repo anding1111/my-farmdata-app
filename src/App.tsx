@@ -1,9 +1,11 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { initializeLocale } from "./config/locale";
 import { AuthProvider } from "@/context/AuthContext";
 
 // Authentication Pages
@@ -31,15 +33,7 @@ const queryClient = new QueryClient();
 
 // Configurar la localización para Colombia/América Bogotá
 if (typeof window !== 'undefined') {
-  document.documentElement.lang = 'es';
-  
-  // Establecer la zona horaria para Colombia
-  try {
-    // Si el navegador soporta Intl.DateTimeFormat con timeZone
-    Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota' });
-  } catch (e) {
-    console.error("Error al configurar la zona horaria:", e);
-  }
+  initializeLocale();
 }
 
 // Función para detectar modo desarrollo en Lovable

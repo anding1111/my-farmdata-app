@@ -253,14 +253,11 @@ export const mockProductLists: ProductList[] = [
   },
 ];
 
-// Función para formatear moneda colombiana (COP)
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0
-  }).format(value);
-};
+// Importar configuración de localización
+import { formatCurrency } from "@/config/locale";
+
+// Re-exportar para mantener compatibilidad
+export { formatCurrency };
 
 // Función para calcular el total de una lista
 export const calculateListTotal = (products: ProductList['products']): number => {
