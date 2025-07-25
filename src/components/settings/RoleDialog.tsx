@@ -50,7 +50,7 @@ const RoleDialog = ({ open, onClose, role, onSuccess }: RoleDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>{role ? "Editar Rol" : "Nuevo Rol"}</DialogTitle>
           <DialogDescription>
