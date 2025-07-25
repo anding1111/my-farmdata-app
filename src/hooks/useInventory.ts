@@ -252,8 +252,8 @@ export const useDeleteBatch = () => {
   });
 };
 
-// Hook para movimientos
-export const useMovements = (params?: {
+// Hook para movimientos de inventario (legacy)
+export const useInventoryMovements = (params?: {
   page?: number;
   per_page?: number;
   product_id?: number;

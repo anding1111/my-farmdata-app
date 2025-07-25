@@ -130,13 +130,23 @@ const MovementForm = ({ movement, onSuccess, onCancel }: MovementFormProps) => {
   const onSubmit = async (data: z.infer<typeof movementSchema>) => {
     try {
       if (movement) {
-        const updateData: UpdateMovementData = {
+        await updateMovementMutation.mutateAsync({
           id: movement.id,
-          ...data,
-        };
-        await updateMovementMutation.mutateAsync(updateData);
+          data: {
+            ...data,
+            subtype: data.subtype as any
+          }
+        });
       } else {
-        const createData: CreateMovementData = data;
+        // For create, use the old API endpoint with movement_type
+        const createData = {
+          product_id: data.product_id,
+          movement_type: data.type,
+          quantity: data.quantity,
+          unit_cost: data.unit_cost,
+          reason: data.reason,
+          reference_document: data.reference_document,
+        };
         await createMovementMutation.mutateAsync(createData);
       }
       onSuccess();

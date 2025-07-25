@@ -1268,27 +1268,10 @@ export const inventoryApi = {
     return handleApiResponse(response);
   },
 
-  // Movements API
-  getMovements: async (filters?: any) => {
-    await simulateApiCall();
-    return { data: mockMovements };
-  },
-
+  // ========== MOVEMENTS NEW API ==========
   getMovement: async (id: number) => {
     await simulateApiCall();
     return mockMovements.find(m => m.id === id);
-  },
-
-  createMovement: async (data: any) => {
-    await simulateApiCall();
-    const newMovement = {
-      id: nextMovementId++,
-      ...data,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    };
-    mockMovements.push(newMovement);
-    return newMovement;
   },
 
   updateMovement: async (id: number, data: any) => {
