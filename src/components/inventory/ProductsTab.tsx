@@ -145,7 +145,6 @@ const ProductsTab = () => {
               <SelectValue placeholder="Categoría" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas las categorías</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.id.toString()}>
                   {category.name}
@@ -159,7 +158,6 @@ const ProductsTab = () => {
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
               <SelectItem value="active">Activo</SelectItem>
               <SelectItem value="inactive">Inactivo</SelectItem>
               <SelectItem value="discontinued">Descontinuado</SelectItem>

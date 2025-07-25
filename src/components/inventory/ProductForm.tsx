@@ -201,7 +201,6 @@ const ProductForm = ({ product, onSuccess, onCancel }: ProductFormProps) => {
                   <SelectValue placeholder="Seleccionar laboratorio" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sin laboratorio</SelectItem>
                   {laboratories.map((laboratory) => (
                     <SelectItem key={laboratory.id} value={laboratory.id.toString()}>
                       {laboratory.name}
