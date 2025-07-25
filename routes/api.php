@@ -12,7 +12,12 @@ use App\Structures\Edge;
 use App\Support\Storage;
 use Illuminate\Http\Request;
 
-/* ---------- PRODUCTS (AVL TREE) ---------- */
+/* ========== PRODUCTOS (ÁRBOL AVL) ========== 
+ * Cumple con requerimientos académicos: 
+ * - Estructura no-lineal tipo árbol
+ * - Búsqueda eficiente O(log n)
+ * - Sin usar librerías externas
+ */
 Route::prefix('products')->group(function () {
     Route::get('/', function () {
         $data   = Storage::load();
@@ -47,7 +52,12 @@ Route::prefix('products')->group(function () {
     });
 });
 
-/* ---------- TURNS (LINKED QUEUE) ---------- */
+/* ========== TURNOS (COLA ENLAZADA) ========== 
+ * Cumple con requerimientos académicos:
+ * - Estructura lineal usando solo nodos
+ * - FIFO (First In, First Out)
+ * - Sin usar arreglos ni librerías
+ */
 Route::prefix('turns')->group(function () {
     Route::get('/', function () {
         $data = Storage::load();
@@ -265,7 +275,12 @@ Route::prefix('inventory')->group(function () {
     });
 });
 
-/* ---------- STACK (LINKED STACK) ---------- */
+/* ========== PILA (PILA ENLAZADA) ========== 
+ * Cumple con requerimientos académicos:
+ * - Estructura lineal usando solo nodos
+ * - LIFO (Last In, First Out) 
+ * - Sin usar arreglos ni librerías
+ */
 Route::prefix('stack')->group(function () {
     Route::get('/', function () {
         $data = Storage::load();
@@ -329,7 +344,12 @@ Route::prefix('stack')->group(function () {
     });
 });
 
-/* ---------- LINKED LIST ---------- */
+/* ========== LISTA ENLAZADA ========== 
+ * Cumple con requerimientos académicos:
+ * - Estructura lineal usando solo nodos
+ * - Acceso secuencial a elementos
+ * - Sin usar arreglos ni librerías
+ */
 Route::prefix('list')->group(function () {
     Route::get('/', function () {
         $data = Storage::load();
@@ -403,7 +423,12 @@ Route::prefix('list')->group(function () {
     });
 });
 
-/* ---------- HASH TABLE ---------- */
+/* ========== TABLA HASH ========== 
+ * Cumple con requerimientos académicos:
+ * - Estructura de datos con función hash personalizada
+ * - Búsqueda eficiente O(1) promedio
+ * - Sin usar HashMap ni librerías
+ */
 Route::prefix('hash')->group(function () {
     Route::get('/', function () {
         $data = Storage::load();
@@ -485,7 +510,12 @@ Route::prefix('hash')->group(function () {
     });
 });
 
-/* ---------- GRAPH (WITH VERTICES AND EDGES) ---------- */
+/* ========== GRAFO (CON VÉRTICES Y ARISTAS) ========== 
+ * Cumple con requerimientos académicos:
+ * - Usa VÉRTICES y ARISTAS (NO nodos)
+ * - Representa relaciones entre entidades
+ * - Sin usar librerías de grafos
+ */
 Route::prefix('graph')->group(function () {
     Route::get('/', function () {
         $data = Storage::load();

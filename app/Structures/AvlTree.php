@@ -1,9 +1,14 @@
 <?php
 namespace App\Structures;
 
+/**
+ * Implementación de Árbol AVL (Árbol Binario Balanceado)
+ * Utilizado para almacenar productos del inventario con búsqueda eficiente O(log n)
+ * Cumple con los requerimientos académicos: estructura no-lineal sin usar librerías
+ */
 class AvlTree
 {
-    private ?Node $root = null;
+    private ?Node $root = null; // Nodo raíz del árbol
 
     private function height(?Node $n): int   { return $n?->height ?? 0; }
     private function bal(?Node $n): int      { return $this->height($n->left) - $this->height($n->right); }

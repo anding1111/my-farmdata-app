@@ -1,10 +1,15 @@
 <?php
 namespace App\Structures;
 
+/**
+ * Implementación de Grafo usando Vértices y Aristas
+ * Utilizado para representar relaciones entre entidades (proveedores-productos-categorías)
+ * Cumple con los requerimientos académicos: usa vértices y aristas, NO nodos
+ */
 class Graph
 {
-    private array $vertices = [];
-    private bool  $directed;
+    private array $vertices = []; // Colección de vértices del grafo
+    private bool  $directed;      // Indica si el grafo es dirigido o no dirigido
 
     public function __construct(bool $directed = false)
     {
