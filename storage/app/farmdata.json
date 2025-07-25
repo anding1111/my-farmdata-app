@@ -1,4 +1,8 @@
 {
   "products": [],
-  "queue": []
+  "queue": [],
+  "stack": [],
+  "list": [],
+  "hash": [],
+  "graph": []
 }
