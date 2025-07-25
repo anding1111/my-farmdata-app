@@ -102,6 +102,39 @@ export const useCreateCategory = () => {
   });
 };
 
+// Hook para actualizar categoría
+export const useUpdateCategory = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<Category> }) =>
+      inventoryApi.updateCategory(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast.success('Categoría actualizada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al actualizar la categoría');
+    },
+  });
+};
+
+// Hook para eliminar categoría
+export const useDeleteCategory = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryApi.deleteCategory,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      toast.success('Categoría eliminada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al eliminar la categoría');
+    },
+  });
+};
+
 // Hook para laboratorios
 export const useLaboratories = () => {
   return useQuery({
