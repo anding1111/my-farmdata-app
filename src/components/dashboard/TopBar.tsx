@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Grid, List, Plus, MoreVertical } from "lucide-react";
+import { Search, Grid, List, Plus, MoreVertical, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "sonner";
 
 interface TopBarProps {
   title?: string;
@@ -21,6 +23,7 @@ const TopBar = ({
 }: TopBarProps) => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [searchValue, setSearchValue] = useState("");
+  const { logout, user } = useAuth();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -43,6 +46,15 @@ const TopBar = ({
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Sesión cerrada exitosamente");
+    } catch (error) {
+      toast.error("Error al cerrar sesión");
+    }
+  };
+
   return (
     <div className="bg-white border-b py-3 px-4 flex items-center justify-between">
       <div className="flex items-center">
@@ -50,15 +62,18 @@ const TopBar = ({
       </div>
       
       <div className="flex items-center space-x-4">
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <MoreVertical className="h-5 w-5" />
-          </Button>
-        </div>
+        <span className="text-sm text-gray-600">
+          ¡Hola, {user?.name}!
+        </span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          className="text-gray-500 hover:text-gray-700"
+          title="Cerrar sesión"
+        >
+          <LogOut className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );

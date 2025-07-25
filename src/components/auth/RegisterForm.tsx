@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 const RegisterForm = () => {
   const [name, setName] = useState("");
@@ -13,6 +14,7 @@ const RegisterForm = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,12 +32,12 @@ const RegisterForm = () => {
     setIsLoading(true);
     
     try {
-      // Demo registro - simular una respuesta exitosa
+      await register(name, email, password, confirmPassword);
       toast.success("Cuenta creada exitosamente");
-      navigate("/login");
-    } catch (error) {
+      navigate("/dashboard");
+    } catch (error: any) {
       console.error("Error al registrar:", error);
-      toast.error("Error al crear la cuenta. Intenta de nuevo.");
+      toast.error(error.message || "Error al crear la cuenta. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }

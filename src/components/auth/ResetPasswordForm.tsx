@@ -5,11 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 const ResetPasswordForm = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const { resetPassword } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,14 +24,12 @@ const ResetPasswordForm = () => {
     setIsLoading(true);
     
     try {
-      // Demo recuperación - simular una respuesta exitosa
-      setTimeout(() => {
-        setIsSubmitted(true);
-        toast.success("Instrucciones enviadas a tu correo");
-      }, 1500);
-    } catch (error) {
+      await resetPassword(email);
+      setIsSubmitted(true);
+      toast.success("Instrucciones enviadas a tu correo");
+    } catch (error: any) {
       console.error("Error al enviar instrucciones:", error);
-      toast.error("Ocurrió un error. Intenta de nuevo.");
+      toast.error(error.message || "Ocurrió un error. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }

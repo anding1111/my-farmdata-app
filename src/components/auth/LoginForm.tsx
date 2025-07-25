@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { UserRound } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -16,6 +17,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,14 +30,7 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
     setIsLoading(true);
     
     try {
-      // Demo login - simular una respuesta exitosa
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("user", JSON.stringify({
-        name: "Victoria",
-        email: email,
-        avatar: "https://i.pravatar.cc/300?img=28"
-      }));
-      
+      await login(email, password);
       toast.success("¡Inicio de sesión exitoso!");
       
       if (onSuccess) {
@@ -43,9 +38,9 @@ const LoginForm = ({ onSuccess }: LoginFormProps) => {
       } else {
         navigate("/dashboard");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error al iniciar sesión:", error);
-      toast.error("Error al iniciar sesión. Intenta de nuevo.");
+      toast.error(error.message || "Error al iniciar sesión. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }
