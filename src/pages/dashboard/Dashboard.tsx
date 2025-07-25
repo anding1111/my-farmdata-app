@@ -64,7 +64,7 @@ const Dashboard = () => {
   const [selectedListForView, setSelectedListForView] = useState<number | null>(null);
   const [selectedProductInfo, setSelectedProductInfo] = useState<any>(null);
   
-  const { toast } = useToast();
+  const { toast, dismiss } = useToast();
 
   // Iconos para las listas
   const getListIcon = (iconName?: string) => {
@@ -118,6 +118,9 @@ const Dashboard = () => {
   };
 
   const handleAddProduct = (product: any, quantity: number) => {
+    // Dismissar todos los toasts previos
+    dismiss();
+    
     // Agregar al carrito independiente
     const existingItem = shoppingCart.find(item => item.productId === product.id);
     if (existingItem) {
@@ -140,6 +143,7 @@ const Dashboard = () => {
     toast({
       title: "Producto agregado",
       description: `${product.name} agregado al carrito`,
+      duration: 2000, // Solo 2 segundos
     });
   };
 
