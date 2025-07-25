@@ -1,41 +1,74 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Structures\AvlTree;
 use App\Structures\LinkedQueue;
 use App\Support\Storage;
 
+/* ---------- PRODUCTS (AVL TREE) ---------- */
 Route::prefix('products')->group(function () {
-    Route::get('/',   fn() => Storage::load()['products']);
-    Route::post('/',  function () {
-        $p = request()->validate(['id'=>'required|int', 'name'=>'required', 'stock'=>'required|int', 'price'=>'required|numeric']);
+    Route::get('/', function () {
+        $data   = Storage::load();
+        $tree   = new AvlTree();
+        foreach ($data['products'] as $p) $tree->insert($p);
+        return response()->json($tree->toArray());
+    });
+
+    Route::post('/', function () {
+        $payload = request()->validate([
+            'id'    => 'required|integer',
+            'name'  => 'required|string',
+            'stock' => 'required|integer',
+            'price' => 'required|numeric'
+        ]);
+
+        $data   = Storage::load();
+        $tree   = new AvlTree();
+        foreach ($data['products'] as $p) $tree->insert($p);
+        $tree->insert($payload);
+        Storage::save(['products' => $tree->toArray(), 'queue' => $data['queue']]);
+
+        return response()->json(['message' => 'Producto agregado']);
+    });
+
+    Route::get('/{id}', function (int $id) {
         $data = Storage::load();
         $tree = new AvlTree();
-        foreach ($data['products'] as $prod) $tree->insert($prod);
-        $tree->insert($p);
-        Storage::save(['products'=>$tree->toArray(),'queue'=>$data['queue']]);
-        return response()->json(['msg'=>'Producto agregado']);
+        foreach ($data['products'] as $p) $tree->insert($p);
+        $product = $tree->search($id);
+        return $product ? response()->json($product) : response()->json([], 404);
     });
 });
 
+/* ---------- TURNS (LINKED QUEUE) ---------- */
 Route::prefix('turns')->group(function () {
-    Route::get('/',   fn() => Storage::load()['queue']);
-    Route::post('/',  function () {
-        $t = request()->validate(['customer'=>'required']);
-        $t['ticket'] = now()->timestamp;
-        $t['time']   = now()->toTimeString();
+    Route::get('/', function () {
         $data = Storage::load();
-        $q = new LinkedQueue();
-        foreach ($data['queue'] as $turn) $q->enqueue($turn);
-        $q->enqueue($t);
-        Storage::save(['products'=>$data['products'],'queue'=>$q->toArray()]);
-        return response()->json(['msg'=>'Turno agregado']);
+        $q    = new LinkedQueue();
+        foreach ($data['queue'] as $t) $q->enqueue($t);
+        return response()->json($q->toArray());
     });
+
+    Route::post('/', function () {
+        $payload = request()->validate(['customer' => 'required|string']);
+        $payload['ticket'] = now()->timestamp;
+        $payload['time']   = now()->toTimeString();
+
+        $data = Storage::load();
+        $q    = new LinkedQueue();
+        foreach ($data['queue'] as $t) $q->enqueue($t);
+        $q->enqueue($payload);
+        Storage::save(['products' => $data['products'], 'queue' => $q->toArray()]);
+
+        return response()->json(['message' => 'Turno agregado']);
+    });
+
     Route::delete('/', function () {
         $data = Storage::load();
-        $q = new LinkedQueue();
-        foreach ($data['queue'] as $turn) $q->enqueue($turn);
+        $q    = new LinkedQueue();
+        foreach ($data['queue'] as $t) $q->enqueue($t);
         $next = $q->dequeue();
-        Storage::save(['products'=>$data['products'],'queue'=>$q->toArray()]);
-        return response()->json(['next'=>$next]);
+        Storage::save(['products' => $data['products'], 'queue' => $q->toArray()]);
+        return response()->json(['next' => $next]);
     });
 });
