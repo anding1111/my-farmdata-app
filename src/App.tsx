@@ -51,7 +51,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
           {/* Rutas públicas */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<GuestGuard><Login /></GuestGuard>} />
           <Route path="/registro" element={<GuestGuard><Register /></GuestGuard>} />
           <Route path="/recuperar-contrasena" element={<GuestGuard><ResetPassword /></GuestGuard>} />
