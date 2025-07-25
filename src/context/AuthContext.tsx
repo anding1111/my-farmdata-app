@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Verificar autenticación al cargar la aplicación
   useEffect(() => {
     if (isDevelopment) {
-      // En desarrollo, simular usuario autenticado
+      // En desarrollo, simular usuario autenticado inmediatamente
       setUser({
         id: 1,
         name: 'Usuario Demo',

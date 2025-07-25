@@ -7,14 +7,12 @@ interface AuthGuardProps {
 }
 
 const AuthGuard = ({ children }: AuthGuardProps) => {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // Modo desarrollo - deshabilitar autenticación temporalmente
-  const isDevelopment = import.meta.env.DEV;
-  
-  if (isDevelopment) {
+  // En desarrollo, siempre permitir acceso
+  if (import.meta.env.DEV) {
     return <>{children}</>;
   }
+
+  const { isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
