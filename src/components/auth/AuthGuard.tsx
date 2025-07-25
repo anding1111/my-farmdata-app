@@ -9,6 +9,13 @@ interface AuthGuardProps {
 const AuthGuard = ({ children }: AuthGuardProps) => {
   const { isAuthenticated, isLoading } = useAuth();
 
+  // Modo desarrollo - deshabilitar autenticación temporalmente
+  const isDevelopment = import.meta.env.DEV;
+  
+  if (isDevelopment) {
+    return <>{children}</>;
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
