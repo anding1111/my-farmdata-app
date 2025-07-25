@@ -532,9 +532,19 @@ const Sales = () => {
                       <span className="text-primary">{formatCurrency(cartTotal)}</span>
                     </div>
                   </div>
-                  <PurchaseDialog 
-                    onPurchaseComplete={() => setShoppingCart([])}
-                  />
+                  <Button 
+                    className="w-full"
+                    onClick={() => {
+                      setShoppingCart([]);
+                      toast({
+                        title: "Compra procesada",
+                        description: "El carrito ha sido procesado exitosamente",
+                      });
+                    }}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-2" />
+                    Proceder al pago
+                  </Button>
                 </div>
               </Card>
             </>
