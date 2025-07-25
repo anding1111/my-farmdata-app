@@ -109,8 +109,112 @@ let mockBatches: Batch[] = [
   }
 ];
 
+// Mock data for locations
+let mockLocations: Location[] = [
+  {
+    id: 1,
+    code: "FARM001",
+    name: "Farmacia Principal",
+    description: "Área principal de la farmacia",
+    type: "pharmacy",
+    status: "active",
+    current_capacity: 0,
+    products_count: 0,
+    created_at: "2024-01-01T10:00:00Z",
+    updated_at: "2024-01-01T10:00:00Z"
+  },
+  {
+    id: 2,
+    code: "ZONA01",
+    name: "Zona de Vitaminas",
+    description: "Sección dedicada a vitaminas y suplementos",
+    type: "zone",
+    parent_id: 1,
+    status: "active",
+    characteristics: {
+      temperature_controlled: false,
+      humidity_controlled: false,
+      requires_security: false,
+      max_capacity: 500
+    },
+    created_at: "2024-01-01T10:00:00Z",
+    updated_at: "2024-01-01T10:00:00Z"
+  },
+  {
+    id: 3,
+    code: "EST01",
+    name: "Estante A1",
+    description: "Primer estante de vitaminas",
+    type: "shelf",
+    parent_id: 2,
+    status: "active",
+    characteristics: {
+      max_capacity: 100,
+      dimensions: { width: 120, height: 200, depth: 40 }
+    },
+    created_at: "2024-01-01T10:00:00Z",
+    updated_at: "2024-01-01T10:00:00Z"
+  },
+  {
+    id: 4,
+    code: "COMP01",
+    name: "Compartimiento Superior",
+    description: "Compartimiento superior del estante A1",
+    type: "compartment",
+    parent_id: 3,
+    status: "active",
+    characteristics: {
+      max_capacity: 25,
+      dimensions: { width: 120, height: 40, depth: 40 }
+    },
+    created_at: "2024-01-01T10:00:00Z",
+    updated_at: "2024-01-01T10:00:00Z"
+  },
+  {
+    id: 5,
+    code: "ZONA02",
+    name: "Zona Refrigerada",
+    description: "Sección para productos que requieren refrigeración",
+    type: "zone",
+    parent_id: 1,
+    status: "active",
+    characteristics: {
+      temperature_controlled: true,
+      humidity_controlled: true,
+      requires_security: true,
+      max_capacity: 200
+    },
+    created_at: "2024-01-01T10:00:00Z",
+    updated_at: "2024-01-01T10:00:00Z"
+  }
+];
+
+// Mock data for product locations
+let mockProductLocations: ProductLocation[] = [
+  {
+    id: 1,
+    product_id: 1,
+    location_id: 4,
+    is_primary: true,
+    quantity: 150,
+    created_at: "2024-01-15T10:30:00Z",
+    updated_at: "2024-01-15T10:30:00Z"
+  },
+  {
+    id: 2,
+    product_id: 2,
+    location_id: 4,
+    is_primary: true,
+    quantity: 80,
+    created_at: "2024-01-16T10:30:00Z",
+    updated_at: "2024-01-16T10:30:00Z"
+  }
+];
+
 let nextCategoryId = 6;
 let nextBatchId = 5;
+let nextLocationId = 6;
+let nextProductLocationId = 3;
 
 // Función helper para hacer requests autenticados
 const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
@@ -124,6 +228,16 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
   // Mock implementation for batches
   if (url.includes('/api/inventory/batches')) {
     return mockFetchBatches(url, options);
+  }
+  
+  // Mock implementation for locations
+  if (url.includes('/api/inventory/locations')) {
+    return mockFetchLocations(url, options);
+  }
+  
+  // Mock implementation for product locations
+  if (url.includes('/api/inventory/product-locations')) {
+    return mockFetchProductLocations(url, options);
   }
   
   return fetch(`${API_URL}${url}`, {
@@ -319,6 +433,243 @@ const mockFetchBatches = async (url: string, options: RequestInit = {}) => {
   }), { status: 404 });
 };
 
+// Mock fetch for locations
+const mockFetchLocations = async (url: string, options: RequestInit = {}) => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const method = options.method || 'GET';
+  const urlParts = url.split('?');
+  const basePath = urlParts[0];
+  const searchParams = new URLSearchParams(urlParts[1] || '');
+  
+  if (method === 'GET' && basePath === '/api/inventory/locations') {
+    let filteredLocations = mockLocations;
+    
+    const search = searchParams.get('search');
+    const type = searchParams.get('type');
+    const parentId = searchParams.get('parent_id');
+    const status = searchParams.get('status');
+    
+    if (search) {
+      filteredLocations = filteredLocations.filter(loc => 
+        loc.name.toLowerCase().includes(search.toLowerCase()) ||
+        loc.code.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    
+    if (type) {
+      filteredLocations = filteredLocations.filter(loc => loc.type === type);
+    }
+    
+    if (parentId) {
+      filteredLocations = filteredLocations.filter(loc => loc.parent_id === parseInt(parentId));
+    }
+    
+    if (status) {
+      filteredLocations = filteredLocations.filter(loc => loc.status === status);
+    }
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: filteredLocations
+    }), { status: 200 });
+  }
+  
+  if (method === 'POST' && basePath === '/api/inventory/locations') {
+    const body = JSON.parse(options.body as string);
+    const newLocation: Location = {
+      id: nextLocationId++,
+      ...body,
+      products_count: 0,
+      current_capacity: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    mockLocations.push(newLocation);
+    return new Response(JSON.stringify({
+      success: true,
+      data: newLocation
+    }), { status: 201 });
+  }
+  
+  if (method === 'PUT' && basePath.match(/\/api\/inventory\/locations\/\d+/)) {
+    const id = parseInt(basePath.split('/').pop()!);
+    const body = JSON.parse(options.body as string);
+    const locationIndex = mockLocations.findIndex(l => l.id === id);
+    
+    if (locationIndex === -1) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Ubicación no encontrada'
+      }), { status: 404 });
+    }
+    
+    mockLocations[locationIndex] = {
+      ...mockLocations[locationIndex],
+      ...body,
+      updated_at: new Date().toISOString()
+    };
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: mockLocations[locationIndex]
+    }), { status: 200 });
+  }
+  
+  if (method === 'DELETE' && basePath.match(/\/api\/inventory\/locations\/\d+/)) {
+    const id = parseInt(basePath.split('/').pop()!);
+    const locationIndex = mockLocations.findIndex(l => l.id === id);
+    
+    if (locationIndex === -1) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Ubicación no encontrada'
+      }), { status: 404 });
+    }
+    
+    // Check if location has children
+    const hasChildren = mockLocations.some(l => l.parent_id === id);
+    if (hasChildren) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'No se puede eliminar una ubicación que tiene sub-ubicaciones'
+      }), { status: 400 });
+    }
+    
+    // Check if location has products
+    const hasProducts = mockProductLocations.some(pl => pl.location_id === id);
+    if (hasProducts) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'No se puede eliminar una ubicación que tiene productos asignados'
+      }), { status: 400 });
+    }
+    
+    mockLocations.splice(locationIndex, 1);
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Ubicación eliminada exitosamente'
+    }), { status: 200 });
+  }
+  
+  return new Response(JSON.stringify({
+    success: false,
+    message: 'Endpoint no encontrado'
+  }), { status: 404 });
+};
+
+// Mock fetch for product locations
+const mockFetchProductLocations = async (url: string, options: RequestInit = {}) => {
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const method = options.method || 'GET';
+  const urlParts = url.split('?');
+  const basePath = urlParts[0];
+  const searchParams = new URLSearchParams(urlParts[1] || '');
+  
+  if (method === 'GET' && basePath === '/api/inventory/product-locations') {
+    let filteredProductLocations = mockProductLocations;
+    
+    const productId = searchParams.get('product_id');
+    const locationId = searchParams.get('location_id');
+    
+    if (productId) {
+      filteredProductLocations = filteredProductLocations.filter(pl => pl.product_id === parseInt(productId));
+    }
+    
+    if (locationId) {
+      filteredProductLocations = filteredProductLocations.filter(pl => pl.location_id === parseInt(locationId));
+    }
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: filteredProductLocations
+    }), { status: 200 });
+  }
+  
+  if (method === 'POST' && basePath === '/api/inventory/product-locations') {
+    const body = JSON.parse(options.body as string);
+    
+    // If setting as primary, remove primary from other locations for this product
+    if (body.is_primary) {
+      mockProductLocations.forEach(pl => {
+        if (pl.product_id === body.product_id) {
+          pl.is_primary = false;
+        }
+      });
+    }
+    
+    const newProductLocation: ProductLocation = {
+      id: nextProductLocationId++,
+      ...body,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    mockProductLocations.push(newProductLocation);
+    return new Response(JSON.stringify({
+      success: true,
+      data: newProductLocation
+    }), { status: 201 });
+  }
+  
+  if (method === 'PUT' && basePath.match(/\/api\/inventory\/product-locations\/\d+/)) {
+    const id = parseInt(basePath.split('/').pop()!);
+    const body = JSON.parse(options.body as string);
+    const productLocationIndex = mockProductLocations.findIndex(pl => pl.id === id);
+    
+    if (productLocationIndex === -1) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Asignación de producto-ubicación no encontrada'
+      }), { status: 404 });
+    }
+    
+    // If setting as primary, remove primary from other locations for this product
+    if (body.is_primary) {
+      const productId = mockProductLocations[productLocationIndex].product_id;
+      mockProductLocations.forEach(pl => {
+        if (pl.product_id === productId && pl.id !== id) {
+          pl.is_primary = false;
+        }
+      });
+    }
+    
+    mockProductLocations[productLocationIndex] = {
+      ...mockProductLocations[productLocationIndex],
+      ...body,
+      updated_at: new Date().toISOString()
+    };
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: mockProductLocations[productLocationIndex]
+    }), { status: 200 });
+  }
+  
+  if (method === 'DELETE' && basePath.match(/\/api\/inventory\/product-locations\/\d+/)) {
+    const id = parseInt(basePath.split('/').pop()!);
+    const productLocationIndex = mockProductLocations.findIndex(pl => pl.id === id);
+    
+    if (productLocationIndex === -1) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Asignación de producto-ubicación no encontrada'
+      }), { status: 404 });
+    }
+    
+    mockProductLocations.splice(productLocationIndex, 1);
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Asignación eliminada exitosamente'
+    }), { status: 200 });
+  }
+  
+  return new Response(JSON.stringify({
+    success: false,
+    message: 'Endpoint no encontrado'
+  }), { status: 404 });
+};
+
 // Función helper para manejar respuestas de la API
 const handleApiResponse = async (response: Response) => {
   const data = await response.json();
@@ -423,6 +774,46 @@ export interface InventoryMovement {
   reference_document?: string;
   user_id: number;
   user?: any;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Location {
+  id: number;
+  code: string;
+  name: string;
+  description?: string;
+  type: 'pharmacy' | 'zone' | 'shelf' | 'compartment';
+  parent_id?: number;
+  parent?: Location;
+  children?: Location[];
+  characteristics?: {
+    temperature_controlled?: boolean;
+    humidity_controlled?: boolean;
+    requires_security?: boolean;
+    max_capacity?: number;
+    dimensions?: {
+      width?: number;
+      height?: number;
+      depth?: number;
+    };
+  };
+  status: 'active' | 'inactive' | 'maintenance';
+  current_capacity?: number;
+  products_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProductLocation {
+  id: number;
+  product_id: number;
+  product?: Product;
+  location_id: number;
+  location?: Location;
+  quantity?: number;
+  is_primary: boolean;
+  notes?: string;
   created_at: string;
   updated_at: string;
 }
@@ -694,6 +1085,95 @@ export const inventoryApi = {
   // ========== BÚSQUEDA AVANZADA ==========
   searchProducts: async (query: string) => {
     const response = await authenticatedFetch(`/api/inventory/search?q=${encodeURIComponent(query)}`);
+    return handleApiResponse(response);
+  },
+
+  // ========== UBICACIONES ==========
+  getLocations: async (params?: {
+    search?: string;
+    type?: string;
+    parent_id?: number;
+    status?: string;
+    has_products?: boolean;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.type) queryParams.append('type', params.type);
+    if (params?.parent_id) queryParams.append('parent_id', params.parent_id.toString());
+    if (params?.status) queryParams.append('status', params.status);
+    if (params?.has_products) queryParams.append('has_products', params.has_products.toString());
+
+    const response = await authenticatedFetch(`/api/inventory/locations?${queryParams}`);
+    return handleApiResponse(response);
+  },
+
+  getLocation: async (id: number) => {
+    const response = await authenticatedFetch(`/api/inventory/locations/${id}`);
+    return handleApiResponse(response);
+  },
+
+  createLocation: async (locationData: Omit<Location, 'id' | 'created_at' | 'updated_at' | 'current_capacity' | 'products_count'>) => {
+    const response = await authenticatedFetch('/api/inventory/locations', {
+      method: 'POST',
+      body: JSON.stringify(locationData),
+    });
+    return handleApiResponse(response);
+  },
+
+  updateLocation: async (id: number, locationData: Partial<Location>) => {
+    const response = await authenticatedFetch(`/api/inventory/locations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(locationData),
+    });
+    return handleApiResponse(response);
+  },
+
+  deleteLocation: async (id: number) => {
+    const response = await authenticatedFetch(`/api/inventory/locations/${id}`, {
+      method: 'DELETE',
+    });
+    return handleApiResponse(response);
+  },
+
+  // ========== UBICACIONES DE PRODUCTOS ==========
+  getProductLocations: async (params?: {
+    product_id?: number;
+    location_id?: number;
+  }) => {
+    const queryParams = new URLSearchParams();
+    if (params?.product_id) queryParams.append('product_id', params.product_id.toString());
+    if (params?.location_id) queryParams.append('location_id', params.location_id.toString());
+
+    const response = await authenticatedFetch(`/api/inventory/product-locations?${queryParams}`);
+    return handleApiResponse(response);
+  },
+
+  createProductLocation: async (productLocationData: Omit<ProductLocation, 'id' | 'created_at' | 'updated_at'>) => {
+    const response = await authenticatedFetch('/api/inventory/product-locations', {
+      method: 'POST',
+      body: JSON.stringify(productLocationData),
+    });
+    return handleApiResponse(response);
+  },
+
+  updateProductLocation: async (id: number, productLocationData: Partial<ProductLocation>) => {
+    const response = await authenticatedFetch(`/api/inventory/product-locations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(productLocationData),
+    });
+    return handleApiResponse(response);
+  },
+
+  deleteProductLocation: async (id: number) => {
+    const response = await authenticatedFetch(`/api/inventory/product-locations/${id}`, {
+      method: 'DELETE',
+    });
+    return handleApiResponse(response);
+  },
+
+  // ========== BÚSQUEDA DE UBICACIONES ==========
+  searchLocations: async (query: string) => {
+    const response = await authenticatedFetch(`/api/inventory/locations/search?q=${encodeURIComponent(query)}`);
     return handleApiResponse(response);
   },
 };

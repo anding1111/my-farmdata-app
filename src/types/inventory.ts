@@ -7,6 +7,8 @@ export type {
   Supplier,
   InventoryMovement,
   InventoryAlert,
+  Location,
+  ProductLocation,
 } from '@/api/inventory';
 
 // Tipos adicionales para UI
@@ -114,6 +116,42 @@ export interface AlertFilters {
   is_read?: boolean;
 }
 
+export interface LocationFormData {
+  code: string;
+  name: string;
+  description?: string;
+  type: 'pharmacy' | 'zone' | 'shelf' | 'compartment';
+  parent_id?: number;
+  characteristics?: {
+    temperature_controlled?: boolean;
+    humidity_controlled?: boolean;
+    requires_security?: boolean;
+    max_capacity?: number;
+    dimensions?: {
+      width?: number;
+      height?: number;
+      depth?: number;
+    };
+  };
+  status: 'active' | 'inactive' | 'maintenance';
+}
+
+export interface LocationFilters {
+  search?: string;
+  type?: string;
+  parent_id?: number;
+  status?: string;
+  has_products?: boolean;
+}
+
+export interface ProductLocationFormData {
+  product_id: number;
+  location_id: number;
+  quantity?: number;
+  is_primary: boolean;
+  notes?: string;
+}
+
 // Constantes
 export const PRODUCT_STATUS_OPTIONS = [
   { value: 'active', label: 'Activo' },
@@ -174,4 +212,17 @@ export const CONCENTRATION_UNITS = [
   'mg/mL',
   'g/100mL',
   'mcg/mL'
+];
+
+export const LOCATION_TYPE_OPTIONS = [
+  { value: 'pharmacy', label: 'Farmacia' },
+  { value: 'zone', label: 'Zona' },
+  { value: 'shelf', label: 'Estante' },
+  { value: 'compartment', label: 'Compartimiento' }
+];
+
+export const LOCATION_STATUS_OPTIONS = [
+  { value: 'active', label: 'Activo' },
+  { value: 'inactive', label: 'Inactivo' },
+  { value: 'maintenance', label: 'Mantenimiento' }
 ];

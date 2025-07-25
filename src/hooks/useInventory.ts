@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { inventoryApi, type Product, type Category, type Laboratory, type Supplier, type InventoryAlert, type Batch } from '@/api/inventory';
+import { inventoryApi, type Product, type Category, type Laboratory, type Supplier, type InventoryAlert, type Batch, type Location, type ProductLocation } from '@/api/inventory';
 import { toast } from 'sonner';
 
 // Hook para productos
@@ -479,4 +479,191 @@ export const useInventoryStats = () => {
   }, [products, alerts]);
 
   return stats;
+};
+
+// ========== HOOKS PARA UBICACIONES ==========
+
+// Hook para ubicaciones
+export const useLocations = (params?: {
+  search?: string;
+  type?: string;
+  parent_id?: number;
+  status?: string;
+  has_products?: boolean;
+}) => {
+  return useQuery({
+    queryKey: ['locations', params],
+    queryFn: () => inventoryApi.getLocations(params),
+    staleTime: 10 * 60 * 1000, // 10 minutos
+  });
+};
+
+// Hook para una ubicación específica
+export const useLocation = (id: number) => {
+  return useQuery({
+    queryKey: ['location', id],
+    queryFn: () => inventoryApi.getLocation(id),
+    enabled: !!id,
+  });
+};
+
+// Hook para crear ubicación
+export const useCreateLocation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryApi.createLocation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      toast.success('Ubicación creada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al crear la ubicación');
+    },
+  });
+};
+
+// Hook para actualizar ubicación
+export const useUpdateLocation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<Location> }) =>
+      inventoryApi.updateLocation(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      toast.success('Ubicación actualizada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al actualizar la ubicación');
+    },
+  });
+};
+
+// Hook para eliminar ubicación
+export const useDeleteLocation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryApi.deleteLocation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      toast.success('Ubicación eliminada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al eliminar la ubicación');
+    },
+  });
+};
+
+// Hook para ubicaciones de productos
+export const useProductLocations = (params?: {
+  product_id?: number;
+  location_id?: number;
+}) => {
+  return useQuery({
+    queryKey: ['product-locations', params],
+    queryFn: () => inventoryApi.getProductLocations(params),
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
+};
+
+// Hook para crear ubicación de producto
+export const useCreateProductLocation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryApi.createProductLocation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-locations'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      toast.success('Producto asignado a ubicación exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al asignar producto a ubicación');
+    },
+  });
+};
+
+// Hook para actualizar ubicación de producto
+export const useUpdateProductLocation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<ProductLocation> }) =>
+      inventoryApi.updateProductLocation(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-locations'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      toast.success('Asignación de producto actualizada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al actualizar la asignación');
+    },
+  });
+};
+
+// Hook para eliminar ubicación de producto
+export const useDeleteProductLocation = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: inventoryApi.deleteProductLocation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['product-locations'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['locations'] });
+      toast.success('Asignación de producto eliminada exitosamente');
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Error al eliminar la asignación');
+    },
+  });
+};
+
+// Hook para búsqueda de ubicaciones
+export const useSearchLocations = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<Location[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  const searchLocations = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await inventoryApi.searchLocations(query);
+      setSearchResults(results.data || []);
+    } catch (error) {
+      console.error('Error al buscar ubicaciones:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (searchQuery) {
+        searchLocations(searchQuery);
+      } else {
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  return {
+    searchQuery,
+    setSearchQuery,
+    searchResults,
+    isSearching,
+    searchLocations,
+  };
 };
