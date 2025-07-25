@@ -107,8 +107,8 @@ const CategoryForm = ({ category, onSubmit, onCancel, isLoading }: CategoryFormP
             <FormItem>
               <FormLabel>Categoría Padre</FormLabel>
               <Select
-                value={field.value?.toString() || ""}
-                onValueChange={(value) => field.onChange(value ? parseInt(value) : undefined)}
+                value={field.value?.toString() || "none"}
+                onValueChange={(value) => field.onChange(value === "none" ? undefined : parseInt(value))}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -116,7 +116,7 @@ const CategoryForm = ({ category, onSubmit, onCancel, isLoading }: CategoryFormP
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">Sin categoría padre</SelectItem>
+                  <SelectItem value="none">Sin categoría padre</SelectItem>
                   {availableParentCategories.map((cat) => (
                     <SelectItem key={cat.id} value={cat.id.toString()}>
                       {cat.name}
