@@ -28,8 +28,9 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { type Batch } from "@/api/inventory";
-import { useProducts, useSuppliers } from "@/hooks/useInventory";
+import { type Batch, type Product } from "@/api/inventory";
+import { useSuppliers } from "@/hooks/useInventory";
+import ProductSearchInput from "./ProductSearchInput";
 
 const batchSchema = z.object({
   product_id: z.number().min(1, "Debe seleccionar un producto"),
@@ -53,10 +54,8 @@ interface BatchFormProps {
 }
 
 const BatchForm = ({ batch, onSubmit, onCancel, isLoading }: BatchFormProps) => {
-  const { data: productsResponse } = useProducts();
   const { data: suppliersResponse } = useSuppliers();
   
-  const products = productsResponse?.data || [];
   const suppliers = suppliersResponse?.data || [];
 
   const form = useForm<BatchFormData>({
@@ -87,25 +86,15 @@ const BatchForm = ({ batch, onSubmit, onCancel, isLoading }: BatchFormProps) => 
           render={({ field }) => (
             <FormItem>
               <FormLabel>Producto</FormLabel>
-              <Select
-                value={field.value?.toString() || "0"}
-                onValueChange={(value) => field.onChange(parseInt(value))}
-                disabled={!!batch} // No permitir cambiar producto en edición
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un producto" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value="0" disabled>Seleccione un producto</SelectItem>
-                  {products.map((product) => (
-                    <SelectItem key={product.id} value={product.id.toString()}>
-                      {product.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormControl>
+                <ProductSearchInput
+                  value={field.value}
+                  onSelect={(product: Product) => {
+                    field.onChange(product.id);
+                  }}
+                  placeholder="Buscar producto por nombre o código de barras..."
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
