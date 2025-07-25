@@ -69,14 +69,14 @@ const ClientFilters = ({ filters, onFiltersChange, onClearFilters }: ClientFilte
         <div className="space-y-2">
           <label className="text-sm font-medium">Tipo de Documento</label>
           <Select
-            value={filters.document_type || ''}
-            onValueChange={(value) => updateFilter('document_type', value || undefined)}
+            value={filters.document_type || 'all'}
+            onValueChange={(value) => updateFilter('document_type', value === 'all' ? undefined : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todos los tipos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los tipos</SelectItem>
+              <SelectItem value="all">Todos los tipos</SelectItem>
               {DOCUMENT_TYPE_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -89,14 +89,14 @@ const ClientFilters = ({ filters, onFiltersChange, onClearFilters }: ClientFilte
         <div className="space-y-2">
           <label className="text-sm font-medium">Departamento</label>
           <Select
-            value={filters.department || ''}
-            onValueChange={(value) => updateFilter('department', value || undefined)}
+            value={filters.department || 'all'}
+            onValueChange={(value) => updateFilter('department', value === 'all' ? undefined : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todos los departamentos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los departamentos</SelectItem>
+              <SelectItem value="all">Todos los departamentos</SelectItem>
               {COLOMBIA_DEPARTMENTS.map((dept) => (
                 <SelectItem key={dept} value={dept}>
                   {dept}
@@ -109,14 +109,14 @@ const ClientFilters = ({ filters, onFiltersChange, onClearFilters }: ClientFilte
         <div className="space-y-2">
           <label className="text-sm font-medium">Estado</label>
           <Select
-            value={filters.status || ''}
-            onValueChange={(value) => updateFilter('status', value || undefined)}
+            value={filters.status || 'all'}
+            onValueChange={(value) => updateFilter('status', value === 'all' ? undefined : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todos los estados" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los estados</SelectItem>
+              <SelectItem value="all">Todos los estados</SelectItem>
               {CLIENT_STATUS_OPTIONS.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -138,14 +138,14 @@ const ClientFilters = ({ filters, onFiltersChange, onClearFilters }: ClientFilte
         <div className="space-y-2">
           <label className="text-sm font-medium">Seguro Médico</label>
           <Select
-            value={filters.has_insurance?.toString() || ''}
-            onValueChange={(value) => updateFilter('has_insurance', value === '' ? undefined : value === 'true')}
+            value={filters.has_insurance?.toString() || 'all'}
+            onValueChange={(value) => updateFilter('has_insurance', value === 'all' ? undefined : value === 'true')}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="true">Con seguro</SelectItem>
               <SelectItem value="false">Sin seguro</SelectItem>
             </SelectContent>
