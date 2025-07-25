@@ -1,8 +1,60 @@
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
+// Mock data for categories
+let mockCategories: Category[] = [
+  {
+    id: 1,
+    name: "Vitaminas",
+    description: "Suplementos vitamínicos y minerales",
+    status: "active",
+    created_at: "2024-01-15T10:30:00Z",
+    updated_at: "2024-01-15T10:30:00Z"
+  },
+  {
+    id: 2,
+    name: "Articulaciones",
+    description: "Productos para la salud articular",
+    status: "active",
+    created_at: "2024-01-16T10:30:00Z",
+    updated_at: "2024-01-16T10:30:00Z"
+  },
+  {
+    id: 3,
+    name: "Cardiovascular",
+    description: "Productos para la salud del corazón",
+    status: "active",
+    created_at: "2024-01-17T10:30:00Z",
+    updated_at: "2024-01-17T10:30:00Z"
+  },
+  {
+    id: 4,
+    name: "Pediátrico",
+    description: "Productos para niños",
+    status: "active",
+    created_at: "2024-01-18T10:30:00Z",
+    updated_at: "2024-01-18T10:30:00Z"
+  },
+  {
+    id: 5,
+    name: "Vitaminas Pediátricas",
+    description: "Vitaminas específicas para niños",
+    parent_id: 4,
+    status: "active",
+    created_at: "2024-01-19T10:30:00Z",
+    updated_at: "2024-01-19T10:30:00Z"
+  }
+];
+
+let nextCategoryId = 6;
+
 // Función helper para hacer requests autenticados
 const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('auth_token');
+  
+  // Mock implementation for categories
+  if (url.includes('/api/inventory/categories')) {
+    return mockFetchCategories(url, options);
+  }
   
   return fetch(`${API_URL}${url}`, {
     ...options,
@@ -13,6 +65,92 @@ const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
       ...options.headers,
     },
   });
+};
+
+// Mock fetch for categories
+const mockFetchCategories = async (url: string, options: RequestInit = {}) => {
+  // Simulate network delay
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  const method = options.method || 'GET';
+  
+  if (method === 'GET' && url === '/api/inventory/categories') {
+    return new Response(JSON.stringify({
+      success: true,
+      data: mockCategories
+    }), { status: 200 });
+  }
+  
+  if (method === 'POST' && url === '/api/inventory/categories') {
+    const body = JSON.parse(options.body as string);
+    const newCategory: Category = {
+      id: nextCategoryId++,
+      ...body,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    mockCategories.push(newCategory);
+    return new Response(JSON.stringify({
+      success: true,
+      data: newCategory
+    }), { status: 201 });
+  }
+  
+  if (method === 'PUT' && url.match(/\/api\/inventory\/categories\/\d+/)) {
+    const id = parseInt(url.split('/').pop()!);
+    const body = JSON.parse(options.body as string);
+    const categoryIndex = mockCategories.findIndex(c => c.id === id);
+    
+    if (categoryIndex === -1) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Categoría no encontrada'
+      }), { status: 404 });
+    }
+    
+    mockCategories[categoryIndex] = {
+      ...mockCategories[categoryIndex],
+      ...body,
+      updated_at: new Date().toISOString()
+    };
+    
+    return new Response(JSON.stringify({
+      success: true,
+      data: mockCategories[categoryIndex]
+    }), { status: 200 });
+  }
+  
+  if (method === 'DELETE' && url.match(/\/api\/inventory\/categories\/\d+/)) {
+    const id = parseInt(url.split('/').pop()!);
+    const categoryIndex = mockCategories.findIndex(c => c.id === id);
+    
+    if (categoryIndex === -1) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'Categoría no encontrada'
+      }), { status: 404 });
+    }
+    
+    // Check if category has subcategories
+    const hasSubcategories = mockCategories.some(c => c.parent_id === id);
+    if (hasSubcategories) {
+      return new Response(JSON.stringify({
+        success: false,
+        message: 'No se puede eliminar una categoría que tiene subcategorías'
+      }), { status: 400 });
+    }
+    
+    mockCategories.splice(categoryIndex, 1);
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Categoría eliminada exitosamente'
+    }), { status: 200 });
+  }
+  
+  return new Response(JSON.stringify({
+    success: false,
+    message: 'Endpoint no encontrado'
+  }), { status: 404 });
 };
 
 // Función helper para manejar respuestas de la API
