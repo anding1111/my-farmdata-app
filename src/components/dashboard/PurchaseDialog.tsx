@@ -9,6 +9,7 @@ import { formatCurrency } from "@/data/mockData";
 import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, CreditCard, Truck } from "lucide-react";
 import { PaymentReceipt } from "./PaymentReceipt";
+import { useGenerateSaleMovement } from "@/hooks/useAutoMovements";
 
 interface PurchaseDialogProps {
   list: ProductList;
@@ -28,6 +29,7 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
     notes: "",
   });
   const { toast } = useToast();
+  const generateSaleMovement = useGenerateSaleMovement();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,18 +50,48 @@ export function PurchaseDialog({ list, children }: PurchaseDialogProps) {
     
     setPurchaseData(finalPurchaseData);
     
-    // Simular proceso de compra
-    setTimeout(() => {
+    // Generar ID único para la venta
+    const saleId = Date.now();
+    const referenceDocument = `VT-${saleId}`;
+    
+    // Generar movimientos automáticos para cada producto
+    const movementPromises = list.products.map(async (product) => {
+      try {
+        await generateSaleMovement.mutateAsync({
+          product_id: product.productId,
+          quantity: product.quantity,
+          unit_cost: product.price,
+          sale_id: saleId,
+          reference_document: referenceDocument,
+        });
+      } catch (error) {
+        console.error(`Error generando movimiento para producto ${product.name}:`, error);
+      }
+    });
+
+    // Procesar todos los movimientos y luego mostrar el resultado
+    Promise.all(movementPromises).then(() => {
       toast({
         title: "¡Compra realizada con éxito!",
-        description: `La orden para "${list.name}" ha sido procesada.`,
+        description: `La orden para "${list.name}" ha sido procesada y los movimientos de inventario generados automáticamente.`,
       });
       
       // Cerrar el modal de compra y mostrar el recibo
       setOpen(false);
       setShowReceipt(true);
       setStep(1);
-    }, 1500);
+    }).catch((error) => {
+      toast({
+        title: "Compra procesada con advertencias",
+        description: "La venta se completó pero algunos movimientos de inventario no se pudieron generar.",
+        variant: "destructive",
+      });
+      
+      // Cerrar el modal de compra y mostrar el recibo de todas formas
+      setOpen(false);
+      setShowReceipt(true);
+      setStep(1);
+    });
   };
 
   const handleCloseReceipt = () => {

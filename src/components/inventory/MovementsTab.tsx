@@ -54,11 +54,30 @@ const MovementsTab = () => {
   });
 
   const handleEdit = (movement: Movement) => {
+    // Solo permitir editar movimientos manuales
+    if (movement.notes?.includes('automático') || movement.notes?.includes('Venta automática') || movement.notes?.includes('Recepción automática')) {
+      toast({
+        title: "Acción no permitida",
+        description: "No se pueden editar movimientos generados automáticamente",
+        variant: "destructive",
+      });
+      return;
+    }
     setEditingMovement(movement);
     setIsEditDialogOpen(true);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: number, movement: Movement) => {
+    // Solo permitir eliminar movimientos manuales
+    if (movement.notes?.includes('automático') || movement.notes?.includes('Venta automática') || movement.notes?.includes('Recepción automática')) {
+      toast({
+        title: "Acción no permitida",
+        description: "No se pueden eliminar movimientos generados automáticamente",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     try {
       await deleteMovementMutation.mutateAsync(id);
       toast({
@@ -218,9 +237,16 @@ const MovementsTab = () => {
                       <TableRow key={movement.id}>
                         <TableCell className="font-mono">#{movement.id}</TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            {getMovementTypeIcon(movement.type)}
-                            {getMovementTypeBadge(movement.type)}
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              {getMovementTypeIcon(movement.type)}
+                              {getMovementTypeBadge(movement.type)}
+                            </div>
+                            {(movement.notes?.includes('automático') || movement.notes?.includes('Venta automática') || movement.notes?.includes('Recepción automática')) && (
+                              <Badge variant="outline" className="text-xs">
+                                Automático
+                              </Badge>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -248,6 +274,7 @@ const MovementsTab = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(movement)}
+                              disabled={movement.notes?.includes('automático') || movement.notes?.includes('Venta automática') || movement.notes?.includes('Recepción automática')}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
@@ -257,6 +284,7 @@ const MovementsTab = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="text-destructive hover:text-destructive"
+                                  disabled={movement.notes?.includes('automático') || movement.notes?.includes('Venta automática') || movement.notes?.includes('Recepción automática')}
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
@@ -271,7 +299,7 @@ const MovementsTab = () => {
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
                                   <AlertDialogAction
-                                    onClick={() => handleDelete(movement.id)}
+                                    onClick={() => handleDelete(movement.id, movement)}
                                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                   >
                                     Eliminar

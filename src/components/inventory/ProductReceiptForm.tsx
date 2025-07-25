@@ -26,6 +26,7 @@ import { ProductReceiptFormData } from "@/types/inventory";
 import { CalendarIcon, Package, User, FileText } from "lucide-react";
 import ProductSearchInput from "./ProductSearchInput";
 import { type Product } from "@/api/inventory";
+import { useGenerateReceiptMovement } from "@/hooks/useAutoMovements";
 
 const receiptSchema = z.object({
   product_id: z.number().min(1, "Selecciona un producto"),
@@ -63,6 +64,7 @@ const ProductReceiptForm = ({ onSuccess, onCancel }: ProductReceiptFormProps) =>
   const { data: products } = useProducts();
   const { data: suppliers } = useSuppliers();
   const receiptMutation = useProductReceipt();
+  const generateReceiptMovement = useGenerateReceiptMovement();
 
   const form = useForm<ProductReceiptFormData>({
     resolver: zodResolver(receiptSchema),
@@ -80,10 +82,25 @@ const ProductReceiptForm = ({ onSuccess, onCancel }: ProductReceiptFormProps) =>
     },
   });
 
-  const onSubmit = (data: ProductReceiptFormData) => {
-    receiptMutation.mutate(data, {
-      onSuccess,
-    });
+  const onSubmit = async (data: ProductReceiptFormData) => {
+    try {
+      // Procesar la recepción de productos
+      await receiptMutation.mutateAsync(data);
+      
+      // Generar movimiento automático de entrada
+      await generateReceiptMovement.mutateAsync({
+        product_id: data.product_id,
+        quantity: data.quantity,
+        unit_cost: data.purchase_price,
+        supplier_id: data.supplier_id,
+        reference_document: data.reference_document,
+      });
+      
+      onSuccess();
+    } catch (error) {
+      console.error('Error en recepción de productos:', error);
+      // Error handling se maneja en los hooks
+    }
   };
 
   const selectedProduct = products?.data?.find(p => p.id === form.watch("product_id"));
@@ -344,9 +361,9 @@ const ProductReceiptForm = ({ onSuccess, onCancel }: ProductReceiptFormProps) =>
           </Button>
           <Button 
             type="submit" 
-            disabled={receiptMutation.isPending}
+            disabled={receiptMutation.isPending || generateReceiptMovement.isPending}
           >
-            {receiptMutation.isPending ? "Procesando..." : "Recibir Productos"}
+            {(receiptMutation.isPending || generateReceiptMovement.isPending) ? "Procesando..." : "Recibir Productos"}
           </Button>
         </div>
       </form>

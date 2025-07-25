@@ -104,6 +104,24 @@ export interface MovementFormData {
   reference_document?: string;
 }
 
+// Movimiento automático generado por el sistema
+export interface AutoMovementData {
+  product_id: number;
+  batch_id?: number;
+  type: 'entry' | 'exit' | 'transfer';
+  subtype: 'sale' | 'purchase' | 'receipt' | 'adjustment' | 'transfer';
+  quantity: number;
+  unit_cost?: number;
+  location_from_id?: number;
+  location_to_id?: number;
+  reason: string;
+  reference_document?: string;
+  source_type: 'sale' | 'purchase' | 'receipt' | 'manual' | 'transfer';
+  source_id?: number; // ID de la venta, compra, etc.
+  notes?: string;
+  is_automatic: boolean;
+}
+
 export interface InventoryFilters {
   search?: string;
   category_id?: number;
