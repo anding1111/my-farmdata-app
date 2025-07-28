@@ -125,16 +125,6 @@ export const usePureInventory = () => {
     return { success: true };
   };
 
-  // Funciones de relaciones usando Graph
-  const createRelation = (relationData: any) => {
-    dataStructures.addRelation(relationData);
-    return { data: relationData };
-  };
-
-  const addRelationEdge = (fromId: string, toId: string, weight = 1) => {
-    dataStructures.addRelationEdge(fromId, toId);
-    return { success: true };
-  };
 
   // Stats calculadas en tiempo real
   const getInventoryStats = () => {
@@ -150,8 +140,7 @@ export const usePureInventory = () => {
       totalValue,
       categoriesCount,
       turnsPending: dataStructures.turns.length,
-      totalSales: dataStructures.sales.length,
-      relations: dataStructures.relations.length
+      totalSales: dataStructures.sales.length
     };
   };
 
@@ -160,7 +149,6 @@ export const usePureInventory = () => {
     products: dataStructures.products,
     turns: dataStructures.turns,
     sales: dataStructures.sales,
-    relations: dataStructures.relations,
     
     // Datos estáticos
     categories,
@@ -184,10 +172,6 @@ export const usePureInventory = () => {
     deleteSale,
     clearSalesHistory,
     
-    // Funciones de relaciones
-    createRelation,
-    addRelationEdge,
-    
     // Stats
     getInventoryStats,
     
@@ -196,8 +180,7 @@ export const usePureInventory = () => {
     _internal: {
       avlTree: dataStructures.structures?.productTree,
       linkedQueue: dataStructures.structures?.turnQueue,
-      linkedList: dataStructures.structures?.salesHistory,
-      graph: dataStructures.structures?.relationGraph
+      linkedList: dataStructures.structures?.salesHistory
     }
   };
 };

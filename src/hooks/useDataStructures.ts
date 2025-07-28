@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { AvlTree } from '@/structures/AvlTree';
 import { LinkedQueue } from '@/structures/LinkedQueue';
 import { LinkedList } from '@/structures/LinkedList';
-import { Graph, Vertex } from '@/structures/Graph';
 import { Stack } from '@/structures/Stack';
 
 
@@ -55,11 +54,6 @@ export interface Sale {
   customer: string;
 }
 
-export interface Relation {
-  id: string;
-  type: 'supplier' | 'product' | 'category';
-  name: string;
-}
 
 export interface Action {
   id: number;
@@ -77,14 +71,12 @@ export const useDataStructures = () => {
   const [productTree] = useState(() => new AvlTree<Product>((a, b) => a.id - b.id));
   const [turnQueue] = useState(() => new LinkedQueue<Turn>());
   const [salesHistory] = useState(() => new LinkedList<Sale>());
-  const [relationGraph] = useState(() => new Graph<Relation>());
   const [actionsStack] = useState(() => new Stack<Action>());
 
   // Estados para las UI
   const [products, setProducts] = useState<Product[]>([]);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
-  const [relations, setRelations] = useState<Relation[]>([]);
   const [actionsHistory, setActionsHistory] = useState<Action[]>([]);
 
   // Inicializar con datos de ejemplo
@@ -114,15 +106,6 @@ export const useDataStructures = () => {
     });
     setTurns(turnQueue.toArray());
 
-    // Relaciones de ejemplo
-    const supplier = relationGraph.addVertex({ id: 'supp1', type: 'supplier', name: 'Laboratorios ABC' });
-    const category = relationGraph.addVertex({ id: 'cat1', type: 'category', name: 'Analgésicos' });
-    const productVertex = relationGraph.addVertex({ id: 'prod1', type: 'product', name: 'Aspirina' });
-    
-    relationGraph.addEdge(supplier, productVertex, 1, 'suministra');
-    relationGraph.addEdge(productVertex, category, 1, 'pertenece_a');
-    
-    setRelations(relationGraph.getVertices().map(v => v.data));
 
     // Acciones de ejemplo
     const sampleActions: Action[] = [
@@ -213,40 +196,6 @@ export const useDataStructures = () => {
     setSales([]);
   };
 
-  // Funciones para relaciones (Graph)
-  const addRelation = (relation: Relation): Vertex<Relation> => {
-    const vertex = relationGraph.addVertex(relation);
-    setRelations(relationGraph.getVertices().map(v => v.data));
-    return vertex;
-  };
-
-  const addRelationEdge = (fromId: string, toId: string, label?: string) => {
-    const fromVertex = relationGraph.findVertex(r => r.id === fromId);
-    const toVertex = relationGraph.findVertex(r => r.id === toId);
-    
-    if (fromVertex && toVertex) {
-      relationGraph.addEdge(fromVertex, toVertex, 1, label);
-    }
-  };
-
-  const removeRelation = (relationId: string) => {
-    const vertex = relationGraph.findVertex(r => r.id === relationId);
-    if (vertex) {
-      relationGraph.removeVertex(vertex);
-      setRelations(relationGraph.getVertices().map(v => v.data));
-    }
-  };
-
-  const findPath = (fromId: string, toId: string): Relation[] | null => {
-    const fromVertex = relationGraph.findVertex(r => r.id === fromId);
-    const toVertex = relationGraph.findVertex(r => r.id === toId);
-    
-    if (fromVertex && toVertex) {
-      const path = relationGraph.findPath(fromVertex, toVertex);
-      return path ? path.map(v => v.data) : null;
-    }
-    return null;
-  };
 
   // Funciones para acciones (Stack)
   const addAction = (action: Action) => {
@@ -285,7 +234,6 @@ export const useDataStructures = () => {
     products,
     turns,
     sales,
-    relations,
     actionsHistory,
     
     // Funciones para productos (AVL Tree)
@@ -306,12 +254,6 @@ export const useDataStructures = () => {
     searchSale,
     clearSalesHistory,
     
-    // Funciones para relaciones (Graph)
-    addRelation,
-    addRelationEdge,
-    removeRelation,
-    findPath,
-
     // Funciones para acciones (Stack)
     addAction,
     undoLastAction,
@@ -324,7 +266,6 @@ export const useDataStructures = () => {
       productTree,
       turnQueue,
       salesHistory,
-      relationGraph,
       actionsStack
     }
   };
