@@ -27,7 +27,7 @@ import {
   Eye
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useProducts, useCategories, useLaboratories, useDeleteProduct } from "@/hooks/useInventory";
+import { useProducts, useCategories, useLaboratories, useDeleteProduct } from "@/hooks/useStaticInventory";
 import ProductForm from "./ProductForm";
 import ProductDetails from "./ProductDetails";
 import { type Product } from "@/api/inventory";
@@ -42,6 +42,15 @@ const ProductsTab = () => {
   const [showProductDetails, setShowProductDetails] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  // Integrar con estructuras de datos puras
+  const { 
+    products: avlProducts, 
+    addProduct: addToAvl, 
+    updateProduct: updateInAvl, 
+    deleteProduct: deleteFromAvl, 
+    searchProduct: searchInAvl 
+  } = useDataStructures();
 
   const { data: productsData, isLoading } = useProducts({
     page: currentPage,
@@ -69,6 +78,9 @@ const ProductsTab = () => {
   const handleDelete = async (productId: number) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
       await deleteProductMutation.mutateAsync(productId);
+      // Eliminar de AVL Tree también
+      deleteFromAvl(productId);
+      console.log('🗑️ PRODUCTO ELIMINADO del AVL Tree - ID:', productId);
     }
   };
 
@@ -317,17 +329,57 @@ const ProductsTab = () => {
               }
             </DialogDescription>
           </DialogHeader>
-          <ProductForm
-            product={selectedProduct}
-            onSuccess={() => {
-              setShowProductForm(false);
-              setSelectedProduct(null);
-            }}
-            onCancel={() => {
-              setShowProductForm(false);
-              setSelectedProduct(null);
-            }}
-          />
+        <ProductForm
+          product={selectedProduct}
+          onSuccess={(productData?: any) => {
+            // Si se está creando un producto nuevo, agregarlo al AVL Tree
+            if (!selectedProduct && productData) {
+              console.log('📥 AGREGANDO PRODUCTO al AVL Tree:', productData);
+              addToAvl({
+                id: productData.id,
+                name: productData.name,
+                category: productData.category_id?.toString() || 'Sin categoría',
+                price: productData.sale_price,
+                stock: productData.current_stock || 0,
+                minStock: productData.min_stock,
+                laboratory: productData.laboratory_id?.toString() || 'Sin laboratorio',
+                description: productData.description || '',
+                presentation: productData.presentation || '',
+                activeIngredient: productData.active_ingredient || '',
+                concentration: productData.concentration || '',
+                requiresPrescription: productData.requires_prescription || false,
+                location: productData.location || '',
+                status: productData.status
+              });
+            } else if (selectedProduct && productData) {
+              // Si se está editando, actualizar en AVL Tree
+              console.log('✏️ ACTUALIZANDO PRODUCTO en AVL Tree:', productData);
+              updateInAvl({
+                id: productData.id,
+                name: productData.name,
+                category: productData.category_id?.toString() || 'Sin categoría',
+                price: productData.sale_price,
+                stock: productData.current_stock || 0,
+                minStock: productData.min_stock,
+                laboratory: productData.laboratory_id?.toString() || 'Sin laboratorio',
+                description: productData.description || '',
+                presentation: productData.presentation || '',
+                activeIngredient: productData.active_ingredient || '',
+                concentration: productData.concentration || '',
+                requiresPrescription: productData.requires_prescription || false,
+                location: productData.location || '',
+                status: productData.status
+              });
+            }
+            
+            setShowProductForm(false);
+            setSelectedProduct(null);
+          }}
+          onCancel={() => {
+            setShowProductForm(false);
+            setSelectedProduct(null);
+          }}
+        />
         </DialogContent>
       </Dialog>
 

@@ -11,6 +11,15 @@ export interface Product {
   price: number;
   category: string;
   stock: number;
+  minStock?: number;
+  laboratory?: string;
+  description?: string;
+  presentation?: string;
+  activeIngredient?: string;
+  concentration?: string;
+  requiresPrescription?: boolean;
+  location?: string;
+  status?: string;
 }
 
 export interface Turn {

@@ -7,13 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useCreateProduct, useUpdateProduct, useCategories, useLaboratories } from "@/hooks/useInventory";
+import { useCreateProduct, useUpdateProduct, useCategories, useLaboratories } from "@/hooks/useStaticInventory";
 import { type Product } from "@/api/inventory";
 import { PRODUCT_STATUS_OPTIONS, PRESENTATION_OPTIONS } from "@/types/inventory";
 
 interface ProductFormProps {
   product?: Product | null;
-  onSuccess: () => void;
+  onSuccess: (productData?: any) => void;
   onCancel: () => void;
 }
 
@@ -93,16 +93,17 @@ const ProductForm = ({ product, onSuccess, onCancel }: ProductFormProps) => {
         status: formData.status,
       };
 
+      let result;
       if (isEditing && product) {
-        await updateProductMutation.mutateAsync({
+        result = await updateProductMutation.mutateAsync({
           id: product.id,
           data: productData,
         });
       } else {
-        await createProductMutation.mutateAsync(productData);
+        result = await createProductMutation.mutateAsync(productData);
       }
       
-      onSuccess();
+      onSuccess(result);
     } catch (error) {
       console.error('Error al guardar producto:', error);
     }
