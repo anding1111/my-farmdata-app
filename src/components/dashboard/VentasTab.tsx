@@ -205,8 +205,58 @@ export function VentasTab() {
             </Table>
           )}
 
+          {/* Visualización de la LinkedList */}
+          <div className="mt-6 p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+            <h4 className="font-medium mb-3">Visualización de la Lista Enlazada:</h4>
+            <div className="flex items-center gap-2 mb-3">
+              <Badge variant="outline">Size: {sales.length}</Badge>
+              <Badge variant="secondary">Head: {sales[0]?.product || 'null'}</Badge>
+            </div>
+            
+            {/* Elementos de la lista */}
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {sales.slice(0, 5).map((sale, index) => (
+                <div key={sale.id} className="flex items-center gap-2">
+                  <div className={`px-3 py-2 rounded text-xs ${
+                    index === 0 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'
+                  }`}>
+                    <div className="font-medium">Venta #{sale.id}</div>
+                    <div className="text-xs">{sale.product || sale.productName}</div>
+                    <div className="text-xs">{sale.customer} - ${sale.total}</div>
+                  </div>
+                  {index < Math.min(sales.length - 1, 4) && (
+                    <div className="text-green-400">↓</div>
+                  )}
+                </div>
+              ))}
+              {sales.length > 5 && (
+                <div className="text-sm text-green-600 dark:text-green-400 text-center">
+                  ... y {sales.length - 5} ventas más
+                </div>
+              )}
+            </div>
+
+            {/* Detalles de nodos y punteros */}
+            <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border">
+              <h5 className="text-sm font-medium mb-2">Nodos y Punteros:</h5>
+              <div className="space-y-1 text-xs font-mono max-h-32 overflow-y-auto">
+                {sales.map((sale, index) => (
+                  <div key={sale.id} className="flex justify-between">
+                    <span>[{index}] Data: {JSON.stringify({id: sale.id, product: sale.product || sale.productName, customer: sale.customer})}</span>
+                    <span>→ Next: {index < sales.length - 1 ? `[${index + 1}]` : 'null'}</span>
+                  </div>
+                ))}
+                {sales.length === 0 && (
+                  <div className="text-muted-foreground">Lista vacía</div>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Información de la estructura */}
-          <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
             <h4 className="font-medium mb-2">Información de la LinkedList:</h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>

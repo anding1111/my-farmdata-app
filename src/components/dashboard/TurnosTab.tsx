@@ -256,6 +256,11 @@ export function TurnosTab() {
               {/* Visualización de la cola */}
               <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-950 rounded-lg">
                 <h4 className="font-medium mb-3">Visualización de la Cola (FIFO):</h4>
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge variant="outline">Size: {turns.length}</Badge>
+                  <Badge variant="secondary">Head: {turns[0]?.customer || 'null'}</Badge>
+                  <Badge variant="secondary">Tail: {turns[turns.length - 1]?.customer || 'null'}</Badge>
+                </div>
                 <div className="flex items-center gap-2 overflow-x-auto">
                   <div className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400">
                     <span>Head →</span>
@@ -267,7 +272,8 @@ export function TurnosTab() {
                           ? 'bg-blue-600 text-white' 
                           : 'bg-blue-200 text-blue-800 dark:bg-blue-800 dark:text-blue-200'
                       }`}>
-                        {appointment.customer}
+                        <div className="font-medium">#{appointment.ticket}</div>
+                        <div className="text-xs">{appointment.customer}</div>
                       </div>
                       {index < Math.min(turns.length - 1, 4) && (
                         <div className="mx-1 text-blue-400">→</div>
@@ -281,6 +287,22 @@ export function TurnosTab() {
                   )}
                   <div className="flex items-center gap-1 text-sm text-blue-600 dark:text-blue-400">
                     <span>← Tail</span>
+                  </div>
+                </div>
+                
+                {/* Detalles de nodos y punteros */}
+                <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border">
+                  <h5 className="text-sm font-medium mb-2">Nodos y Punteros:</h5>
+                  <div className="space-y-1 text-xs font-mono">
+                    {turns.map((turn, index) => (
+                      <div key={turn.id} className="flex justify-between">
+                        <span>[{index}] Data: {JSON.stringify({ticket: turn.ticket, customer: turn.customer})}</span>
+                        <span>→ Next: {index < turns.length - 1 ? `[${index + 1}]` : 'null'}</span>
+                      </div>
+                    ))}
+                    {turns.length === 0 && (
+                      <div className="text-muted-foreground">Queue vacía</div>
+                    )}
                   </div>
                 </div>
               </div>

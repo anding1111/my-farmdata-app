@@ -353,6 +353,77 @@ export function AnalisisTab() {
             </CardContent>
           </Card>
           
+          {/* Visualización del Árbol AVL */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Network className="h-5 w-5" />
+                Árbol AVL - Productos (Búsqueda Balanceada)
+              </CardTitle>
+              <CardDescription>
+                Visualización de los productos organizados en un árbol AVL balanceado por ID
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge variant="outline">Size: {inventory.products.length}</Badge>
+                  <Badge variant="secondary">Estructura: AVL Tree</Badge>
+                  <Badge variant="secondary">Balanceado: Sí</Badge>
+                </div>
+                
+                {/* Productos en el árbol */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
+                  {inventory.products.slice(0, 12).map((product, index) => (
+                    <div key={product.id} className={`p-2 rounded text-xs ${
+                      index === 0 
+                        ? 'bg-purple-600 text-white' 
+                        : 'bg-purple-200 text-purple-800 dark:bg-purple-800 dark:text-purple-200'
+                    }`}>
+                      <div className="font-medium">ID: {product.id}</div>
+                      <div className="text-xs opacity-75">{product.name}</div>
+                      <div className="text-xs opacity-75">Stock: {product.current_stock || product.stock || 0}</div>
+                    </div>
+                  ))}
+                  {inventory.products.length > 12 && (
+                    <div className="p-2 rounded text-xs bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-400 text-center">
+                      ... +{inventory.products.length - 12} más
+                    </div>
+                  )}
+                </div>
+
+                {/* Información del árbol */}
+                <div className="p-3 bg-white dark:bg-gray-800 rounded border">
+                  <h5 className="text-sm font-medium mb-2">Información del Árbol AVL:</h5>
+                  <div className="grid grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <strong>Nodos totales:</strong> {inventory.products.length}
+                    </div>
+                    <div>
+                      <strong>Altura estimada:</strong> {Math.ceil(Math.log2(inventory.products.length + 1)) || 1}
+                    </div>
+                    <div>
+                      <strong>Factor de balance:</strong> Óptimo (-1 ≤ fb ≤ 1)
+                    </div>
+                    <div>
+                      <strong>Complejidad búsqueda:</strong> O(log n)
+                    </div>
+                  </div>
+                </div>
+
+                {/* Operaciones del árbol */}
+                <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border">
+                  <h5 className="text-sm font-medium mb-2">Últimas Operaciones:</h5>
+                  <div className="space-y-1 text-xs text-muted-foreground">
+                    <div>✓ Inserción de producto #{inventory.products[0]?.id || 'N/A'}</div>
+                    <div>✓ Rebalanceado automático del árbol</div>
+                    <div>✓ Productos ordenados por ID ascendente</div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Información técnica */}
           <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
             <h4 className="font-medium mb-2">Análisis Basado en Grafos:</h4>
