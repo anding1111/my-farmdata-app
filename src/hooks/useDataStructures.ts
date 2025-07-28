@@ -115,7 +115,7 @@ export const useDataStructures = () => {
     
     setRelations(relationGraph.getVertices().map(v => v.data));
 
-    // Log datos iniciales
+    // Log datos iniciales solo una vez
     logOperation(
       'AvlTree',
       'Datos iniciales cargados',
@@ -140,7 +140,7 @@ export const useDataStructures = () => {
       { message: 'Lista inicializada con ventas de ejemplo' }
     );
 
-  }, [productTree, turnQueue, salesHistory, relationGraph, logOperation]);
+  }, []); // Solo ejecutar una vez al montar el componente
 
   // Funciones para productos (AVL Tree)
   const addProduct = (product: Product) => {
