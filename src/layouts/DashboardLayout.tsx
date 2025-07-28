@@ -14,6 +14,9 @@ interface DashboardLayoutProps {
 const DashboardLayoutContent = ({ children }: DashboardLayoutProps) => {
   const location = useLocation();
   
+  // Inicializar estructuras para generar logs
+  useDataStructures();
+  
   const { logs, isVisible, clearLogs, toggleVisibility, setActiveStructure, activeStructure } = useStructureLoggerContext();
 
   // Determinar estructura activa según la ruta
@@ -71,16 +74,9 @@ const DashboardLayoutContent = ({ children }: DashboardLayoutProps) => {
   );
 };
 
-const DataStructuresInitializer = () => {
-  // Inicializar estructuras para generar logs
-  useDataStructures();
-  return null;
-};
-
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <StructureLoggerProvider>
-      <DataStructuresInitializer />
       <DashboardLayoutContent>{children}</DashboardLayoutContent>
     </StructureLoggerProvider>
   );
