@@ -25,63 +25,53 @@ interface StructureLoggerProps {
 
 const StructureVisualizer = ({ structure, state, title }: { structure: string; state: any; title: string }) => {
   const renderAvlTree = (state: any) => {
-    if (!state || !state.root) return <div className="text-muted-foreground">Árbol vacío</div>;
-    
-    const renderNode = (node: any, level = 0) => (
-      <div key={`${node.data?.id || 'root'}-${level}`} className="flex flex-col items-center">
-        <div className="bg-primary text-primary-foreground rounded-full w-12 h-12 flex items-center justify-center text-xs mb-2">
-          {node.data?.name?.substring(0, 3) || node.data?.id || 'N'}
-          <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground rounded-full w-4 h-4 flex items-center justify-center text-xs">
-            {node.height || 1}
-          </div>
-        </div>
-        <div className="flex gap-4">
-          {node.left && (
-            <div className="flex flex-col items-center">
-              <div className="w-px h-4 bg-border"></div>
-              {renderNode(node.left, level + 1)}
-            </div>
-          )}
-          {node.right && (
-            <div className="flex flex-col items-center">
-              <div className="w-px h-4 bg-border"></div>
-              {renderNode(node.right, level + 1)}
-            </div>
-          )}
-        </div>
-      </div>
-    );
+    if (!state || !state.root || (Array.isArray(state.root) && state.root.length === 0)) {
+      return <div className="text-muted-foreground">Árbol vacío</div>;
+    }
 
+    const products = Array.isArray(state.root) ? state.root : [state.root];
+    
     return (
       <div className="p-4 bg-muted/20 rounded-lg overflow-auto">
-        <div className="text-sm font-medium mb-2">Estructura AVL Tree:</div>
-        <div className="flex justify-center">
-          {renderNode(state.root)}
+        <div className="text-sm font-medium mb-2">AVL Tree - Productos:</div>
+        <div className="grid grid-cols-2 gap-2">
+          {products.map((product: any, index: number) => (
+            <div key={product.id || index} className="bg-primary text-primary-foreground p-2 rounded text-xs">
+              <div className="font-medium">{product.name}</div>
+              <div className="text-xs opacity-75">Stock: {product.stock}</div>
+              <div className="text-xs opacity-75">Precio: ${product.price}</div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-2 text-xs text-muted-foreground">
+          Total productos: {state.size || products.length}
         </div>
       </div>
     );
   };
 
   const renderLinkedQueue = (state: any) => {
-    if (!state || (!state.head && state.size === 0)) {
+    if (!state || (!state.queue && state.size === 0)) {
       return <div className="text-muted-foreground">Cola vacía</div>;
     }
 
+    const items = state.queue || [];
+
     return (
       <div className="p-4 bg-muted/20 rounded-lg">
-        <div className="text-sm font-medium mb-2">Cola Enlazada (FIFO):</div>
+        <div className="text-sm font-medium mb-2">Cola Enlazada (FIFO) - Turnos:</div>
         <div className="flex items-center gap-2 mb-2">
-          <Badge variant="outline">Head: {state.head?.data?.ticket || 'null'}</Badge>
-          <Badge variant="outline">Tail: {state.tail?.data?.ticket || 'null'}</Badge>
-          <Badge variant="outline">Size: {state.size || 0}</Badge>
+          <Badge variant="outline">Size: {state.size || items.length}</Badge>
         </div>
         <div className="flex gap-2 overflow-x-auto">
-          {state.items && state.items.map((item: any, index: number) => (
+          {items.map((item: any, index: number) => (
             <div key={index} className="flex items-center">
               <div className="bg-secondary text-secondary-foreground p-2 rounded text-xs whitespace-nowrap">
-                {item.ticket || item.name || `Item ${index + 1}`}
+                <div className="font-medium">#{item.ticket}</div>
+                <div className="text-xs">{item.customer}</div>
+                <div className="text-xs">{item.service}</div>
               </div>
-              {index < state.items.length - 1 && (
+              {index < items.length - 1 && (
                 <div className="mx-1 text-muted-foreground">→</div>
               )}
             </div>
@@ -92,28 +82,32 @@ const StructureVisualizer = ({ structure, state, title }: { structure: string; s
   };
 
   const renderLinkedList = (state: any) => {
-    if (!state || (!state.head && state.size === 0)) {
+    if (!state || (!state.list && state.size === 0)) {
       return <div className="text-muted-foreground">Lista vacía</div>;
     }
 
+    const items = state.list || [];
+
     return (
       <div className="p-4 bg-muted/20 rounded-lg">
-        <div className="text-sm font-medium mb-2">Lista Enlazada:</div>
+        <div className="text-sm font-medium mb-2">Lista Enlazada - Ventas:</div>
         <div className="flex items-center gap-2 mb-2">
-          <Badge variant="outline">Head: {state.head?.data?.id || 'null'}</Badge>
-          <Badge variant="outline">Size: {state.size || 0}</Badge>
+          <Badge variant="outline">Size: {state.size || items.length}</Badge>
         </div>
-        <div className="flex gap-2 overflow-x-auto">
-          {state.items && state.items.map((item: any, index: number) => (
-            <div key={index} className="flex items-center">
-              <div className="bg-secondary text-secondary-foreground p-2 rounded text-xs">
-                {item.product || item.customer || `Item ${index + 1}`}
-              </div>
-              {index < state.items.length - 1 && (
-                <div className="mx-1 text-muted-foreground">→</div>
-              )}
+        <div className="space-y-2 max-h-32 overflow-y-auto">
+          {items.slice(0, 5).map((item: any, index: number) => (
+            <div key={index} className="bg-secondary text-secondary-foreground p-2 rounded text-xs">
+              <div className="font-medium">Venta #{item.id}</div>
+              <div className="text-xs">Cliente: {item.customer}</div>
+              <div className="text-xs">Producto: {item.product}</div>
+              <div className="text-xs">Total: ${item.total}</div>
             </div>
           ))}
+          {items.length > 5 && (
+            <div className="text-xs text-muted-foreground text-center">
+              ... y {items.length - 5} ventas más
+            </div>
+          )}
         </div>
       </div>
     );
@@ -176,70 +170,71 @@ export const StructureLogger: React.FC<StructureLoggerProps> = ({
   onToggleVisibility,
   onClear
 }) => {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(true);
   const [selectedLog, setSelectedLog] = React.useState<LogEntry | null>(null);
 
   if (!isVisible) {
     return (
-      <Button
-        onClick={onToggleVisibility}
-        className="fixed bottom-4 right-4 z-50 rounded-full w-12 h-12 p-0"
-        variant="default"
-      >
-        <Eye className="h-4 w-4" />
-      </Button>
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={onToggleVisibility}
+          variant="outline"
+          size="lg"
+          className="bg-background/80 backdrop-blur-sm shadow-lg hover:bg-background/90 border-2"
+        >
+          <Eye className="h-5 w-5 mr-2" />
+          Ver Logger de Estructuras
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className={`fixed ${isExpanded ? 'inset-4' : 'bottom-4 right-4 w-96 h-96'} z-50 transition-all duration-300`}>
-      <Card className="h-full flex flex-col shadow-2xl border-2">
-        <CardHeader className="flex-shrink-0 pb-2">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-sm">Logger de Estructuras</CardTitle>
-            <div className="flex gap-1">
-              <Button
-                onClick={() => setIsExpanded(!isExpanded)}
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-              >
-                {isExpanded ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
-              </Button>
-              <Button
-                onClick={onClear}
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-              >
-                Limpiar
-              </Button>
-              <Button
-                onClick={onToggleVisibility}
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
-              >
-                <EyeOff className="h-3 w-3" />
-              </Button>
-            </div>
+    <div 
+      className={`fixed z-50 bg-background/95 backdrop-blur-sm border rounded-lg shadow-xl transition-all duration-300 ${
+        isExpanded ? 'w-[900px] h-[700px] bottom-6 right-6' : 'w-[500px] h-[400px] bottom-6 right-6'
+      }`}
+      style={{ minWidth: '400px', minHeight: '300px' }}
+    >
+      <div className="p-4 h-full flex flex-col">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold">Logger de Estructuras de Datos</h3>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setIsExpanded(!isExpanded)}
+              variant="outline"
+              size="sm"
+            >
+              {isExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            </Button>
+            <Button onClick={onClear} variant="outline" size="sm">
+              Limpiar ({logs.length})
+            </Button>
+            <Button
+              onClick={onToggleVisibility}
+              variant="outline"
+              size="sm"
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-          <div className="text-xs text-muted-foreground">
-            {logs.length} operaciones registradas
-          </div>
-        </CardHeader>
+        </div>
 
-        <CardContent className="flex-1 overflow-hidden p-2">
-          <div className="h-full flex gap-2">
+        <div className="text-xs text-muted-foreground mb-4">
+          {logs.length} operaciones registradas
+        </div>
+
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full flex gap-4">
             {/* Lista de logs */}
-            <div className="w-1/3 border-r pr-2">
-              <div className="text-xs font-medium mb-2">Operaciones:</div>
-              <div className="space-y-1 max-h-full overflow-y-auto">
+            <div className="w-1/3 border-r pr-4">
+              <div className="text-sm font-medium mb-2">Operaciones:</div>
+              <div className="space-y-2 max-h-full overflow-y-auto">
                 {logs.slice(-10).reverse().map((log) => (
                   <div
                     key={log.id}
                     onClick={() => setSelectedLog(log)}
-                    className={`p-2 rounded cursor-pointer text-xs ${
+                    className={`p-3 rounded cursor-pointer text-sm transition-colors ${
                       selectedLog?.id === log.id
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted hover:bg-muted/80'
@@ -261,14 +256,14 @@ export const StructureLogger: React.FC<StructureLoggerProps> = ({
                     <div className="flex items-center gap-2 mb-2">
                       <Badge variant="outline">{selectedLog.structure}</Badge>
                       <Badge variant="secondary">{selectedLog.operation}</Badge>
-                      <Badge variant="outline">{selectedLog.executionTime}ms</Badge>
+                      <Badge variant="outline">{selectedLog.executionTime.toFixed(2)}ms</Badge>
                     </div>
                   </div>
 
                   <Separator />
 
                   <div>
-                    <div className="text-xs font-medium mb-2">Estado Anterior:</div>
+                    <div className="text-sm font-medium mb-2">Estado Anterior:</div>
                     <StructureVisualizer
                       structure={selectedLog.structure}
                       state={selectedLog.beforeState}
@@ -279,7 +274,7 @@ export const StructureLogger: React.FC<StructureLoggerProps> = ({
                   <Separator />
 
                   <div>
-                    <div className="text-xs font-medium mb-2">Estado Posterior:</div>
+                    <div className="text-sm font-medium mb-2">Estado Posterior:</div>
                     <StructureVisualizer
                       structure={selectedLog.structure}
                       state={selectedLog.afterState}
@@ -291,7 +286,7 @@ export const StructureLogger: React.FC<StructureLoggerProps> = ({
                     <>
                       <Separator />
                       <div>
-                        <div className="text-xs font-medium mb-2">Métricas:</div>
+                        <div className="text-sm font-medium mb-2">Métricas:</div>
                         <div className="grid grid-cols-2 gap-2">
                           {Object.entries(selectedLog.metrics).map(([key, value]) => (
                             <div key={key} className="bg-muted p-2 rounded text-xs">
@@ -311,8 +306,8 @@ export const StructureLogger: React.FC<StructureLoggerProps> = ({
               )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 };

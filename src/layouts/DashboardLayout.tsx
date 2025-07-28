@@ -4,17 +4,17 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import TopBar from "@/components/dashboard/TopBar";
 import { StructureLogger } from "@/components/ui/structure-logger";
 import { useDataStructures } from "@/hooks/useDataStructures";
-import { useStructureLogger } from "@/hooks/useStructureLogger";
+import { StructureLoggerProvider, useStructureLoggerContext } from "@/context/StructureLoggerContext";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+const DashboardLayoutContent = ({ children }: DashboardLayoutProps) => {
   // Inicializar estructuras para generar logs
   useDataStructures();
   
-  const { logs, isVisible, clearLogs, toggleVisibility } = useStructureLogger();
+  const { logs, isVisible, clearLogs, toggleVisibility } = useStructureLoggerContext();
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -32,6 +32,14 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         onClear={clearLogs}
       />
     </div>
+  );
+};
+
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  return (
+    <StructureLoggerProvider>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </StructureLoggerProvider>
   );
 };
 

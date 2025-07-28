@@ -3,7 +3,7 @@ import { AvlTree } from '@/structures/AvlTree';
 import { LinkedQueue } from '@/structures/LinkedQueue';
 import { LinkedList } from '@/structures/LinkedList';
 import { Graph, Vertex } from '@/structures/Graph';
-import { useStructureLogger } from './useStructureLogger';
+import { useStructureLoggerContext } from '@/context/StructureLoggerContext';
 
 // Tipos para las estructuras - Aligned with full inventory system
 export interface Product {
@@ -62,7 +62,7 @@ export interface Relation {
 
 // Hook principal para manejar todas las estructuras de datos
 export const useDataStructures = () => {
-  const { logOperation } = useStructureLogger();
+  const { logOperation } = useStructureLoggerContext();
   
   // Inicializar estructuras
   const [productTree] = useState(() => new AvlTree<Product>((a, b) => a.id - b.id));
@@ -113,7 +113,32 @@ export const useDataStructures = () => {
     
     setRelations(relationGraph.getVertices().map(v => v.data));
 
-  }, [productTree, turnQueue, salesHistory, relationGraph]);
+    // Log datos iniciales
+    logOperation(
+      'AvlTree',
+      'Datos iniciales cargados',
+      { root: [], size: 0 },
+      { root: productTree.inOrder(), size: productTree.inOrder().length },
+      { message: 'Estructura inicializada con productos de ejemplo' }
+    );
+
+    logOperation(
+      'LinkedQueue',
+      'Datos iniciales cargados',
+      { queue: [], size: 0 },
+      { queue: turnQueue.toArray(), size: turnQueue.getSize() },
+      { message: 'Cola inicializada con turnos de ejemplo' }
+    );
+
+    logOperation(
+      'LinkedList',
+      'Datos iniciales cargados',
+      { list: [], size: 0 },
+      { list: salesHistory.toArray(), size: salesHistory.getSize() },
+      { message: 'Lista inicializada con ventas de ejemplo' }
+    );
+
+  }, [productTree, turnQueue, salesHistory, relationGraph, logOperation]);
 
   // Funciones para productos (AVL Tree)
   const addProduct = (product: Product) => {

@@ -13,7 +13,7 @@ interface LogEntry {
 
 export const useStructureLogger = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
   const logOperation = useCallback((
     structure: string,
