@@ -75,23 +75,26 @@ const ProductsTab = () => {
   };
 
   const getStockStatus = (product: any) => {
-    if (product.stock === 0) {
+    const currentStock = product.current_stock || product.stock || 0;
+    const minStock = product.min_stock || product.minStock || 0;
+    
+    if (currentStock === 0) {
       return { label: "Sin Stock", variant: "destructive" as const, icon: AlertTriangle };
     }
-    if (product.stock <= (product.minStock || 0)) {
+    if (currentStock <= minStock) {
       return { label: "Stock Bajo", variant: "secondary" as const, icon: AlertTriangle };
     }
     return { label: "Normal", variant: "default" as const, icon: Package };
   };
 
-  const getCategoryName = (categoryId: number) => {
-    const category = categories.find(cat => cat.id === categoryId);
+  const getCategoryName = (categoryId: number | string) => {
+    const category = categories.find(cat => cat.id === Number(categoryId));
     return category?.name || 'Sin categoría';
   };
 
-  const getLaboratoryName = (laboratoryId?: number) => {
+  const getLaboratoryName = (laboratoryId?: number | string) => {
     if (!laboratoryId) return 'Sin laboratorio';
-    const laboratory = laboratories.find(lab => lab.id === laboratoryId);
+    const laboratory = laboratories.find(lab => lab.id === Number(laboratoryId));
     return laboratory?.name || 'Sin laboratorio';
   };
 
@@ -199,38 +202,38 @@ const ProductsTab = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product: Product) => {
+                {products.map((product: any) => {
                   const stockStatus = getStockStatus(product);
                   const StatusIcon = stockStatus.icon;
                   
                   return (
                     <TableRow key={product.id}>
                       <TableCell className="font-mono text-sm">
-                        {product.code}
+                        {product.code || `P${product.id}`}
                       </TableCell>
                       <TableCell>
                         <div>
                           <div className="font-medium">{product.name}</div>
-                          {product.active_ingredient && (
+                          {(product.active_ingredient || product.activeIngredient) && (
                             <div className="text-sm text-gray-500">
-                              {product.active_ingredient} {product.concentration}
+                              {product.active_ingredient || product.activeIngredient} {product.concentration}
                             </div>
                           )}
                         </div>
                       </TableCell>
-                      <TableCell>{getCategoryName(product.category_id)}</TableCell>
-                      <TableCell>{getLaboratoryName(product.laboratory_id)}</TableCell>
+                      <TableCell>{getCategoryName(product.category_id || product.category)}</TableCell>
+                      <TableCell>{getLaboratoryName(product.laboratory_id || product.laboratory)}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <StatusIcon className="h-4 w-4" />
-                          <span className="font-medium">{product.current_stock}</span>
+                          <span className="font-medium">{product.current_stock || product.stock || 0}</span>
                           <Badge variant={stockStatus.variant} className="text-xs">
                             {stockStatus.label}
                           </Badge>
                         </div>
                       </TableCell>
                       <TableCell>
-                        ${(product.sale_price || 0).toLocaleString()}
+                        ${((product.sale_price || product.price) || 0).toLocaleString()}
                       </TableCell>
                       <TableCell>
                         <Badge variant={product.status === 'active' ? 'default' : 'secondary'}>

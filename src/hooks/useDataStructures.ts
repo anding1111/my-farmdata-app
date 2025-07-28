@@ -5,22 +5,34 @@ import { LinkedList } from '@/structures/LinkedList';
 import { Graph, Vertex } from '@/structures/Graph';
 import { useStructureLogger } from './useStructureLogger';
 
-// Tipos para las estructuras
+// Tipos para las estructuras - Aligned with full inventory system
 export interface Product {
   id: number;
+  code?: string;
+  barcode?: string;
   name: string;
-  price: number;
-  category: string;
-  stock: number;
-  minStock?: number;
-  laboratory?: string;
   description?: string;
-  presentation?: string;
-  activeIngredient?: string;
+  category_id?: number;
+  category?: string;
+  laboratory_id?: number;
+  laboratory?: string;
+  active_ingredient?: string;
   concentration?: string;
-  requiresPrescription?: boolean;
+  presentation?: string;
+  purchase_price?: number;
+  sale_price?: number;
+  price?: number; // For backward compatibility
+  current_stock?: number;
+  stock?: number; // For backward compatibility
+  min_stock?: number;
+  minStock?: number; // For backward compatibility
+  max_stock?: number;
   location?: string;
+  requires_prescription?: boolean;
+  requiresPrescription?: boolean; // For backward compatibility
   status?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Turn {

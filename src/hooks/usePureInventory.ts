@@ -24,6 +24,13 @@ export const usePureInventory = () => {
   const createProduct = (productData: any) => {
     const product = {
       ...productData,
+      // Ensure both naming conventions work
+      price: productData.sale_price || productData.price,
+      stock: productData.current_stock || productData.stock,
+      minStock: productData.min_stock || productData.minStock,
+      category: productData.category_id?.toString() || productData.category,
+      laboratory: productData.laboratory_id?.toString() || productData.laboratory,
+      requiresPrescription: productData.requires_prescription || productData.requiresPrescription,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -35,6 +42,13 @@ export const usePureInventory = () => {
     const updatedProduct = {
       ...productData,
       id,
+      // Ensure both naming conventions work
+      price: productData.sale_price || productData.price,
+      stock: productData.current_stock || productData.stock,
+      minStock: productData.min_stock || productData.minStock,
+      category: productData.category_id?.toString() || productData.category,
+      laboratory: productData.laboratory_id?.toString() || productData.laboratory,
+      requiresPrescription: productData.requires_prescription || productData.requiresPrescription,
       updatedAt: new Date().toISOString()
     };
     dataStructures.updateProduct(updatedProduct);
@@ -125,9 +139,9 @@ export const usePureInventory = () => {
   const getInventoryStats = () => {
     const products = dataStructures.products;
     const totalProducts = products.length;
-    const lowStockProducts = products.filter(p => p.stock < p.minStock).length;
-    const totalValue = products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-    const categoriesCount = new Set(products.map(p => p.category)).size;
+    const lowStockProducts = products.filter(p => (p.stock || p.current_stock || 0) < (p.minStock || p.min_stock || 0)).length;
+    const totalValue = products.reduce((sum, p) => sum + ((p.price || p.sale_price || 0) * (p.stock || p.current_stock || 0)), 0);
+    const categoriesCount = new Set(products.map(p => p.category || p.category_id)).size;
 
     return {
       totalProducts,
