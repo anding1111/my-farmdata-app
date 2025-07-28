@@ -5,7 +5,9 @@ import { useDataStructures } from '@/hooks/useDataStructures';
 const DataStructuresContext = createContext<ReturnType<typeof useDataStructures> | undefined>(undefined);
 
 export const DataStructuresProvider = ({ children }: { children: ReactNode }) => {
+  console.log('🔧 DataStructuresProvider mounting...');
   const dataStructures = useDataStructures();
+  console.log('✅ DataStructuresProvider data loaded:', !!dataStructures);
 
   return (
     <DataStructuresContext.Provider value={dataStructures}>

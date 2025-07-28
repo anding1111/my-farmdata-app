@@ -66,12 +66,25 @@ export interface Action {
 
 // Hook principal para manejar todas las estructuras de datos
 export const useDataStructures = () => {
+  console.log('🚀 useDataStructures hook called');
   
   // Inicializar estructuras
-  const [productTree] = useState(() => new AvlTree<Product>((a, b) => a.id - b.id));
-  const [turnQueue] = useState(() => new LinkedQueue<Turn>());
-  const [salesHistory] = useState(() => new LinkedList<Sale>());
-  const [actionsStack] = useState(() => new Stack<Action>());
+  const [productTree] = useState(() => {
+    console.log('🌳 Initializing AvlTree');
+    return new AvlTree<Product>((a, b) => a.id - b.id);
+  });
+  const [turnQueue] = useState(() => {
+    console.log('📋 Initializing LinkedQueue');
+    return new LinkedQueue<Turn>();
+  });
+  const [salesHistory] = useState(() => {
+    console.log('📝 Initializing LinkedList');
+    return new LinkedList<Sale>();
+  });
+  const [actionsStack] = useState(() => {
+    console.log('📚 Initializing Stack');
+    return new Stack<Action>();
+  });
 
   // Estados para las UI
   const [products, setProducts] = useState<Product[]>([]);
