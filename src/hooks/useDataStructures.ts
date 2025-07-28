@@ -3,6 +3,7 @@ import { AvlTree } from '@/structures/AvlTree';
 import { LinkedQueue } from '@/structures/LinkedQueue';
 import { LinkedList } from '@/structures/LinkedList';
 import { Graph, Vertex } from '@/structures/Graph';
+import { Stack } from '@/structures/Stack';
 
 
 // Tipos para las estructuras - Aligned with full inventory system
@@ -60,6 +61,15 @@ export interface Relation {
   name: string;
 }
 
+export interface Action {
+  id: number;
+  type: string;
+  description: string;
+  timestamp: string;
+  user: string;
+  details?: any;
+}
+
 // Hook principal para manejar todas las estructuras de datos
 export const useDataStructures = () => {
   
@@ -68,12 +78,14 @@ export const useDataStructures = () => {
   const [turnQueue] = useState(() => new LinkedQueue<Turn>());
   const [salesHistory] = useState(() => new LinkedList<Sale>());
   const [relationGraph] = useState(() => new Graph<Relation>());
+  const [actionsStack] = useState(() => new Stack<Action>());
 
   // Estados para las UI
   const [products, setProducts] = useState<Product[]>([]);
   const [turns, setTurns] = useState<Turn[]>([]);
   const [sales, setSales] = useState<Sale[]>([]);
   const [relations, setRelations] = useState<Relation[]>([]);
+  const [actionsHistory, setActionsHistory] = useState<Action[]>([]);
 
   // Inicializar con datos de ejemplo
   useEffect(() => {
@@ -111,6 +123,17 @@ export const useDataStructures = () => {
     relationGraph.addEdge(productVertex, category, 1, 'pertenece_a');
     
     setRelations(relationGraph.getVertices().map(v => v.data));
+
+    // Acciones de ejemplo
+    const sampleActions: Action[] = [
+      { id: 1, type: 'Sistema', description: 'Sistema iniciado', timestamp: new Date().toLocaleString('es-ES'), user: 'Sistema', details: {} },
+      { id: 2, type: 'Sistema', description: 'Estructuras de datos inicializadas', timestamp: new Date().toLocaleString('es-ES'), user: 'Sistema', details: {} }
+    ];
+
+    sampleActions.forEach(action => {
+      actionsStack.push(action);
+    });
+    setActionsHistory(actionsStack.toArray());
 
 
   }, []); // Solo ejecutar una vez al montar el componente
@@ -225,12 +248,45 @@ export const useDataStructures = () => {
     return null;
   };
 
+  // Funciones para acciones (Stack)
+  const addAction = (action: Action) => {
+    actionsStack.push(action);
+    const newActions = actionsStack.toArray();
+    setActionsHistory(newActions);
+  };
+
+  const undoLastAction = (): Action | null => {
+    const lastAction = actionsStack.pop();
+    const newActions = actionsStack.toArray();
+    setActionsHistory(newActions);
+    return lastAction;
+  };
+
+  const peekLastAction = (): Action | null => {
+    return actionsStack.peek();
+  };
+
+  const clearActionsHistory = () => {
+    actionsStack.clear();
+    setActionsHistory([]);
+  };
+
+  const getActionsStats = () => {
+    const actions = actionsStack.toArray();
+    return {
+      total: actions.length,
+      manual: actions.filter(a => a.type === 'Manual').length,
+      system: actions.filter(a => a.type === 'Sistema').length
+    };
+  };
+
   return {
     // Estados
     products,
     turns,
     sales,
     relations,
+    actionsHistory,
     
     // Funciones para productos (AVL Tree)
     addProduct,
@@ -256,12 +312,20 @@ export const useDataStructures = () => {
     removeRelation,
     findPath,
 
+    // Funciones para acciones (Stack)
+    addAction,
+    undoLastAction,
+    peekLastAction,
+    clearActionsHistory,
+    getActionsStats,
+
     // Acceso directo a las estructuras para debugging
     structures: {
       productTree,
       turnQueue,
       salesHistory,
-      relationGraph
+      relationGraph,
+      actionsStack
     }
   };
 };
