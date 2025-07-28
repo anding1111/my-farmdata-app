@@ -84,13 +84,26 @@ export class LinkedQueue<T> {
     console.log('Head:', this.head?.data || 'null');
     console.log('Tail:', this.tail?.data || 'null');
     
+    // Validacion de integridad
+    const isValid = this.validateIntegrity();
+    console.log('Integridad:', isValid ? '✅ VÁLIDA' : '❌ CORRUPTA');
+    
     if (this.head) {
       let current = this.head;
       let index = 0;
-      console.log('Nodos y punteros:');
+      console.log('Nodos y punteros detallados:');
       while (current) {
+        const nodeId = `0x${(Math.abs(JSON.stringify(current.data).split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 65536).toString(16).padStart(4, '0')}`;
         const nextData = current.next ? JSON.stringify(current.next.data) : 'null';
-        console.log(`  [${index}] Data: ${JSON.stringify(current.data)} -> Next: ${nextData}`);
+        const nextId = current.next ? `0x${(Math.abs(JSON.stringify(current.next.data).split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 65536).toString(16).padStart(4, '0')}` : 'null';
+        const isHead = current === this.head ? ' [HEAD]' : '';
+        const isTail = current === this.tail ? ' [TAIL]' : '';
+        
+        console.log(`  [${index}] Nodo@${nodeId}${isHead}${isTail}:`);
+        console.log(`       Data: ${JSON.stringify(current.data)}`);
+        console.log(`       Next: ${nextData} -> ${nextId}`);
+        console.log(`       Conexion: ${current.next ? '🔗 CONECTADO' : '🔒 FINAL'}`);
+        
         current = current.next;
         index++;
       }
@@ -100,5 +113,27 @@ export class LinkedQueue<T> {
     
     console.log('Array representation:', this.toArray());
     console.log('---');
+  }
+
+  // validar integridad de punteros
+  private validateIntegrity(): boolean {
+    if (this.isEmpty()) return true;
+    
+    if (!this.head || !this.tail) return false;
+    
+    // verificar que head y tail sean correctos
+    let current = this.head;
+    let count = 0;
+    let lastNode = null;
+    
+    while (current) {
+      lastNode = current;
+      current = current.next;
+      count++;
+      
+      if (count > this.size) return false; // ciclo infinito
+    }
+    
+    return lastNode === this.tail && count === this.size;
   }
 }

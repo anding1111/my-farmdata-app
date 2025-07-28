@@ -205,6 +205,11 @@ export class AvlTree<T> {
   printStructure(): void {
     console.log('🌳 AVL TREE - Estructura completa:');
     console.log('Root:', this.root?.data);
+    
+    // Validacion de integridad
+    const isValid = this.validateIntegrity();
+    console.log('Integridad:', isValid ? '✅ VÁLIDA' : '❌ CORRUPTA');
+    
     this.printTree(this.root, '', true);
     console.log('In-order traversal:', this.inOrder());
     console.log('Altura total:', this.getHeight(this.root));
@@ -212,7 +217,15 @@ export class AvlTree<T> {
 
   private printTree(node: Node<T> | null, prefix: string, isLast: boolean): void {
     if (node) {
-      console.log(prefix + (isLast ? '└── ' : '├── ') + JSON.stringify(node.data) + ` (h:${node.height}, b:${this.getBalance(node)})`);
+      const nodeId = `0x${(Math.abs(JSON.stringify(node.data).split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 65536).toString(16).padStart(4, '0')}`;
+      const leftId = node.left ? `0x${(Math.abs(JSON.stringify(node.left.data).split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 65536).toString(16).padStart(4, '0')}` : 'null';
+      const rightId = node.right ? `0x${(Math.abs(JSON.stringify(node.right.data).split('').reduce((a, b) => a + b.charCodeAt(0), 0)) % 65536).toString(16).padStart(4, '0')}` : 'null';
+      
+      console.log(prefix + (isLast ? '└── ' : '├── ') + `Nodo@${nodeId}: ${JSON.stringify(node.data)}`);
+      console.log(prefix + (isLast ? '    ' : '│   ') + `├─ h:${node.height}, b:${this.getBalance(node)}`);
+      console.log(prefix + (isLast ? '    ' : '│   ') + `├─ Left: ${leftId}`);
+      console.log(prefix + (isLast ? '    ' : '│   ') + `└─ Right: ${rightId}`);
+      
       const newPrefix = prefix + (isLast ? '    ' : '│   ');
       if (node.left || node.right) {
         if (node.right) {
@@ -223,5 +236,31 @@ export class AvlTree<T> {
         }
       }
     }
+  }
+
+  // validar integridad del arbol
+  private validateIntegrity(): boolean {
+    return this.validateNode(this.root);
+  }
+
+  private validateNode(node: Node<T> | null): boolean {
+    if (!node) return true;
+    
+    // verificar altura
+    const leftHeight = this.getHeight(node.left);
+    const rightHeight = this.getHeight(node.right);
+    const expectedHeight = Math.max(leftHeight, rightHeight) + 1;
+    
+    if (node.height !== expectedHeight) return false;
+    
+    // verificar balance AVL
+    const balance = this.getBalance(node);
+    if (Math.abs(balance) > 1) return false;
+    
+    // verificar orden BST
+    if (node.left && this.compareFunction(node.left.data, node.data) >= 0) return false;
+    if (node.right && this.compareFunction(node.right.data, node.data) <= 0) return false;
+    
+    return this.validateNode(node.left) && this.validateNode(node.right);
   }
 }
