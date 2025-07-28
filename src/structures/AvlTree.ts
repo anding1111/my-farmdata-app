@@ -1,60 +1,34 @@
 import { Node } from './Node';
 
-/**
- * 🌳 ÁRBOL AVL (Auto-balanceado)
- * 
- * ¿Qué es un AVL Tree?
- * - Es un árbol binario de búsqueda que se mantiene automáticamente balanceado
- * - Nombrado por Adelson-Velsky y Landis (sus inventores en 1962)
- * - Garantiza que la diferencia de altura entre subárboles izquierdo y derecho sea máximo 1
- * 
- * ¿Por qué es importante el balance?
- * - Un árbol balanceado garantiza búsquedas, inserciones y eliminaciones en O(log n)
- * - Sin balance, el árbol puede degenerar a una lista (O(n) en el peor caso)
- * 
- * Conceptos clave:
- * - Factor de Balance (FB) = altura_izquierda - altura_derecha
- * - FB debe estar entre -1, 0, 1 para mantener el balance
- * - Rotaciones: simples (LL, RR) y dobles (LR, RL) para rebalancear
- */
+// Arbol AVL - se mantiene balanceado automaticamente
+// Factor de balance entre -1, 0, 1
 export class AvlTree<T> {
-  private root: Node<T> | null = null;  // 🌳 Raíz del árbol (punto de entrada)
-  private compareFunction: (a: T, b: T) => number;  // 🔍 Función para comparar elementos
+  private root: Node<T> | null = null;  // nodo raiz del arbol
+  private compareFunction: (a: T, b: T) => number;  // funcion para comparar
 
   constructor(compareFunction: (a: T, b: T) => number) {
     this.compareFunction = compareFunction;
   }
 
-  // 📏 Obtener altura del nodo
-  // La altura es el número máximo de niveles desde este nodo hasta una hoja
+  // obtener altura del nodo
   private getHeight(node: Node<T> | null): number {
     return node ? node.height : 0;
   }
 
-  // ⚖️ Calcular factor de balance
-  // FB = altura_izquierda - altura_derecha
-  // Si FB > 1: subárbol izquierdo muy pesado
-  // Si FB < -1: subárbol derecho muy pesado
+  // calcular factor de balance
   private getBalance(node: Node<T> | null): number {
     return node ? this.getHeight(node.left) - this.getHeight(node.right) : 0;
   }
 
-  // 🔄 Actualizar altura del nodo
-  // La altura de un nodo = 1 + máximo(altura_izquierda, altura_derecha)
+  // actualizar altura del nodo
   private updateHeight(node: Node<T>): void {
     node.height = Math.max(this.getHeight(node.left), this.getHeight(node.right)) + 1;
   }
 
-  // 🔄 Rotación derecha (caso LL - Left Left)
-  // Cuando el subárbol izquierdo está desbalanceado hacia la izquierda
-  //     y              x
-  //    / \    →       / \
-  //   x   C          A   y
-  //  / \                / \
-  // A   B              B   C
+  // rotacion derecha
   private rotateRight(y: Node<T>): Node<T> {
-    const x = y.left!;  // x se convierte en la nueva raíz
-    const T2 = x.right; // Subárbol que va a cambiar de padre
+    const x = y.left!;
+    const T2 = x.right;
 
     x.right = y;
     y.left = T2;
@@ -65,7 +39,7 @@ export class AvlTree<T> {
     return x;
   }
 
-  // Rotación izquierda
+  // rotacion izquierda
   private rotateLeft(x: Node<T>): Node<T> {
     const y = x.right!;
     const T2 = y.left;

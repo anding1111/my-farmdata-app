@@ -1,21 +1,10 @@
-/**
- * 🕸️ GRAFO (Graph) - Estructura para modelar relaciones
- * 
- * ¿Qué es un Grafo?
- * - Estructura de datos que consiste en vértices (nodos) conectados por aristas (edges)
- * - Ideal para modelar relaciones entre entidades (redes sociales, mapas, dependencias)
- * 
- * Componentes:
- * - Vértice (Vertex): Representa una entidad (ej: producto, proveedor, categoría)
- * - Arista (Edge): Representa una relación entre dos vértices (ej: "suministra", "pertenece_a")
- * 
- * Uso en este proyecto: Modelar relaciones entre productos, proveedores y categorías
- */
+// Grafo - vertices conectados por aristas
+// Se usa para relaciones entre productos
 
-// 🔵 Vértice del grafo (representa una entidad)
+// Vertice del grafo
 export class Vertex<T> {
-  public data: T;                    // 📦 Datos del vértice
-  public edges: Edge<T>[] = [];      // 🔗 Lista de aristas que salen de este vértice
+  public data: T;                    // datos del vertice
+  public edges: Edge<T>[] = [];      // aristas que salen
 
   constructor(data: T) {
     this.data = data;
@@ -35,12 +24,12 @@ export class Vertex<T> {
   }
 }
 
-// 🔗 Arista del grafo (representa una relación entre dos vértices)
+// Arista del grafo
 export class Edge<T> {
-  public from: Vertex<T>;       // 🎯 Vértice origen
-  public to: Vertex<T>;         // 🏁 Vértice destino  
-  public weight: number;        // ⚖️ Peso de la relación (importancia, distancia, costo)
-  public label?: string;        // 🏷️ Etiqueta descriptiva (ej: "suministra", "pertenece_a")
+  public from: Vertex<T>;       // vertice origen
+  public to: Vertex<T>;         // vertice destino
+  public weight: number;        // peso de la relacion
+  public label?: string;        // etiqueta
 
   constructor(from: Vertex<T>, to: Vertex<T>, weight: number = 1, label?: string) {
     this.from = from;
@@ -50,11 +39,11 @@ export class Edge<T> {
   }
 }
 
-// Grafo para relaciones proveedor-producto-categoría
+// Clase principal del grafo
 export class Graph<T> {
   private vertices: Vertex<T>[] = [];
 
-  // Agregar vértice
+  // agregar vertice
   addVertex(data: T): Vertex<T> {
     const vertex = new Vertex(data);
     this.vertices.push(vertex);
@@ -62,23 +51,23 @@ export class Graph<T> {
     return vertex;
   }
 
-  // Remover vértice
+  // remover vertice
   removeVertex(vertex: Vertex<T>): boolean {
     const index = this.vertices.indexOf(vertex);
     if (index === -1) return false;
 
-    // Remover todas las aristas que apuntan a este vértice
+    // remover aristas que apuntan a este vertice
     this.vertices.forEach(v => {
       v.removeEdge(vertex);
     });
 
-    // Remover el vértice
+    // remover el vertice
     this.vertices.splice(index, 1);
     this.printStructure();
     return true;
   }
 
-  // Agregar arista
+  // agregar arista
   addEdge(from: Vertex<T>, to: Vertex<T>, weight: number = 1, label?: string): Edge<T> {
     const edge = new Edge(from, to, weight, label);
     from.addEdge(edge);
@@ -86,7 +75,7 @@ export class Graph<T> {
     return edge;
   }
 
-  // Remover arista
+  // remover arista
   removeEdge(from: Vertex<T>, to: Vertex<T>): boolean {
     const result = from.removeEdge(to);
     if (result) {
@@ -95,24 +84,24 @@ export class Graph<T> {
     return result;
   }
 
-  // Buscar vértice
+  // buscar vertice
   findVertex(predicate: (data: T) => boolean): Vertex<T> | null {
     const result = this.vertices.find(vertex => predicate(vertex.data)) || null;
     console.log('🔍 Graph - Búsqueda de vértice:', result ? 'ENCONTRADO' : 'NO ENCONTRADO');
     return result;
   }
 
-  // Obtener todos los vértices
+  // obtener todos los vertices
   getVertices(): Vertex<T>[] {
     return [...this.vertices];
   }
 
-  // Obtener vértices adyacentes
+  // obtener vertices adyacentes
   getAdjacent(vertex: Vertex<T>): Vertex<T>[] {
     return vertex.edges.map(edge => edge.to);
   }
 
-  // Buscar camino entre dos vértices (BFS)
+  // buscar camino entre vertices
   findPath(start: Vertex<T>, end: Vertex<T>): Vertex<T>[] | null {
     if (start === end) return [start];
 
@@ -141,7 +130,7 @@ export class Graph<T> {
     return null;
   }
 
-  // Recorrido DFS
+  // recorrido en profundidad
   dfs(start: Vertex<T>, visited = new Set<Vertex<T>>()): T[] {
     const result: T[] = [];
     
@@ -161,7 +150,7 @@ export class Graph<T> {
     return result;
   }
 
-  // Recorrido BFS
+  // recorrido por niveles
   bfs(start: Vertex<T>): T[] {
     const result: T[] = [];
     const visited = new Set<Vertex<T>>();
@@ -184,7 +173,7 @@ export class Graph<T> {
     return result;
   }
 
-  // Imprimir estructura completa
+  // imprimir estructura
   printStructure(): void {
     console.log('🕸️ GRAPH - Estructura completa:');
     console.log('Número de vértices:', this.vertices.length);
@@ -201,7 +190,7 @@ export class Graph<T> {
       }
     });
 
-    // Matriz de adyacencia conceptual
+    // matriz de conexiones
     console.log('Conexiones:');
     this.vertices.forEach(v1 => {
       const connections = this.vertices.map(v2 => {

@@ -1,37 +1,18 @@
 import { Node } from './Node';
 
-/**
- * 📋 COLA ENLAZADA (LinkedQueue) - FIFO
- * 
- * ¿Qué es una Cola?
- * - Estructura de datos que sigue el principio FIFO (First In, First Out)
- * - Como una fila en el banco: el primero en llegar es el primero en ser atendido
- * 
- * Operaciones principales:
- * - enqueue(): Agregar elemento al final de la cola
- * - dequeue(): Remover elemento del frente de la cola
- * - peek(): Ver el elemento del frente sin removerlo
- * 
- * Implementación con Lista Enlazada:
- * - head: apunta al frente de la cola (donde se remueven elementos)
- * - tail: apunta al final de la cola (donde se agregan elementos)
- * 
- * Uso en este proyecto: Sistema de turnos de atención al cliente
- */
+// Cola enlazada - FIFO (primero en entrar, primero en salir)
+// Se usa para turnos de atencion
 export class LinkedQueue<T> {
-  private head: Node<T> | null = null;  // 🎯 Frente de la cola (primero en salir)
-  private tail: Node<T> | null = null;  // 🔚 Final de la cola (último en entrar)
-  private size: number = 0;             // 📊 Número de elementos en la cola
+  private head: Node<T> | null = null;  // frente de la cola
+  private tail: Node<T> | null = null;  // final de la cola
+  private size: number = 0;             // numero de elementos
 
-  // ➕ Agregar elemento al final de la cola (encolar/enqueue)
-  // Complejidad: O(1) - muy eficiente gracias al puntero tail
+  // agregar al final (enqueue)
   enqueue(data: T): void {
     const newNode = new Node(data);
     if (this.tail === null) {
-      // 📋 Cola vacía: head y tail apuntan al mismo nodo
       this.head = this.tail = newNode;
     } else {
-      // 🔗 Conectar el nuevo nodo al final y actualizar tail
       this.tail.next = newNode;
       this.tail = newNode;
     }
@@ -39,17 +20,15 @@ export class LinkedQueue<T> {
     this.printStructure();
   }
 
-  // ➖ Remover elemento del frente de la cola (desencolar/dequeue)
-  // Complejidad: O(1) - muy eficiente
-  // Principio FIFO: el primer elemento en entrar es el primero en salir
+  // remover del frente (dequeue)
   dequeue(): T | null {
     if (this.head === null) {
-      console.log('⚠️ Queue vacía - no se puede desencolar');
+      console.log('Queue vacía');
       return null;
     }
     
-    const data = this.head.data;  // 📦 Guardar los datos del nodo a remover
-    this.head = this.head.next;   // 🎯 Mover head al siguiente nodo
+    const data = this.head.data;
+    this.head = this.head.next;
     if (this.head === null) {
       this.tail = null;
     }
@@ -58,22 +37,22 @@ export class LinkedQueue<T> {
     return data;
   }
 
-  // Ver el primer elemento sin removerlo
+  // ver el primero sin remover
   peek(): T | null {
     return this.head ? this.head.data : null;
   }
 
-  // Verificar si está vacía
+  // verificar si esta vacia
   isEmpty(): boolean {
     return this.head === null;
   }
 
-  // Obtener tamaño
+  // obtener tamaño
   getSize(): number {
     return this.size;
   }
 
-  // Convertir a array para visualización
+  // convertir a array
   toArray(): T[] {
     const result: T[] = [];
     let current = this.head;
@@ -84,7 +63,7 @@ export class LinkedQueue<T> {
     return result;
   }
 
-  // Buscar elemento
+  // buscar elemento
   search(predicate: (item: T) => boolean): T | null {
     let current = this.head;
     while (current) {
@@ -98,7 +77,7 @@ export class LinkedQueue<T> {
     return null;
   }
 
-  // Imprimir estructura completa
+  // imprimir estructura
   printStructure(): void {
     console.log('📋 LINKED QUEUE - Estructura completa:');
     console.log('Size:', this.size);
