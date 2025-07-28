@@ -37,13 +37,13 @@ const Inventory = () => {
           <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
-              AVL Tree
+              Productos
             </TabsTrigger>
             <TabsTrigger value="ventas" className="flex items-center gap-2">
-              LinkedList
+              Historial Ventas
             </TabsTrigger>
             <TabsTrigger value="relaciones" className="flex items-center gap-2">
-              Graph
+              Red de Relaciones
             </TabsTrigger>
             <TabsTrigger value="receipts" className="flex items-center gap-2">
               <PackageOpen className="h-4 w-4" />
