@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { AvlTree } from '@/structures/AvlTree';
 import { LinkedQueue } from '@/structures/LinkedQueue';
 import { LinkedList } from '@/structures/LinkedList';
 import { Graph, Vertex } from '@/structures/Graph';
-import { useStructureLoggerContext } from '@/context/StructureLoggerContext';
+import { StructureLoggerContext } from '@/context/StructureLoggerContext';
 
 // Tipos para las estructuras - Aligned with full inventory system
 export interface Product {
@@ -62,7 +62,9 @@ export interface Relation {
 
 // Hook principal para manejar todas las estructuras de datos
 export const useDataStructures = () => {
-  const { logOperation } = useStructureLoggerContext();
+  // Usar el contexto de forma opcional para evitar errores
+  const loggerContext = useContext(StructureLoggerContext);
+  const logOperation = loggerContext?.logOperation || (() => {});
   
   // Inicializar estructuras
   const [productTree] = useState(() => new AvlTree<Product>((a, b) => a.id - b.id));

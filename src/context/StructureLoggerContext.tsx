@@ -20,6 +20,8 @@ interface StructureLoggerContextType {
 
 const StructureLoggerContext = createContext<StructureLoggerContextType | undefined>(undefined);
 
+export { StructureLoggerContext };
+
 export const StructureLoggerProvider = ({ children }: { children: ReactNode }) => {
   const logger = useStructureLogger();
 
