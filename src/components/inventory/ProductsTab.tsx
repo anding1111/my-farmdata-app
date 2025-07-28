@@ -27,7 +27,8 @@ import {
   Eye
 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useProducts, useCategories, useLaboratories, useDeleteProduct } from "@/hooks/useStaticInventory";
+import { usePureInventory } from '@/hooks/usePureInventory';
+import { useToast } from '@/hooks/use-toast';
 import ProductForm from "./ProductForm";
 import ProductDetails from "./ProductDetails";
 import { type Product } from "@/api/inventory";
@@ -43,57 +44,41 @@ const ProductsTab = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Integrar con estructuras de datos puras
-  const { 
-    products: avlProducts, 
-    addProduct: addToAvl, 
-    updateProduct: updateInAvl, 
-    deleteProduct: deleteFromAvl, 
-    searchProduct: searchInAvl 
-  } = useDataStructures();
+  const inventory = usePureInventory();
+  const { toast } = useToast();
+  
+  const products = inventory.products;
+  const categories = inventory.categories;
+  const laboratories = inventory.laboratories;
+  const isLoading = false;
 
-  const { data: productsData, isLoading } = useProducts({
-    page: currentPage,
-    per_page: itemsPerPage,
-    search: searchQuery || undefined,
-    category_id: selectedCategory ? parseInt(selectedCategory) : undefined,
-    status: selectedStatus || undefined,
-    low_stock: showLowStock || undefined,
-  });
-
-  const { data: categoriesData } = useCategories();
-  const { data: laboratoriesData } = useLaboratories();
-  const deleteProductMutation = useDeleteProduct();
-
-  const products = productsData?.data || [];
-  const totalPages = Math.ceil((productsData?.total || 0) / itemsPerPage);
-  const categories = categoriesData?.data || [];
-  const laboratories = laboratoriesData?.data || [];
-
-  const handleEdit = (product: Product) => {
+  const handleEdit = (product: any) => {
     setSelectedProduct(product);
     setShowProductForm(true);
   };
 
   const handleDelete = async (productId: number) => {
     if (window.confirm('¿Estás seguro de que quieres eliminar este producto?')) {
-      await deleteProductMutation.mutateAsync(productId);
-      // Eliminar de AVL Tree también
-      deleteFromAvl(productId);
-      console.log('🗑️ PRODUCTO ELIMINADO del AVL Tree - ID:', productId);
+      const result = inventory.deleteProduct(productId);
+      if (result.success) {
+        toast({
+          title: "Producto eliminado",
+          description: "El producto ha sido removido del AVL Tree."
+        });
+      }
     }
   };
 
-  const handleViewDetails = (product: Product) => {
+  const handleViewDetails = (product: any) => {
     setSelectedProduct(product);
     setShowProductDetails(true);
   };
 
-  const getStockStatus = (product: Product) => {
-    if (product.current_stock === 0) {
+  const getStockStatus = (product: any) => {
+    if (product.stock === 0) {
       return { label: "Sin Stock", variant: "destructive" as const, icon: AlertTriangle };
     }
-    if (product.current_stock <= product.min_stock) {
+    if (product.stock <= (product.minStock || 0)) {
       return { label: "Stock Bajo", variant: "secondary" as const, icon: AlertTriangle };
     }
     return { label: "Normal", variant: "default" as const, icon: Package };
@@ -285,32 +270,24 @@ const ProductsTab = () => {
               </TableBody>
             </Table>
 
-            {/* Paginación */}
-            {totalPages > 1 && (
-              <div className="flex items-center justify-between mt-4">
-                <p className="text-sm text-gray-700">
-                  Mostrando {((currentPage - 1) * itemsPerPage) + 1} a {Math.min(currentPage * itemsPerPage, productsData?.total || 0)} de {productsData?.total || 0} productos
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Anterior
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Siguiente
-                  </Button>
+            {/* Información de AVL Tree */}
+            <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+              <h4 className="font-medium mb-2">Información del AVL Tree:</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <strong>Total productos:</strong> {products.length} nodos
+                </div>
+                <div>
+                  <strong>Estructura:</strong> Árbol AVL balanceado
+                </div>
+                <div>
+                  <strong>Complejidad búsqueda:</strong> O(log n)
+                </div>
+                <div>
+                  <strong>Auto-balanceado:</strong> Sí
                 </div>
               </div>
-            )}
+            </div>
           </>
         )}
       </CardContent>
@@ -334,41 +311,17 @@ const ProductsTab = () => {
           onSuccess={(productData?: any) => {
             // Si se está creando un producto nuevo, agregarlo al AVL Tree
             if (!selectedProduct && productData) {
-              console.log('📥 AGREGANDO PRODUCTO al AVL Tree:', productData);
-              addToAvl({
-                id: productData.id,
-                name: productData.name,
-                category: productData.category_id?.toString() || 'Sin categoría',
-                price: productData.sale_price,
-                stock: productData.current_stock || 0,
-                minStock: productData.min_stock,
-                laboratory: productData.laboratory_id?.toString() || 'Sin laboratorio',
-                description: productData.description || '',
-                presentation: productData.presentation || '',
-                activeIngredient: productData.active_ingredient || '',
-                concentration: productData.concentration || '',
-                requiresPrescription: productData.requires_prescription || false,
-                location: productData.location || '',
-                status: productData.status
+              const result = inventory.createProduct(productData);
+              toast({
+                title: "Producto creado",
+                description: `${result.data.name} ha sido agregado al inventario AVL Tree.`
               });
             } else if (selectedProduct && productData) {
               // Si se está editando, actualizar en AVL Tree
-              console.log('✏️ ACTUALIZANDO PRODUCTO en AVL Tree:', productData);
-              updateInAvl({
-                id: productData.id,
-                name: productData.name,
-                category: productData.category_id?.toString() || 'Sin categoría',
-                price: productData.sale_price,
-                stock: productData.current_stock || 0,
-                minStock: productData.min_stock,
-                laboratory: productData.laboratory_id?.toString() || 'Sin laboratorio',
-                description: productData.description || '',
-                presentation: productData.presentation || '',
-                activeIngredient: productData.active_ingredient || '',
-                concentration: productData.concentration || '',
-                requiresPrescription: productData.requires_prescription || false,
-                location: productData.location || '',
-                status: productData.status
+              const result = inventory.updateProduct(selectedProduct.id, productData);
+              toast({
+                title: "Producto actualizado",
+                description: `${result.data.name} ha sido actualizado en el AVL Tree.`
               });
             }
             

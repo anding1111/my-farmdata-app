@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Clock, UserPlus, UserX } from "lucide-react";
 import { toast } from "sonner";
-import { useDataStructures } from "@/hooks/useDataStructures";
+import { usePureInventory } from "@/hooks/usePureInventory";
+import { useToast } from "@/hooks/use-toast";
 
 interface Turno {
   customer: string;
@@ -14,55 +15,75 @@ interface Turno {
 }
 
 export function TurnosTab() {
-  const [turnos, setTurnos] = useState<Turno[]>([]);
-  const [loading, setLoading] = useState(true);
+  const inventory = usePureInventory();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
 
-  const fetchTurnos = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/turns');
-      const data = await response.json();
-      setTurnos(data);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching turnos:', error);
-      toast.error('Error al cargar turnos');
-      setLoading(false);
-    }
-  };
+  const turnos = inventory.turns;
 
   const atenderTurno = async () => {
-    try {
-      const response = await fetch('http://localhost:8000/api/turns', {
-        method: 'DELETE'
+    if (turnos.length === 0) {
+      toast({
+        title: "Cola vacía",
+        description: "No hay turnos pendientes para atender.",
+        variant: "default"
       });
-      const data = await response.json();
-      
-      if (data.next) {
-        toast.success(`Atendiendo a: ${data.next.customer}`);
-        fetchTurnos(); // Recargar lista
-      } else {
-        toast.info('No hay más turnos en la cola');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const result = inventory.serveTurn();
+      if (result.data) {
+        toast({
+          title: "Turno atendido",
+          description: `Se atendió al cliente ${result.data.customer} (Ticket: ${result.data.ticket})`
+        });
       }
     } catch (error) {
-      toast.error('Error al atender turno');
+      toast({
+        title: "Error",
+        description: "No se pudo atender el turno.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchTurnos();
-  }, []);
+  const agregarTurno = () => {
+    const clientesEjemplo = ['Juan Pérez', 'María García', 'Carlos López', 'Ana Martínez', 'Luis Rodríguez', 'Carmen Silva', 'Roberto Díaz'];
+    const prioridades = ['normal', 'urgent', 'priority'];
+    
+    const cliente = clientesEjemplo[Math.floor(Math.random() * clientesEjemplo.length)];
+    const prioridad = prioridades[Math.floor(Math.random() * prioridades.length)];
+    
+    try {
+      const result = inventory.createTurn({
+        customer: cliente,
+        priority: prioridad
+      });
+      
+      toast({
+        title: "Turno agregado",
+        description: `${cliente} agregado a la cola (Ticket: ${result.data.ticket})`
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "No se pudo agregar el turno.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'urgente': return 'destructive';
-      case 'preferencial': return 'secondary';
+      case 'urgent': return 'destructive';
+      case 'priority': return 'secondary';
       default: return 'default';
     }
   };
-
-  if (loading) {
-    return <div className="flex justify-center p-8">Cargando turnos...</div>;
-  }
 
   return (
     <div className="space-y-6">
@@ -82,9 +103,13 @@ export function TurnosTab() {
               <Clock className="h-4 w-4" />
               <span className="text-sm">Turnos en cola: {turnos.length}</span>
             </div>
-            <Button onClick={atenderTurno} disabled={turnos.length === 0}>
+            <Button onClick={atenderTurno} disabled={turnos.length === 0 || loading}>
               <UserX className="h-4 w-4 mr-2" />
-              Atender Siguiente
+              {loading ? 'Atendiendo...' : 'Atender Siguiente'}
+            </Button>
+            <Button onClick={agregarTurno} variant="outline">
+              <UserPlus className="h-4 w-4 mr-2" />
+              Simular Turno
             </Button>
           </div>
 
