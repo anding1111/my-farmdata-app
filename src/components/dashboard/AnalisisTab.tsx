@@ -1,226 +1,57 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { 
-  ReactFlow, 
-  Background, 
-  Controls, 
-  MiniMap,
-  useNodesState,
-  useEdgesState,
-  Node,
-  Edge
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { 
-  TrendingUp, 
   Network, 
   Package, 
-  Building, 
-  Tags,
+  Search,
   Eye,
   BarChart3
 } from "lucide-react";
-import { usePureInventory } from "@/hooks/usePureInventory";
+import { useDataStructuresContext } from "@/context/DataStructuresContext";
 import { useToast } from "@/hooks/use-toast";
 
 export function AnalisisTab() {
-  const [viewMode, setViewMode] = useState<'suppliers' | 'categories' | 'recommendations'>('suppliers');
   const [searchQuery, setSearchQuery] = useState("");
-  const inventory = usePureInventory();
+  const { products, searchProduct, deleteProduct } = useDataStructuresContext();
   const { toast } = useToast();
 
-  // Generar nodos y aristas para el grafo interactivo
-  const { nodes: flowNodes, edges: flowEdges } = useMemo(() => {
-    const nodes: Node[] = [];
-    const edges: Edge[] = [];
+  // Filtrar productos por búsqueda
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.id.toString().includes(searchQuery)
+  );
 
-    if (viewMode === 'suppliers') {
-      // Crear nodos para laboratorios
-      const labs = inventory.laboratories.slice(0, 5); // Limitar para mejor visualización
-      labs.forEach((lab, index) => {
-        nodes.push({
-          id: `lab-${lab.id}`,
-          position: { x: index * 250, y: 100 },
-          data: { 
-            label: lab.name,
-            type: 'laboratory',
-            count: inventory.products.filter(p => String(p.laboratory_id) === String(lab.id)).length
-          },
-          type: 'default',
-          style: { 
-            background: '#3b82f6', 
-            color: 'white',
-            border: '2px solid #1d4ed8',
-            borderRadius: '8px',
-            padding: '10px'
-          }
-        });
-
-        // Agregar productos de este laboratorio
-        const labProducts = inventory.products
-          .filter(p => String(p.laboratory_id) === String(lab.id))
-          .slice(0, 3); // Máximo 3 productos por lab
-
-        labProducts.forEach((product, prodIndex) => {
-          const nodeId = `product-${product.id}`;
-          nodes.push({
-            id: nodeId,
-            position: { x: index * 250 + (prodIndex - 1) * 80, y: 250 },
-            data: { 
-              label: product.name.length > 15 ? product.name.substring(0, 15) + '...' : product.name,
-              type: 'product',
-              stock: product.current_stock || product.stock || 0
-            },
-            type: 'default',
-            style: { 
-              background: '#10b981', 
-              color: 'white',
-              border: '2px solid #059669',
-              borderRadius: '8px',
-              fontSize: '12px',
-              padding: '8px'
-            }
-          });
-
-          // Crear arista laboratorio -> producto
-          edges.push({
-            id: `lab-${lab.id}-product-${product.id}`,
-            source: `lab-${lab.id}`,
-            target: nodeId,
-            type: 'smoothstep',
-            style: { stroke: '#6b7280' }
-          });
-        });
+  const handleSearchProduct = () => {
+    if (!searchQuery) return;
+    
+    const productId = parseInt(searchQuery);
+    if (isNaN(productId)) return;
+    
+    const foundProduct = searchProduct(productId);
+    if (foundProduct) {
+      toast({
+        title: "Producto encontrado",
+        description: `${foundProduct.name} - Stock: ${foundProduct.stock}`,
       });
-    } else if (viewMode === 'categories') {
-      // Crear nodos para categorías
-      const cats = inventory.categories.slice(0, 4);
-      cats.forEach((cat, index) => {
-        const angle = (index * 2 * Math.PI) / cats.length;
-        const radius = 200;
-        
-        nodes.push({
-          id: `cat-${cat.id}`,
-          position: { 
-            x: 300 + radius * Math.cos(angle), 
-            y: 200 + radius * Math.sin(angle) 
-          },
-          data: { 
-            label: cat.name,
-            type: 'category',
-            count: inventory.products.filter(p => String(p.category_id) === String(cat.id)).length
-          },
-          type: 'default',
-          style: { 
-            background: '#8b5cf6', 
-            color: 'white',
-            border: '2px solid #7c3aed',
-            borderRadius: '8px',
-            padding: '10px'
-          }
-        });
-      });
-
-      // Nodo central
-      nodes.push({
-        id: 'center',
-        position: { x: 300, y: 200 },
-        data: { label: 'Inventario\nFarmacia', type: 'center' },
-        type: 'default',
-        style: { 
-          background: '#f59e0b', 
-          color: 'white',
-          border: '3px solid #d97706',
-          borderRadius: '50%',
-          width: '80px',
-          height: '80px',
-          fontSize: '12px',
-          textAlign: 'center',
-          padding: '10px'
-        }
-      });
-
-      // Conectar categorías al centro
-      inventory.categories.slice(0, 4).forEach((cat) => {
-        edges.push({
-          id: `center-cat-${cat.id}`,
-          source: 'center',
-          target: `cat-${cat.id}`,
-          type: 'smoothstep',
-          style: { stroke: '#f59e0b', strokeWidth: 2 }
-        });
-      });
-    } else if (viewMode === 'recommendations') {
-      // Análisis de productos con stock bajo
-      const lowStockProducts = inventory.products
-        .filter(p => (p.current_stock || p.stock || 0) <= (p.min_stock || p.minStock || 5))
-        .slice(0, 6);
-
-      lowStockProducts.forEach((product, index) => {
-        const row = Math.floor(index / 3);
-        const col = index % 3;
-        
-        nodes.push({
-          id: `low-stock-${product.id}`,
-          position: { x: col * 200 + 100, y: row * 150 + 100 },
-          data: { 
-            label: product.name.length > 12 ? product.name.substring(0, 12) + '...' : product.name,
-            type: 'low-stock',
-            stock: product.current_stock || product.stock || 0
-          },
-          type: 'default',
-          style: { 
-            background: '#ef4444', 
-            color: 'white',
-            border: '2px solid #dc2626',
-            borderRadius: '8px',
-            fontSize: '12px',
-            padding: '8px'
-          }
-        });
+    } else {
+      toast({
+        title: "Producto no encontrado",
+        description: `No se encontró un producto con ID ${productId}`,
+        variant: "destructive",
       });
     }
+  };
 
-    return { nodes, edges };
-  }, [viewMode, inventory.products, inventory.laboratories, inventory.categories]);
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(flowNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(flowEdges);
-
-  // Actualizar nodos cuando cambie el modo de vista
-  React.useEffect(() => {
-    setNodes(flowNodes);
-    setEdges(flowEdges);
-  }, [flowNodes, flowEdges, setNodes, setEdges]);
-
-  // Estadísticas del análisis
-  const statistics = useMemo(() => {
-    const totalProducts = inventory.products.length;
-    const lowStockProducts = inventory.products.filter(p => 
-      (p.current_stock || p.stock || 0) <= (p.min_stock || p.minStock || 5)
-    ).length;
-    
-    const topLaboratory = inventory.laboratories.reduce((top, lab) => {
-      const count = inventory.products.filter(p => String(p.laboratory_id) === String(lab.id)).length;
-      return count > (top.count || 0) ? { ...lab, count } : top;
-    }, { name: '', count: 0 });
-
-    const topCategory = inventory.categories.reduce((top, cat) => {
-      const count = inventory.products.filter(p => String(p.category_id) === String(cat.id)).length;
-      return count > (top.count || 0) ? { ...cat, count } : top;
-    }, { name: '', count: 0 });
-
-    return {
-      totalProducts,
-      lowStockProducts,
-      topLaboratory,
-      topCategory
-    };
-  }, [inventory.products, inventory.laboratories, inventory.categories]);
+  const handleDeleteProduct = (productId: number) => {
+    deleteProduct(productId);
+    toast({
+      title: "Producto eliminado",
+      description: `Producto con ID ${productId} eliminado del árbol`,
+    });
+  };
 
   return (
     <div className="space-y-6">
@@ -228,43 +59,22 @@ export function AnalisisTab() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            Análisis Inteligente del Inventario
+            Análisis del Inventario (AVL Tree)
           </CardTitle>
           <CardDescription>
-            Visualización interactiva de relaciones entre productos, proveedores y categorías
+            Visualización y análisis de productos organizados en árbol AVL balanceado
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Controles */}
-          <div className="flex gap-4 items-center">
-            <Select value={viewMode} onValueChange={(value: any) => setViewMode(value)}>
-              <SelectTrigger className="w-64">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="suppliers">Laboratorios y Productos</SelectItem>
-                <SelectItem value="categories">Categorías del Inventario</SelectItem>
-                <SelectItem value="recommendations">Alertas de Stock Bajo</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Input
-              placeholder="Buscar en el análisis..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-xs"
-            />
-          </div>
-
-          {/* Estadísticas */}
+          {/* Estadísticas rápidas */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
                   <Package className="h-4 w-4 text-blue-500" />
                   <div>
-                    <div className="text-2xl font-bold">{statistics.totalProducts}</div>
+                    <div className="text-2xl font-bold">{products.length}</div>
                     <div className="text-sm text-muted-foreground">Total Productos</div>
                   </div>
                 </div>
@@ -274,10 +84,10 @@ export function AnalisisTab() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="h-4 w-4 text-red-500" />
+                  <Network className="h-4 w-4 text-green-500" />
                   <div>
-                    <div className="text-2xl font-bold">{statistics.lowStockProducts}</div>
-                    <div className="text-sm text-muted-foreground">Stock Bajo</div>
+                    <div className="text-2xl font-bold">{Math.ceil(Math.log2(products.length + 1)) || 1}</div>
+                    <div className="text-sm text-muted-foreground">Altura Árbol</div>
                   </div>
                 </div>
               </CardContent>
@@ -286,10 +96,10 @@ export function AnalisisTab() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
-                  <Building className="h-4 w-4 text-green-500" />
+                  <Eye className="h-4 w-4 text-purple-500" />
                   <div>
-                    <div className="text-sm font-medium">{statistics.topLaboratory.name || 'N/A'}</div>
-                    <div className="text-sm text-muted-foreground">Top Laboratorio</div>
+                    <div className="text-sm font-bold">O(log n)</div>
+                    <div className="text-sm text-muted-foreground">Complejidad</div>
                   </div>
                 </div>
               </CardContent>
@@ -298,63 +108,32 @@ export function AnalisisTab() {
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-2">
-                  <Tags className="h-4 w-4 text-purple-500" />
+                  <Package className="h-4 w-4 text-orange-500" />
                   <div>
-                    <div className="text-sm font-medium">{statistics.topCategory.name || 'N/A'}</div>
-                    <div className="text-sm text-muted-foreground">Top Categoría</div>
+                    <div className="text-sm font-bold">Balanceado</div>
+                    <div className="text-sm text-muted-foreground">Estado AVL</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Grafo Interactivo */}
-          <div className="h-96 border rounded-lg overflow-hidden bg-white">
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              fitView
-              attributionPosition="bottom-left"
-              style={{ backgroundColor: "#f8fafc" }}
-            >
-              <Background color="#e2e8f0" />
-              <Controls />
-              <MiniMap 
-                zoomable 
-                pannable 
-                style={{ 
-                  background: "#f1f5f9",
-                  border: "1px solid #cbd5e1" 
-                }}
-              />
-            </ReactFlow>
+          {/* Búsqueda */}
+          <div className="flex gap-2">
+            <Input
+              placeholder="Buscar producto por ID o nombre..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-1"
+            />
+            <Button onClick={handleSearchProduct} variant="outline">
+              <Search className="h-4 w-4 mr-2" />
+              Buscar
+            </Button>
           </div>
 
-          {/* Explicación del análisis actual */}
-          <Card className="bg-blue-50 dark:bg-blue-950">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <Eye className="h-5 w-5 text-blue-500 mt-1" />
-                <div>
-                  <div className="font-medium text-blue-900 dark:text-blue-100">
-                    {viewMode === 'suppliers' && 'Análisis Laboratorio-Producto'}
-                    {viewMode === 'categories' && 'Distribución por Categorías'}
-                    {viewMode === 'recommendations' && 'Alertas de Reabastecimiento'}
-                  </div>
-                  <div className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                    {viewMode === 'suppliers' && 'Visualiza qué productos maneja cada laboratorio y sus relaciones comerciales.'}
-                    {viewMode === 'categories' && 'Muestra cómo se distribuyen los productos entre las diferentes categorías.'}
-                    {viewMode === 'recommendations' && 'Identifica productos con stock crítico que requieren reabastecimiento inmediato.'}
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
           {/* Visualización del Árbol AVL */}
-          <Card className="mt-6">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Network className="h-5 w-5" />
@@ -367,14 +146,14 @@ export function AnalisisTab() {
             <CardContent>
               <div className="p-4 bg-purple-50 dark:bg-purple-950 rounded-lg">
                 <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="outline">Size: {inventory.products.length}</Badge>
+                  <Badge variant="outline">Size: {products.length}</Badge>
                   <Badge variant="secondary">Estructura: AVL Tree</Badge>
                   <Badge variant="secondary">Balanceado: Sí</Badge>
                 </div>
                 
                 {/* Productos en el árbol */}
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-4">
-                  {inventory.products.slice(0, 12).map((product, index) => (
+                  {filteredProducts.slice(0, 12).map((product, index) => (
                     <div key={product.id} className={`p-2 rounded text-xs ${
                       index === 0 
                         ? 'bg-purple-600 text-white' 
@@ -382,12 +161,21 @@ export function AnalisisTab() {
                     }`}>
                       <div className="font-medium">ID: {product.id}</div>
                       <div className="text-xs opacity-75">{product.name}</div>
-                      <div className="text-xs opacity-75">Stock: {product.current_stock || product.stock || 0}</div>
+                      <div className="text-xs opacity-75">Stock: {product.stock || 0}</div>
+                      <div className="text-xs opacity-75">Precio: ${product.price || 0}</div>
+                      <Button 
+                        size="sm" 
+                        variant="destructive" 
+                        className="mt-1 h-5 text-xs"
+                        onClick={() => handleDeleteProduct(product.id)}
+                      >
+                        Eliminar
+                      </Button>
                     </div>
                   ))}
-                  {inventory.products.length > 12 && (
+                  {filteredProducts.length > 12 && (
                     <div className="p-2 rounded text-xs bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-400 text-center">
-                      ... +{inventory.products.length - 12} más
+                      ... +{filteredProducts.length - 12} más
                     </div>
                   )}
                 </div>
@@ -397,10 +185,10 @@ export function AnalisisTab() {
                   <h5 className="text-sm font-medium mb-2">Información del Árbol AVL:</h5>
                   <div className="grid grid-cols-2 gap-4 text-xs">
                     <div>
-                      <strong>Nodos totales:</strong> {inventory.products.length}
+                      <strong>Nodos totales:</strong> {products.length}
                     </div>
                     <div>
-                      <strong>Altura estimada:</strong> {Math.ceil(Math.log2(inventory.products.length + 1)) || 1}
+                      <strong>Altura estimada:</strong> {Math.ceil(Math.log2(products.length + 1)) || 1}
                     </div>
                     <div>
                       <strong>Factor de balance:</strong> Óptimo (-1 ≤ fb ≤ 1)
@@ -415,7 +203,7 @@ export function AnalisisTab() {
                 <div className="mt-4 p-3 bg-white dark:bg-gray-800 rounded border">
                   <h5 className="text-sm font-medium mb-2">Últimas Operaciones:</h5>
                   <div className="space-y-1 text-xs text-muted-foreground">
-                    <div>✓ Inserción de producto #{inventory.products[0]?.id || 'N/A'}</div>
+                    <div>✓ Inserción de producto #{products[0]?.id || 'N/A'}</div>
                     <div>✓ Rebalanceado automático del árbol</div>
                     <div>✓ Productos ordenados por ID ascendente</div>
                   </div>
@@ -426,19 +214,19 @@ export function AnalisisTab() {
 
           {/* Información técnica */}
           <div className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-            <h4 className="font-medium mb-2">Análisis Basado en Grafos:</h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <h4 className="font-medium mb-2">Ventajas del Árbol AVL:</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div>
-                <strong>Nodos activos:</strong> {nodes.length}
+                <strong>✅ Autobalanceado:</strong> Mantiene la estructura balanceada automáticamente
               </div>
               <div>
-                <strong>Conexiones:</strong> {edges.length}
+                <strong>✅ Búsqueda eficiente:</strong> Complejidad O(log n) garantizada
               </div>
               <div>
-                <strong>Algoritmo:</strong> Análisis de adyacencia
+                <strong>✅ Ordenado:</strong> Los elementos se mantienen en orden por ID
               </div>
               <div>
-                <strong>Visualización:</strong> Interactive React Flow
+                <strong>✅ Consistente:</strong> Altura máxima log₂(n) para n elementos
               </div>
             </div>
           </div>

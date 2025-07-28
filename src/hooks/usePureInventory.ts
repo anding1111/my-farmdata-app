@@ -1,11 +1,10 @@
 import { useDataStructuresContext } from '../context/DataStructuresContext';
-import { useStructureLogger } from './useStructureLogger';
+
 import { getStaticCategories, getStaticLaboratories, getStaticSuppliers } from '../data/staticData';
 
 // Hook que integra las estructuras puras con la funcionalidad de inventario
 export const usePureInventory = () => {
   const dataStructures = useDataStructuresContext();
-  const logger = useStructureLogger();
 
   // Datos estáticos para dropdowns
   const categories = getStaticCategories();
@@ -190,8 +189,6 @@ export const usePureInventory = () => {
     // Stats
     getInventoryStats,
     
-    // Logger
-    ...logger,
     
     // Acceso directo a estructuras para debugging
     _internal: {

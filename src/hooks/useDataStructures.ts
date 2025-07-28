@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { AvlTree } from '@/structures/AvlTree';
 import { LinkedQueue } from '@/structures/LinkedQueue';
 import { LinkedList } from '@/structures/LinkedList';
 import { Graph, Vertex } from '@/structures/Graph';
-import { StructureLoggerContext } from '@/context/StructureLoggerContext';
+
 
 // Tipos para las estructuras - Aligned with full inventory system
 export interface Product {
@@ -62,9 +62,6 @@ export interface Relation {
 
 // Hook principal para manejar todas las estructuras de datos
 export const useDataStructures = () => {
-  // Usar el contexto de forma opcional para evitar errores
-  const loggerContext = useContext(StructureLoggerContext);
-  const logOperation = loggerContext?.logOperation || (() => {});
   
   // Inicializar estructuras
   const [productTree] = useState(() => new AvlTree<Product>((a, b) => a.id - b.id));
@@ -115,125 +112,28 @@ export const useDataStructures = () => {
     
     setRelations(relationGraph.getVertices().map(v => v.data));
 
-    // Log datos iniciales solo una vez
-    logOperation(
-      'AvlTree',
-      'Datos iniciales cargados',
-      { root: [], size: 0 },
-      { root: productTree.inOrder(), size: productTree.inOrder().length },
-      { message: 'Estructura inicializada con productos de ejemplo' }
-    );
-
-    logOperation(
-      'LinkedQueue',
-      'Datos iniciales cargados',
-      { queue: [], size: 0 },
-      { queue: turnQueue.toArray(), size: turnQueue.getSize() },
-      { message: 'Cola inicializada con turnos de ejemplo' }
-    );
-
-    logOperation(
-      'LinkedList',
-      'Datos iniciales cargados',
-      { list: [], size: 0 },
-      { list: salesHistory.toArray(), size: salesHistory.getSize() },
-      { message: 'Lista inicializada con ventas de ejemplo' }
-    );
 
   }, []); // Solo ejecutar una vez al montar el componente
 
   // Funciones para productos (AVL Tree)
   const addProduct = (product: Product) => {
-    const startTime = performance.now();
-    const beforeState = {
-      root: productTree.inOrder(),
-      size: productTree.inOrder().length
-    };
-    
     productTree.insert(product);
     const newProducts = productTree.inOrder();
     setProducts(newProducts);
-    
-    const endTime = performance.now();
-    const afterState = {
-      root: newProducts,
-      size: newProducts.length
-    };
-    
-    logOperation(
-      'AvlTree',
-      `Insertar producto: ${product.name}`,
-      beforeState,
-      afterState,
-      { 
-        productId: product.id,
-        height: 'N/A',
-        balance: 'Balanced'
-      },
-      endTime - startTime
-    );
   };
 
   const updateProduct = (product: Product) => {
-    const startTime = performance.now();
-    const beforeState = {
-      root: productTree.inOrder(),
-      size: productTree.inOrder().length
-    };
-    
     productTree.insert(product); // AVL actualiza si ya existe
     const newProducts = productTree.inOrder();
     setProducts(newProducts);
-    
-    const endTime = performance.now();
-    const afterState = {
-      root: newProducts,
-      size: newProducts.length
-    };
-    
-    logOperation(
-      'AvlTree',
-      `Actualizar producto: ${product.name}`,
-      beforeState,
-      afterState,
-      { 
-        productId: product.id,
-        operation: 'update'
-      },
-      endTime - startTime
-    );
   };
 
   const deleteProduct = (productId: number) => {
-    const startTime = performance.now();
-    const beforeState = {
-      root: productTree.inOrder(),
-      size: productTree.inOrder().length
-    };
-    
     const product = productTree.search({ id: productId } as Product);
     if (product) {
       productTree.delete(product);
       const newProducts = productTree.inOrder();
       setProducts(newProducts);
-      
-      const endTime = performance.now();
-      const afterState = {
-        root: newProducts,
-        size: newProducts.length
-      };
-      
-      logOperation(
-        'AvlTree',
-        `Eliminar producto: ${product.name}`,
-        beforeState,
-        afterState,
-        { 
-          productId: product.id,
-          operation: 'delete'
-        },
-        endTime - startTime
-      );
     }
   };
 
@@ -243,70 +143,15 @@ export const useDataStructures = () => {
 
   // Funciones para turnos (Linked Queue)
   const addTurn = (turn: Turn) => {
-    const startTime = performance.now();
-    const beforeState = {
-      head: turnQueue.peek(),
-      size: turnQueue.getSize(),
-      items: turnQueue.toArray()
-    };
-    
     turnQueue.enqueue(turn);
     const newTurns = turnQueue.toArray();
     setTurns(newTurns);
-    
-    const endTime = performance.now();
-    const afterState = {
-      head: turnQueue.peek(),
-      tail: turn,
-      size: turnQueue.getSize(),
-      items: newTurns
-    };
-    
-    logOperation(
-      'LinkedQueue',
-      `Agregar turno: ${turn.customer}`,
-      beforeState,
-      afterState,
-      { 
-        ticket: turn.ticket,
-        priority: turn.priority,
-        queueSize: turnQueue.getSize()
-      },
-      endTime - startTime
-    );
   };
 
   const serveTurn = (): Turn | null => {
-    const startTime = performance.now();
-    const beforeState = {
-      head: turnQueue.peek(),
-      size: turnQueue.getSize(),
-      items: turnQueue.toArray()
-    };
-    
     const served = turnQueue.dequeue();
     const newTurns = turnQueue.toArray();
     setTurns(newTurns);
-    
-    const endTime = performance.now();
-    const afterState = {
-      head: turnQueue.peek(),
-      size: turnQueue.getSize(),
-      items: newTurns
-    };
-    
-    logOperation(
-      'LinkedQueue',
-      `Atender turno: ${served?.customer || 'N/A'}`,
-      beforeState,
-      afterState,
-      { 
-        servedTicket: served?.ticket || 'N/A',
-        remainingTurns: turnQueue.getSize()
-      },
-      endTime - startTime
-    );
-    
     return served;
   };
 
@@ -320,73 +165,17 @@ export const useDataStructures = () => {
 
   // Funciones para ventas (Linked List)
   const addSale = (sale: Sale) => {
-    const startTime = performance.now();
-    const beforeState = {
-      head: salesHistory.toArray()[0] || null,
-      size: salesHistory.getSize(),
-      items: salesHistory.toArray()
-    };
-    
     salesHistory.prepend(sale); // Más recientes al inicio
     const newSales = salesHistory.toArray();
     setSales(newSales);
-    
-    const endTime = performance.now();
-    const afterState = {
-      head: newSales[0] || null,
-      size: salesHistory.getSize(),
-      items: newSales
-    };
-    
-    logOperation(
-      'LinkedList',
-      `Registrar venta: ${sale.productName}`,
-      beforeState,
-      afterState,
-      { 
-        saleId: sale.id,
-        customer: sale.customer,
-        total: sale.total,
-        listSize: salesHistory.getSize()
-      },
-      endTime - startTime
-    );
   };
 
   const removeSale = (saleId: number) => {
-    const startTime = performance.now();
-    const beforeState = {
-      head: salesHistory.toArray()[0] || null,
-      size: salesHistory.getSize(),
-      items: salesHistory.toArray()
-    };
-    
     const saleToRemove = sales.find(sale => sale.id === saleId);
     if (saleToRemove) {
       const removed = salesHistory.remove(saleToRemove);
       const newSales = salesHistory.toArray();
       setSales(newSales);
-      
-      const endTime = performance.now();
-      const afterState = {
-        head: newSales[0] || null,
-        size: salesHistory.getSize(),
-        items: newSales
-      };
-      
-      logOperation(
-        'LinkedList',
-        `Eliminar venta: ${saleToRemove.productName}`,
-        beforeState,
-        afterState,
-        { 
-          removedSaleId: saleId,
-          success: removed,
-          listSize: salesHistory.getSize()
-        },
-        endTime - startTime
-      );
-      
       return removed;
     }
     return false;
@@ -397,34 +186,8 @@ export const useDataStructures = () => {
   };
 
   const clearSalesHistory = () => {
-    const startTime = performance.now();
-    const beforeState = {
-      head: salesHistory.toArray()[0] || null,
-      size: salesHistory.getSize(),
-      items: salesHistory.toArray()
-    };
-    
     salesHistory.clear();
     setSales([]);
-    
-    const endTime = performance.now();
-    const afterState = {
-      head: null,
-      size: 0,
-      items: []
-    };
-    
-    logOperation(
-      'LinkedList',
-      'Limpiar historial de ventas',
-      beforeState,
-      afterState,
-      { 
-        clearedItems: beforeState.size,
-        operation: 'clear'
-      },
-      endTime - startTime
-    );
   };
 
   // Funciones para relaciones (Graph)
