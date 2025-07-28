@@ -9,30 +9,46 @@ export class LinkedQueue<T> {
 
   // agregar al final (enqueue)
   enqueue(data: T): void {
+    console.log('➕ LINKED QUEUE - Encolando:', JSON.stringify(data));
     const newNode = new Node(data);
+    
     if (this.tail === null) {
+      console.log('  📍 Queue vacía - nuevo nodo será HEAD y TAIL');
       this.head = this.tail = newNode;
     } else {
+      console.log(`  🔗 Conectando al final. TAIL actual: ${JSON.stringify(this.tail.data)}`);
       this.tail.next = newNode;
       this.tail = newNode;
+      console.log('  ✅ Nuevo nodo es ahora TAIL');
     }
+    
     this.size++;
+    console.log(`  📊 Inserción en TAIL completada en 1 paso. Tamaño: ${this.size}`);
     this.printStructure();
   }
 
   // remover del frente (dequeue)
   dequeue(): T | null {
+    console.log('➖ LINKED QUEUE - Desencolando desde HEAD...');
+    
     if (this.head === null) {
+      console.log('  ❌ Queue vacía - no hay nada que remover');
       console.log('Queue vacía');
       return null;
     }
     
     const data = this.head.data;
+    console.log(`  🎯 Acceso directo al HEAD: ${JSON.stringify(data)}`);
+    console.log(`  🔗 Actualizando HEAD al siguiente: ${this.head.next ? JSON.stringify(this.head.next.data) : 'null'}`);
+    
     this.head = this.head.next;
     if (this.head === null) {
+      console.log('  📍 Queue ahora vacía - TAIL también será null');
       this.tail = null;
     }
+    
     this.size--;
+    console.log(`  ✅ Remoción desde HEAD completada en 1 paso. Tamaño: ${this.size}`);
     this.printStructure();
     return data;
   }
@@ -65,14 +81,25 @@ export class LinkedQueue<T> {
 
   // buscar elemento
   search(predicate: (item: T) => boolean): T | null {
+    console.log('🔍 LINKED QUEUE - Iniciando búsqueda secuencial desde HEAD...');
     let current = this.head;
+    let index = 0;
+    
     while (current) {
+      console.log(`  🔍 Paso ${index + 1}: Revisando nodo con data: ${JSON.stringify(current.data)}`);
+      
       if (predicate(current.data)) {
+        console.log(`  ✅ ¡ENCONTRADO en posición ${index}! Pasos totales: ${index + 1}`);
         console.log('🔍 Queue - Elemento encontrado:', current.data);
         return current.data;
       }
+      
+      console.log(`  ➡️ No coincide, avanzando al siguiente nodo...`);
       current = current.next;
+      index++;
     }
+    
+    console.log(`  ❌ Búsqueda completada. Recorridos ${index} nodos sin éxito.`);
     console.log('🔍 Queue - Elemento no encontrado');
     return null;
   }

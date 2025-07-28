@@ -8,23 +8,41 @@ export class Stack<T> {
 
   // agregar elemento a la cima (push)
   push(data: T): void {
+    console.log('➕ STACK - Insertando en TOP:', JSON.stringify(data));
     const newNode = new Node(data);
+    
+    if (this.top === null) {
+      console.log('  📍 Stack vacía - nuevo nodo será TOP');
+    } else {
+      console.log(`  🔗 Conectando nuevo nodo con TOP actual: ${JSON.stringify(this.top.data)}`);
+    }
+    
     newNode.next = this.top;
     this.top = newNode;
     this.size++;
+    
+    console.log(`  ✅ Inserción en TOP completada en 1 paso. Tamaño: ${this.size}`);
     this.printStructure();
   }
 
   // remover elemento de la cima (pop)
   pop(): T | null {
+    console.log('➖ STACK - Removiendo desde TOP...');
+    
     if (this.top === null) {
+      console.log('  ❌ Stack vacía - no hay nada que remover');
       console.log('Stack vacia');
       return null;
     }
     
     const data = this.top.data;
+    console.log(`  🎯 Acceso directo al TOP: ${JSON.stringify(data)}`);
+    console.log(`  🔗 Actualizando TOP al siguiente nodo: ${this.top.next ? JSON.stringify(this.top.next.data) : 'null'}`);
+    
     this.top = this.top.next;
     this.size--;
+    
+    console.log(`  ✅ Remoción completada en 1 paso. Tamaño: ${this.size}`);
     this.printStructure();
     return data;
   }
@@ -57,14 +75,25 @@ export class Stack<T> {
 
   // buscar elemento
   search(predicate: (item: T) => boolean): T | null {
+    console.log('🔍 STACK - Iniciando búsqueda secuencial desde TOP...');
     let current = this.top;
+    let index = 0;
+    
     while (current) {
+      console.log(`  🔍 Paso ${index + 1}: Revisando nodo con data: ${JSON.stringify(current.data)}`);
+      
       if (predicate(current.data)) {
+        console.log(`  ✅ ¡ENCONTRADO en posición ${index} desde TOP! Pasos totales: ${index + 1}`);
         console.log('🔍 Stack - Elemento encontrado:', current.data);
         return current.data;
       }
+      
+      console.log(`  ⬇️ No coincide, bajando al siguiente nodo...`);
       current = current.next;
+      index++;
     }
+    
+    console.log(`  ❌ Búsqueda completada. Recorridos ${index} nodos sin éxito.`);
     console.log('🔍 Stack - Elemento no encontrado');
     return null;
   }
