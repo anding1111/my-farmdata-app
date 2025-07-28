@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Users, Clock, UserPlus, UserX } from "lucide-react";
 import { toast } from "sonner";
+import { useDataStructures } from "@/hooks/useDataStructures";
 
 interface Turno {
   customer: string;

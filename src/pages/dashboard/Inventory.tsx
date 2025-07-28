@@ -20,6 +20,8 @@ import AlertsTab from "@/components/inventory/AlertsTab";
 import ReportsTab from "@/components/inventory/ReportsTab";
 import ReceiptsTab from "@/components/inventory/ReceiptsTab";
 import LocationsTab from "@/components/inventory/LocationsTab";
+import { VentasTab } from "@/components/dashboard/VentasTab";
+import { RelacionesTab } from "@/components/dashboard/RelacionesTab";
 import { useAlerts } from "@/hooks/useInventory";
 
 const Inventory = () => {
@@ -32,10 +34,16 @@ const Inventory = () => {
     <DashboardLayout>
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
-              Productos
+              AVL Tree
+            </TabsTrigger>
+            <TabsTrigger value="ventas" className="flex items-center gap-2">
+              LinkedList
+            </TabsTrigger>
+            <TabsTrigger value="relaciones" className="flex items-center gap-2">
+              Graph
             </TabsTrigger>
             <TabsTrigger value="receipts" className="flex items-center gap-2">
               <PackageOpen className="h-4 w-4" />
@@ -74,6 +82,14 @@ const Inventory = () => {
 
           <TabsContent value="products" className="space-y-4">
             <ProductsTab />
+          </TabsContent>
+
+          <TabsContent value="ventas" className="space-y-4">
+            <VentasTab />
+          </TabsContent>
+
+          <TabsContent value="relaciones" className="space-y-4">
+            <RelacionesTab />
           </TabsContent>
 
           <TabsContent value="receipts" className="space-y-4">
