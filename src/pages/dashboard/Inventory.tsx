@@ -21,7 +21,8 @@ import ReportsTab from "@/components/inventory/ReportsTab";
 import ReceiptsTab from "@/components/inventory/ReceiptsTab";
 import LocationsTab from "@/components/inventory/LocationsTab";
 import { VentasTab } from "@/components/dashboard/VentasTab";
-import { RelacionesTab } from "@/components/dashboard/RelacionesTab";
+import { AnalisisTab } from "@/components/dashboard/AnalisisTab";
+import { TurnosTab } from "@/components/dashboard/TurnosTab";
 import { useAlerts } from "@/hooks/useInventory";
 
 const Inventory = () => {
@@ -42,8 +43,11 @@ const Inventory = () => {
             <TabsTrigger value="ventas" className="flex items-center gap-2">
               Historial Ventas
             </TabsTrigger>
-            <TabsTrigger value="relaciones" className="flex items-center gap-2">
-              Red de Relaciones
+            <TabsTrigger value="turnos" className="flex items-center gap-2">
+              Cola de Turnos
+            </TabsTrigger>
+            <TabsTrigger value="analisis" className="flex items-center gap-2">
+              Análisis Inteligente
             </TabsTrigger>
             <TabsTrigger value="receipts" className="flex items-center gap-2">
               <PackageOpen className="h-4 w-4" />
@@ -88,8 +92,12 @@ const Inventory = () => {
             <VentasTab />
           </TabsContent>
 
-          <TabsContent value="relaciones" className="space-y-4">
-            <RelacionesTab />
+          <TabsContent value="turnos" className="space-y-4">
+            <TurnosTab />
+          </TabsContent>
+
+          <TabsContent value="analisis" className="space-y-4">
+            <AnalisisTab />
           </TabsContent>
 
           <TabsContent value="receipts" className="space-y-4">

@@ -47,7 +47,25 @@ const ProductsTab = () => {
   const inventory = usePureInventory();
   const { toast } = useToast();
   
-  const products = inventory.products;
+  // Filtrar productos basado en las búsquedas
+  const filteredProducts = inventory.products.filter(product => {
+    const matchesSearch = searchQuery.trim() === '' || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (product.code && product.code.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (product.active_ingredient && product.active_ingredient.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesCategory = selectedCategory === '' || 
+      String(product.category_id || product.category) === selectedCategory;
+    
+    const matchesStatus = selectedStatus === '' || product.status === selectedStatus;
+    
+    const matchesLowStock = !showLowStock || 
+      (product.current_stock || product.stock || 0) <= (product.min_stock || product.minStock || 0);
+    
+    return matchesSearch && matchesCategory && matchesStatus && matchesLowStock;
+  });
+  
+  const products = filteredProducts;
   const categories = inventory.categories;
   const laboratories = inventory.laboratories;
   const isLoading = false;
