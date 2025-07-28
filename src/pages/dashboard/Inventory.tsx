@@ -41,7 +41,7 @@ const Inventory = () => {
     <DashboardLayout>
       <div className="p-6">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-10">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Productos
@@ -55,6 +55,8 @@ const Inventory = () => {
             <TabsTrigger value="analisis" className="flex items-center gap-2">
               Análisis Inteligente
             </TabsTrigger>
+            {/* Temporalmente desactivadas */}
+            {/* 
             <TabsTrigger value="receipts" className="flex items-center gap-2">
               <PackageOpen className="h-4 w-4" />
               Ingresos
@@ -88,6 +90,7 @@ const Inventory = () => {
               <BarChart3 className="h-4 w-4" />
               Reportes
             </TabsTrigger>
+            */}
           </TabsList>
 
           <TabsContent value="products" className="space-y-4">
@@ -106,6 +109,8 @@ const Inventory = () => {
             <AnalisisTab />
           </TabsContent>
 
+          {/* Temporalmente desactivadas */}
+          {/* 
           <TabsContent value="receipts" className="space-y-4">
             <ReceiptsTab />
           </TabsContent>
@@ -133,6 +138,7 @@ const Inventory = () => {
           <TabsContent value="reports" className="space-y-4">
             <ReportsTab />
           </TabsContent>
+          */}
         </Tabs>
       </div>
     </DashboardLayout>

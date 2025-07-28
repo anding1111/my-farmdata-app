@@ -50,11 +50,14 @@ const Sidebar = ({ className }: SidebarProps) => {
       path: "/dashboard/proveedores",
       icon: <Truck className="h-5 w-5" />,
     },
+    // Temporalmente desactivado
+    /*
     {
       name: "Reportes",
       path: "/dashboard/reportes",
       icon: <BarChart2 className="h-5 w-5" />,
     },
+    */
     {
       name: "Configuración",
       path: "/dashboard/configuracion",
