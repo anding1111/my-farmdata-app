@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export function TurnosTab() {
   const [newTicket, setNewTicket] = useState({ customer: "", priority: "normal" as const });
-  const { turns, addTurn, attendTurn, removeTurn } = useDataStructures();
+  const { turns, addTurn, serveTurn, removeSale } = useDataStructures();
   const { toast } = useToast();
 
   // Agregar nuevo turno a la cola
@@ -56,7 +56,7 @@ export function TurnosTab() {
 
   // Atender próximo turno
   const atenderTurno = () => {
-    const nextTicket = attendTurn();
+    const nextTicket = serveTurn();
     if (nextTicket) {
       toast({
         title: "Turno atendido",
@@ -71,15 +71,14 @@ export function TurnosTab() {
     }
   };
 
-  // Remover turno específico
+  // Remover turno específico  
   const removerTurno = (ticketId: number) => {
-    const removedTicket = removeTurn(ticketId);
-    if (removedTicket) {
-      toast({
-        title: "Turno removido",
-        description: `${removedTicket.customer} ha sido removido de la cola.`
-      });
-    }
+    // Nota: Queue no permite eliminar elementos específicos por diseño FIFO
+    toast({
+      title: "Operación no permitida",
+      description: "En una cola FIFO solo se puede atender el siguiente turno.",
+      variant: "destructive"
+    });
   };
 
   const getPriorityColor = (priority: string) => {

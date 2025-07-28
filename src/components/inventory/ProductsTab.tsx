@@ -31,6 +31,7 @@ import { usePureInventory } from '@/hooks/usePureInventory';
 import { useToast } from '@/hooks/use-toast';
 import ProductForm from "./ProductForm";
 import ProductDetails from "./ProductDetails";
+import { ProductForm as SimpleProductForm } from "@/components/dashboard/ProductForm";
 import { type Product } from "@/api/inventory";
 
 const ProductsTab = () => {
@@ -136,13 +137,7 @@ const ProductsTab = () => {
               Gestiona todos los productos de tu farmacia
             </CardDescription>
           </div>
-          <Button onClick={() => {
-            setSelectedProduct(null);
-            setShowProductForm(true);
-          }}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Producto
-          </Button>
+          <SimpleProductForm />
         </div>
 
         {/* Filtros */}

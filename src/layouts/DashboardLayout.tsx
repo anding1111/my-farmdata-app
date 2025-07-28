@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import Sidebar from "@/components/dashboard/Sidebar";
 import TopBar from "@/components/dashboard/TopBar";
 import { StructureLogger } from "@/components/ui/structure-logger";
+import { useDataStructures } from "@/hooks/useDataStructures";
 import { useStructureLogger } from "@/hooks/useStructureLogger";
 
 interface DashboardLayoutProps {
@@ -10,6 +11,9 @@ interface DashboardLayoutProps {
 }
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+  // Inicializar estructuras para generar logs
+  useDataStructures();
+  
   const { logs, isVisible, clearLogs, toggleVisibility } = useStructureLogger();
 
   return (
