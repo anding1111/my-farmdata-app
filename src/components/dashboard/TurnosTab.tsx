@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { useDataStructures } from "@/hooks/useDataStructures";
+import { useDataStructuresContext } from "@/context/DataStructuresContext";
 import { 
   Table,
   TableBody,
@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export function TurnosTab() {
   const [newTicket, setNewTicket] = useState({ customer: "", priority: "normal" as const });
-  const { turns, addTurn, serveTurn, removeSale } = useDataStructures();
+  const { turns, addTurn, serveTurn, removeSale } = useDataStructuresContext();
   const { toast } = useToast();
 
   // Agregar nuevo turno a la cola

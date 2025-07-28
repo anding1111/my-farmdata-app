@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Network, Plus, Search, Trash2, Route } from "lucide-react";
 import { toast } from "sonner";
-import { useDataStructures } from "@/hooks/useDataStructures";
+import { useDataStructuresContext } from "@/context/DataStructuresContext";
 
 export function RelacionesTab() {
   const { 
@@ -15,7 +15,7 @@ export function RelacionesTab() {
     addRelationEdge, 
     removeRelation,
     findPath
-  } = useDataStructures();
+  } = useDataStructuresContext();
   
   const [newRelation, setNewRelation] = useState({ name: "", type: "supplier" as const });
   const [fromId, setFromId] = useState("");

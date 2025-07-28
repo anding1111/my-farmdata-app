@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import Sidebar from "@/components/dashboard/Sidebar";
 import TopBar from "@/components/dashboard/TopBar";
 import { StructureLogger } from "@/components/ui/structure-logger";
-import { useDataStructures } from "@/hooks/useDataStructures";
+import { DataStructuresProvider } from "@/context/DataStructuresContext";
 import { StructureLoggerProvider, useStructureLoggerContext } from "@/context/StructureLoggerContext";
 
 interface DashboardLayoutProps {
@@ -13,9 +13,6 @@ interface DashboardLayoutProps {
 
 const DashboardLayoutContent = ({ children }: DashboardLayoutProps) => {
   const location = useLocation();
-  
-  // Inicializar estructuras para generar logs
-  useDataStructures();
   
   const { logs, isVisible, clearLogs, toggleVisibility, setActiveStructure, activeStructure } = useStructureLoggerContext();
 
@@ -77,7 +74,9 @@ const DashboardLayoutContent = ({ children }: DashboardLayoutProps) => {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   return (
     <StructureLoggerProvider>
-      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      <DataStructuresProvider>
+        <DashboardLayoutContent>{children}</DashboardLayoutContent>
+      </DataStructuresProvider>
     </StructureLoggerProvider>
   );
 };

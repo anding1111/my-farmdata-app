@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
-import { useDataStructures } from "@/hooks/useDataStructures";
+import { useDataStructuresContext } from "@/context/DataStructuresContext";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProductFormProps {
@@ -14,7 +14,7 @@ interface ProductFormProps {
 
 export function ProductForm({ trigger }: ProductFormProps) {
   const [open, setOpen] = useState(false);
-  const { addProduct } = useDataStructures();
+  const { addProduct } = useDataStructuresContext();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
