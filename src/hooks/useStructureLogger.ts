@@ -14,6 +14,7 @@ interface LogEntry {
 export const useStructureLogger = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isVisible, setIsVisible] = useState(true);
+  const [activeStructure, setActiveStructure] = useState<string | null>(null);
 
   const logOperation = useCallback((
     structure: string,
@@ -45,11 +46,18 @@ export const useStructureLogger = () => {
     setIsVisible(prev => !prev);
   }, []);
 
+  // Filtrar logs por estructura activa
+  const filteredLogs = activeStructure 
+    ? logs.filter(log => log.structure === activeStructure)
+    : logs;
+
   return {
-    logs,
+    logs: filteredLogs,
     isVisible,
+    activeStructure,
     logOperation,
     clearLogs,
-    toggleVisibility
+    toggleVisibility,
+    setActiveStructure
   };
 };

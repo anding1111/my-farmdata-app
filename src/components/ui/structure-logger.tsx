@@ -19,6 +19,7 @@ interface LogEntry {
 interface StructureLoggerProps {
   logs: LogEntry[];
   isVisible: boolean;
+  activeStructure: string | null;
   onToggleVisibility: () => void;
   onClear: () => void;
 }
@@ -167,6 +168,7 @@ const StructureVisualizer = ({ structure, state, title }: { structure: string; s
 export const StructureLogger: React.FC<StructureLoggerProps> = ({
   logs,
   isVisible,
+  activeStructure,
   onToggleVisibility,
   onClear
 }) => {
@@ -198,7 +200,17 @@ export const StructureLogger: React.FC<StructureLoggerProps> = ({
     >
       <div className="p-4 h-full flex flex-col">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Logger de Estructuras de Datos</h3>
+          <div>
+            <h3 className="text-lg font-semibold">Logger de Estructuras de Datos</h3>
+            {activeStructure && (
+              <Badge variant="outline" className="mt-1">
+                Monitoreando: {activeStructure === 'AvlTree' ? 'Árbol AVL (Productos)' : 
+                              activeStructure === 'LinkedQueue' ? 'Cola Enlazada (Turnos)' :
+                              activeStructure === 'LinkedList' ? 'Lista Enlazada (Ventas)' :
+                              activeStructure === 'Graph' ? 'Grafo (Relaciones)' : activeStructure}
+              </Badge>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -221,16 +233,16 @@ export const StructureLogger: React.FC<StructureLoggerProps> = ({
         </div>
 
         <div className="text-xs text-muted-foreground mb-4">
-          {logs.length} operaciones registradas
+          {logs.length} operaciones registradas en orden cronológico
         </div>
 
         <div className="flex-1 overflow-hidden">
           <div className="h-full flex gap-4">
             {/* Lista de logs */}
             <div className="w-1/3 border-r pr-4">
-              <div className="text-sm font-medium mb-2">Operaciones:</div>
+              <div className="text-sm font-medium mb-2">Historial de Operaciones:</div>
               <div className="space-y-2 max-h-full overflow-y-auto">
-                {logs.slice(-10).reverse().map((log) => (
+                {logs.slice().reverse().map((log) => (
                   <div
                     key={log.id}
                     onClick={() => setSelectedLog(log)}

@@ -1,5 +1,6 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -26,15 +27,20 @@ import { TurnosTab } from "@/components/dashboard/TurnosTab";
 import { useAlerts } from "@/hooks/useInventory";
 
 const Inventory = () => {
-  const [activeTab, setActiveTab] = useState("products");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'products';
   const { data: alerts } = useAlerts({ is_read: false });
+
+  const handleTabChange = (value: string) => {
+    setSearchParams({ tab: value });
+  };
 
   const unreadAlertsCount = alerts?.data?.length || 0;
 
   return (
     <DashboardLayout>
       <div className="p-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
           <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />

@@ -4,6 +4,7 @@ import { useStructureLogger } from '@/hooks/useStructureLogger';
 interface StructureLoggerContextType {
   logs: any[];
   isVisible: boolean;
+  activeStructure: string | null;
   logOperation: (
     structure: string,
     operation: string,
@@ -14,6 +15,7 @@ interface StructureLoggerContextType {
   ) => void;
   clearLogs: () => void;
   toggleVisibility: () => void;
+  setActiveStructure: (structure: string | null) => void;
 }
 
 const StructureLoggerContext = createContext<StructureLoggerContextType | undefined>(undefined);
