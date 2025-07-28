@@ -28,11 +28,14 @@ export function VentasTab() {
     const total = precio * cantidad;
     
     const nuevaVenta = {
+      id: Date.now() + Math.random(), // ID único
       product: producto,
+      productName: producto, // Para compatibilidad
       customer: cliente,
       quantity: cantidad,
       price: precio,
-      total: total
+      total: total,
+      date: new Date().toISOString() // Fecha válida en formato ISO
     };
     
     try {
@@ -188,7 +191,13 @@ export function VentasTab() {
                     <TableCell>{sale.quantity}</TableCell>
                     <TableCell>${sale.total.toLocaleString()}</TableCell>
                     <TableCell>
-                      {new Date(sale.date).toLocaleDateString('es-ES')}
+                      {new Date(sale.date).toLocaleString('es-ES', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
                     </TableCell>
                     <TableCell>
                       <Button 

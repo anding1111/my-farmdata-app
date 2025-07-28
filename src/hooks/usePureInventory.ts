@@ -93,10 +93,12 @@ export const usePureInventory = () => {
 
   // Funciones de ventas usando LinkedList
   const createSale = (saleData: any) => {
+    const now = new Date();
     const sale = {
       ...saleData,
-      date: new Date().toLocaleDateString(),
-      timestamp: new Date().toISOString()
+      id: Date.now() + Math.random(), // ID único
+      date: now.toISOString(), // Guardar como ISO string válido
+      timestamp: now.toISOString()
     };
     dataStructures.addSale(sale);
     
