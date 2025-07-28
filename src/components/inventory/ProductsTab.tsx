@@ -499,28 +499,6 @@ const ProductsTab = () => {
               </div>
             )}
 
-            {/* Ventajas del AVL Tree */}
-            <div className="mt-4">
-              <strong className="text-sm">🎯 Ventajas del Árbol AVL en Inventario:</strong>
-              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-                <div className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span>
-                  <span>Búsqueda de productos super rápida O(log n)</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span>
-                  <span>Auto-balanceado: no se degrada con el tiempo</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span>
-                  <span>Inserción y eliminación eficientes O(log n)</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-green-500">✓</span>
-                  <span>Mantiene productos ordenados automáticamente</span>
-                </div>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>
