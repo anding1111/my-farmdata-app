@@ -375,6 +375,155 @@ const ProductsTab = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* 🌳 Visualización del Árbol AVL - Similar a LinkedList */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Visualización del Árbol AVL:
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="p-4 bg-green-50 dark:bg-green-950 rounded-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <Badge variant="outline">Size: {products.length}</Badge>
+              <Badge variant="secondary">Root: {products.length > 0 ? `Producto ID ${products[Math.floor(products.length / 2)]?.id}` : 'Vacío'}</Badge>
+            </div>
+            
+            {/* Representación visual de nodos del árbol */}
+            {products.length > 0 ? (
+              <div className="space-y-4">
+                {/* Nodos del árbol organizados por niveles */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                  {products.slice().sort((a, b) => a.id - b.id).map((product, index) => {
+                    const isRoot = index === Math.floor(products.length / 2);
+                    const level = Math.floor(Math.log2(index + 1));
+                    
+                    return (
+                      <div 
+                        key={product.id} 
+                        className={`p-3 rounded text-sm border-2 ${
+                          isRoot 
+                            ? 'bg-green-600 text-white border-green-700' 
+                            : level === 0
+                            ? 'bg-green-500 text-white border-green-600'
+                            : level === 1
+                            ? 'bg-green-400 text-green-900 border-green-500'
+                            : 'bg-green-200 text-green-800 border-green-300'
+                        }`}
+                      >
+                        <div className="font-bold flex items-center gap-2">
+                          {isRoot ? '🌳' : level === 0 ? '🌲' : level === 1 ? '🌿' : '🍃'}
+                          {isRoot ? 'Root' : `Nodo ${index}`}
+                        </div>
+                        <div className="text-xs opacity-90">ID: {product.id}</div>
+                        <div className="font-medium">{product.name}</div>
+                        <div className="text-xs opacity-75">Stock: {product.current_stock || product.stock || 0}</div>
+                        <div className="text-xs opacity-75">Precio: ${product.sale_price || product.price || 0}</div>
+                        {index < products.length - 1 && (
+                          <div className="text-xs mt-1 opacity-60">
+                            ↓ Nivel {level + 1}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Información de nodos y punteros */}
+                <div className="mt-4">
+                  <h5 className="font-medium mb-2">Nodos y Punteros:</h5>
+                  <div className="bg-white dark:bg-gray-800 p-3 rounded border font-mono text-xs space-y-1">
+                    {products.slice().sort((a, b) => a.id - b.id).map((product, index) => {
+                      const leftChild = index * 2 + 1 < products.length ? products[index * 2 + 1] : null;
+                      const rightChild = index * 2 + 2 < products.length ? products[index * 2 + 2] : null;
+                      
+                      return (
+                        <div key={product.id} className="flex justify-between">
+                          <span>
+                            [{index}] Data: {JSON.stringify({
+                              id: product.id,
+                              name: product.name,
+                              stock: product.current_stock || product.stock || 0
+                            })}
+                          </span>
+                          <span className="text-gray-500">
+                            → Left: {leftChild ? `[${index * 2 + 1}]` : 'null'}, 
+                            Right: {rightChild ? `[${index * 2 + 2}]` : 'null'}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-4 text-gray-500">
+                <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p>Árbol AVL vacío</p>
+                <p className="text-xs">Agrega productos para ver la estructura del árbol</p>
+              </div>
+            )}
+          </div>
+
+          {/* Información del AVL Tree */}
+          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+            <h4 className="font-medium mb-2">Información del AVL Tree:</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <strong>Total productos:</strong> {products.length} nodos
+              </div>
+              <div>
+                <strong>Estructura:</strong> Árbol AVL balanceado
+              </div>
+              <div>
+                <strong>Complejidad búsqueda:</strong> O(log n)
+              </div>
+              <div>
+                <strong>Auto-balanceado:</strong> Sí
+              </div>
+            </div>
+            
+            {products.length > 0 && (
+              <div className="mt-3">
+                <strong className="text-sm">Recorrido in-order (productos ordenados por ID):</strong>
+                <div className="mt-1 flex gap-1 flex-wrap">
+                  {products.slice().sort((a, b) => a.id - b.id).map((product, index) => (
+                    <Badge key={product.id} variant="outline" className="text-xs">
+                      {product.id}: {product.name}
+                      {index < products.length - 1 && <span className="ml-1">→</span>}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Ventajas del AVL Tree */}
+            <div className="mt-4">
+              <strong className="text-sm">🎯 Ventajas del Árbol AVL en Inventario:</strong>
+              <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                <div className="flex items-center gap-1">
+                  <span className="text-green-500">✓</span>
+                  <span>Búsqueda de productos super rápida O(log n)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-green-500">✓</span>
+                  <span>Auto-balanceado: no se degrada con el tiempo</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-green-500">✓</span>
+                  <span>Inserción y eliminación eficientes O(log n)</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <span className="text-green-500">✓</span>
+                  <span>Mantiene productos ordenados automáticamente</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </Card>
   );
 };

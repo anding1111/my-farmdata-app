@@ -1,31 +1,56 @@
 import { Node } from './Node';
 
-// Lista enlazada para historial de ventas
+/**
+ * 🔗 LISTA ENLAZADA (LinkedList)
+ * 
+ * ¿Qué es una Lista Enlazada?
+ * - Es una estructura de datos lineal donde cada elemento (nodo) contiene:
+ *   • Datos del elemento
+ *   • Un puntero/referencia al siguiente nodo
+ * 
+ * Ventajas:
+ * - Tamaño dinámico (crece/decrece según necesidad)
+ * - Inserción/eliminación eficiente al inicio O(1)
+ * - No requiere memoria contigua
+ * 
+ * Desventajas:
+ * - No permite acceso aleatorio (no puedes ir directamente al elemento N)
+ * - Requiere memoria extra para los punteros
+ * - Búsqueda secuencial O(n)
+ * 
+ * Uso en este proyecto: Historial de ventas (LIFO - más recientes primero)
+ */
 export class LinkedList<T> {
-  private head: Node<T> | null = null;
-  private size: number = 0;
+  private head: Node<T> | null = null;  // 🎯 Primer nodo de la lista
+  private size: number = 0;             // 📊 Contador de elementos
 
-  // Agregar al final
+  // ➕ Agregar al final de la lista
+  // Complejidad: O(n) porque debe recorrer hasta el final
   append(data: T): void {
     const newNode = new Node(data);
     if (this.head === null) {
+      // 📋 Lista vacía: el nuevo nodo se convierte en head
       this.head = newNode;
     } else {
+      // 🔍 Recorrer hasta encontrar el último nodo
       let current = this.head;
       while (current.next !== null) {
         current = current.next;
       }
+      // 🔗 Conectar el último nodo con el nuevo
       current.next = newNode;
     }
     this.size++;
     this.printStructure();
   }
 
-  // Agregar al inicio
+  // ⬅️ Agregar al inicio de la lista (prepend)
+  // Complejidad: O(1) - muy eficiente!
+  // Este método se usa para el historial de ventas (más recientes primero)
   prepend(data: T): void {
-    const newNode = new Node(data);
-    newNode.next = this.head;
-    this.head = newNode;
+    const newNode = new Node(data);  // 🆕 Crear nuevo nodo
+    newNode.next = this.head;        // 🔗 El nuevo nodo apunta al head actual
+    this.head = newNode;             // 🎯 El nuevo nodo se convierte en head
     this.size++;
     this.printStructure();
   }

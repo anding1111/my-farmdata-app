@@ -1,17 +1,37 @@
 import { Node } from './Node';
 
-// Cola enlazada para turnos FIFO
+/**
+ * 📋 COLA ENLAZADA (LinkedQueue) - FIFO
+ * 
+ * ¿Qué es una Cola?
+ * - Estructura de datos que sigue el principio FIFO (First In, First Out)
+ * - Como una fila en el banco: el primero en llegar es el primero en ser atendido
+ * 
+ * Operaciones principales:
+ * - enqueue(): Agregar elemento al final de la cola
+ * - dequeue(): Remover elemento del frente de la cola
+ * - peek(): Ver el elemento del frente sin removerlo
+ * 
+ * Implementación con Lista Enlazada:
+ * - head: apunta al frente de la cola (donde se remueven elementos)
+ * - tail: apunta al final de la cola (donde se agregan elementos)
+ * 
+ * Uso en este proyecto: Sistema de turnos de atención al cliente
+ */
 export class LinkedQueue<T> {
-  private head: Node<T> | null = null;
-  private tail: Node<T> | null = null;
-  private size: number = 0;
+  private head: Node<T> | null = null;  // 🎯 Frente de la cola (primero en salir)
+  private tail: Node<T> | null = null;  // 🔚 Final de la cola (último en entrar)
+  private size: number = 0;             // 📊 Número de elementos en la cola
 
-  // Agregar elemento al final de la cola (encolar)
+  // ➕ Agregar elemento al final de la cola (encolar/enqueue)
+  // Complejidad: O(1) - muy eficiente gracias al puntero tail
   enqueue(data: T): void {
     const newNode = new Node(data);
     if (this.tail === null) {
+      // 📋 Cola vacía: head y tail apuntan al mismo nodo
       this.head = this.tail = newNode;
     } else {
+      // 🔗 Conectar el nuevo nodo al final y actualizar tail
       this.tail.next = newNode;
       this.tail = newNode;
     }
@@ -19,15 +39,17 @@ export class LinkedQueue<T> {
     this.printStructure();
   }
 
-  // Remover elemento del frente de la cola (desencolar)
+  // ➖ Remover elemento del frente de la cola (desencolar/dequeue)
+  // Complejidad: O(1) - muy eficiente
+  // Principio FIFO: el primer elemento en entrar es el primero en salir
   dequeue(): T | null {
     if (this.head === null) {
       console.log('⚠️ Queue vacía - no se puede desencolar');
       return null;
     }
     
-    const data = this.head.data;
-    this.head = this.head.next;
+    const data = this.head.data;  // 📦 Guardar los datos del nodo a remover
+    this.head = this.head.next;   // 🎯 Mover head al siguiente nodo
     if (this.head === null) {
       this.tail = null;
     }

@@ -1,7 +1,21 @@
-// Vértice del grafo
+/**
+ * 🕸️ GRAFO (Graph) - Estructura para modelar relaciones
+ * 
+ * ¿Qué es un Grafo?
+ * - Estructura de datos que consiste en vértices (nodos) conectados por aristas (edges)
+ * - Ideal para modelar relaciones entre entidades (redes sociales, mapas, dependencias)
+ * 
+ * Componentes:
+ * - Vértice (Vertex): Representa una entidad (ej: producto, proveedor, categoría)
+ * - Arista (Edge): Representa una relación entre dos vértices (ej: "suministra", "pertenece_a")
+ * 
+ * Uso en este proyecto: Modelar relaciones entre productos, proveedores y categorías
+ */
+
+// 🔵 Vértice del grafo (representa una entidad)
 export class Vertex<T> {
-  public data: T;
-  public edges: Edge<T>[] = [];
+  public data: T;                    // 📦 Datos del vértice
+  public edges: Edge<T>[] = [];      // 🔗 Lista de aristas que salen de este vértice
 
   constructor(data: T) {
     this.data = data;
@@ -21,12 +35,12 @@ export class Vertex<T> {
   }
 }
 
-// Arista del grafo
+// 🔗 Arista del grafo (representa una relación entre dos vértices)
 export class Edge<T> {
-  public from: Vertex<T>;
-  public to: Vertex<T>;
-  public weight: number;
-  public label?: string;
+  public from: Vertex<T>;       // 🎯 Vértice origen
+  public to: Vertex<T>;         // 🏁 Vértice destino  
+  public weight: number;        // ⚖️ Peso de la relación (importancia, distancia, costo)
+  public label?: string;        // 🏷️ Etiqueta descriptiva (ej: "suministra", "pertenece_a")
 
   constructor(from: Vertex<T>, to: Vertex<T>, weight: number = 1, label?: string) {
     this.from = from;
