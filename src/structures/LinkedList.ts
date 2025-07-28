@@ -8,31 +8,19 @@ export class LinkedList<T> {
 
   // agregar al final
   append(data: T): void {
-    console.log('➕ LINKED LIST - Insertando al final:', JSON.stringify(data));
     const newNode = new Node(data);
-    
     if (this.head === null) {
-      console.log('  📍 Lista vacía - nuevo nodo será HEAD');
       this.head = newNode;
     } else {
-      console.log('  🔍 Recorriendo hasta el final...');
       // recorrer hasta el final
       let current = this.head;
-      let index = 0;
-      
       while (current.next !== null) {
-        console.log(`    Paso ${index + 1}: Visitando nodo ${JSON.stringify(current.data)}`);
         current = current.next;
-        index++;
       }
-      
-      console.log(`    ✅ Llegamos al final en ${index + 1} pasos. Último nodo: ${JSON.stringify(current.data)}`);
       // conectar al final
       current.next = newNode;
-      console.log('    🔗 Nuevo nodo conectado al final');
     }
     this.size++;
-    console.log(`📊 Tamaño actual: ${this.size}`);
     this.printStructure();
   }
 
@@ -123,25 +111,14 @@ export class LinkedList<T> {
 
   // Buscar elemento
   find(predicate: (item: T) => boolean): T | null {
-    console.log('🔍 LINKED LIST - Iniciando búsqueda secuencial desde HEAD...');
     let current = this.head;
-    let index = 0;
-    
     while (current !== null) {
-      console.log(`  🔍 Paso ${index + 1}: Revisando nodo con data: ${JSON.stringify(current.data)}`);
-      
       if (predicate(current.data)) {
-        console.log(`  ✅ ¡ENCONTRADO en posición ${index}! Pasos totales: ${index + 1}`);
         console.log('🔍 LinkedList - Elemento encontrado:', current.data);
         return current.data;
       }
-      
-      console.log(`  ➡️ No coincide, avanzando al siguiente nodo...`);
       current = current.next;
-      index++;
     }
-    
-    console.log(`  ❌ Búsqueda completada. Recorridos ${index} nodos sin éxito.`);
     console.log('🔍 LinkedList - Elemento no encontrado');
     return null;
   }

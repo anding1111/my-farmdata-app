@@ -55,32 +55,21 @@ export class AvlTree<T> {
 
   // Insertar elemento
   insert(data: T): void {
-    console.log('🌱 AVL TREE - Iniciando inserción de:', JSON.stringify(data));
-    this.root = this.insertNode(this.root, data, 0);
+    this.root = this.insertNode(this.root, data);
     this.printStructure();
   }
 
-  private insertNode(node: Node<T> | null, data: T, level: number): Node<T> {
-    const indent = '  '.repeat(level);
-    
+  private insertNode(node: Node<T> | null, data: T): Node<T> {
     // 1. Inserción normal de BST
-    if (!node) {
-      console.log(`${indent}🌱 Creando nuevo nodo en nivel ${level}: ${JSON.stringify(data)}`);
-      return new Node(data);
-    }
+    if (!node) return new Node(data);
 
-    console.log(`${indent}🔍 Nivel ${level}: Comparando ${JSON.stringify(data)} con ${JSON.stringify(node.data)}`);
-    
     const cmp = this.compareFunction(data, node.data);
     if (cmp < 0) {
-      console.log(`${indent}⬅️ Insertando en hijo IZQUIERDO`);
-      node.left = this.insertNode(node.left, data, level + 1);
+      node.left = this.insertNode(node.left, data);
     } else if (cmp > 0) {
-      console.log(`${indent}➡️ Insertando en hijo DERECHO`);
-      node.right = this.insertNode(node.right, data, level + 1);
+      node.right = this.insertNode(node.right, data);
     } else {
       // Actualizar datos si ya existe
-      console.log(`${indent}🔄 Actualizando nodo existente en nivel ${level}`);
       node.data = data;
       return node;
     }
@@ -90,31 +79,26 @@ export class AvlTree<T> {
 
     // 3. Obtener balance
     const balance = this.getBalance(node);
-    console.log(`${indent}⚖️ Balance del nodo ${JSON.stringify(node.data)}: ${balance}`);
 
     // 4. Casos de rotación
     // Izquierda Izquierda
     if (balance > 1 && this.compareFunction(data, node.left!.data) < 0) {
-      console.log(`${indent}🔄 Rotación DERECHA (caso II) en ${JSON.stringify(node.data)}`);
       return this.rotateRight(node);
     }
 
     // Derecha Derecha
     if (balance < -1 && this.compareFunction(data, node.right!.data) > 0) {
-      console.log(`${indent}🔄 Rotación IZQUIERDA (caso DD) en ${JSON.stringify(node.data)}`);
       return this.rotateLeft(node);
     }
 
     // Izquierda Derecha
     if (balance > 1 && this.compareFunction(data, node.left!.data) > 0) {
-      console.log(`${indent}🔄 Rotación IZQUIERDA-DERECHA (caso ID) en ${JSON.stringify(node.data)}`);
       node.left = this.rotateLeft(node.left!);
       return this.rotateRight(node);
     }
 
     // Derecha Izquierda
     if (balance < -1 && this.compareFunction(data, node.right!.data) < 0) {
-      console.log(`${indent}🔄 Rotación DERECHA-IZQUIERDA (caso DI) en ${JSON.stringify(node.data)}`);
       node.right = this.rotateRight(node.right!);
       return this.rotateLeft(node);
     }
@@ -124,33 +108,18 @@ export class AvlTree<T> {
 
   // Buscar elemento
   search(data: T): T | null {
-    console.log('🔍 AVL TREE - Iniciando búsqueda de:', JSON.stringify(data));
-    const result = this.searchNode(this.root, data, 0);
+    const result = this.searchNode(this.root, data);
     console.log('🔍 AVL Tree - Búsqueda:', data, result ? 'ENCONTRADO' : 'NO ENCONTRADO');
     return result;
   }
 
-  private searchNode(node: Node<T> | null, data: T, level: number): T | null {
-    const indent = '  '.repeat(level);
-    
-    if (!node) {
-      console.log(`${indent}❌ Nodo null en nivel ${level} - fin de recorrido`);
-      return null;
-    }
+  private searchNode(node: Node<T> | null, data: T): T | null {
+    if (!node) return null;
 
-    console.log(`${indent}🔍 Nivel ${level}: Comparando con nodo ${JSON.stringify(node.data)}`);
-    
     const cmp = this.compareFunction(data, node.data);
-    if (cmp === 0) {
-      console.log(`${indent}✅ ¡ENCONTRADO en nivel ${level}! Pasos totales: ${level + 1}`);
-      return node.data;
-    }
-    if (cmp < 0) {
-      console.log(`${indent}⬅️ Buscando en hijo IZQUIERDO (${JSON.stringify(data)} < ${JSON.stringify(node.data)})`);
-      return this.searchNode(node.left, data, level + 1);
-    }
-    console.log(`${indent}➡️ Buscando en hijo DERECHO (${JSON.stringify(data)} > ${JSON.stringify(node.data)})`);
-    return this.searchNode(node.right, data, level + 1);
+    if (cmp === 0) return node.data;
+    if (cmp < 0) return this.searchNode(node.left, data);
+    return this.searchNode(node.right, data);
   }
 
   // Eliminar elemento
